@@ -63,7 +63,7 @@ pub enum Expr {
     },
     Call {
         func: Box<Expr>,
-        args: Vec<(Option<Ident>, Expr)>, // Updated for named args
+        args: Vec<(Option<Ident>, Expr)>,
         span: Span,
     },
     Match {
@@ -77,7 +77,32 @@ pub enum Expr {
     },
     Async(Box<Expr>, Span),
     Await(Box<Expr>, Span),
-    Do(Box<Expr>, Span),
+    Block(Block),
+    StructInit {
+        name: Ident,
+        fields: Vec<(Ident, Expr)>,
+        span: Span,
+    },
+    FieldAccess {
+        expr: Box<Expr>,
+        field: Ident,
+        span: Span,
+    },
+    If {
+        condition: Box<Expr>,
+        then_branch: Block,
+        else_branch: Option<Block>,
+        span: Span,
+    },
+    Loop {
+        body: Block,
+        span: Span,
+    },
+    While {
+        condition: Box<Expr>,
+        body: Block,
+        span: Span,
+    },
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]

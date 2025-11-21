@@ -196,7 +196,74 @@ Primary: Expr = {
     <ident:Ident> => Expr::Ident(ident),
     "(" <expr:Expr> ")" => expr,
     "async" <expr:Primary> => Expr::Async(Box::new(expr), Span { start: 0, end: 0, file_id: 0 }),
-    "await" <expr:Primary> => Expr::Await(Box::new(expr), Span { start: 0, end: 0, file_id: 0 }),
+    <s:StructInit> => s,
+    <f:FieldAccess> => f,
+
+StructInit: Expr = {
+    <name:Ident> "{" <fields:Comma<StructInitField>> "}" => Expr::StructInit {
+        name,
+        fields,
+        span: Span { start: 0, end: 0, file_id: 0 },
+    }
+};
+
+StructInitField: (Ident, Expr) = {
+    <name:Ident> ":" <expr:Expr> => (name, expr),
+};
+
+FieldAccess: Expr = {
+    <expr:Primary> "." <field:Ident> => Expr::FieldAccess {
+        expr: Box::new(expr),
+        field,
+        span: Span { start: 0, end: 0, file_id: 0 },
+    }
+};
+    <i:IfExpr> => i,
+    <m:MatchExpr> => m,
+    <l:LoopExpr> => l,
+    <w:WhileExpr> => w,
+    "{" <b:Block> "}" => Expr::Block(b),
+
+IfExpr: Expr = {
+    "if" <cond:Expr> <then_block:Block> <else_block:("else" <Block>)?> => Expr::If {
+        condition: Box::new(cond),
+        then_branch: then_block,
+        else_branch: else_block,
+        span: Span { start: 0, end: 0, file_id: 0 },
+    }
+};
+
+LoopExpr: Expr = {
+    "loop" <body:Block> => Expr::Loop {
+        body,
+        span: Span { start: 0, end: 0, file_id: 0 },
+    }
+};
+
+WhileExpr: Expr = {
+    "while" <cond:Expr> <body:Block> => Expr::While {
+        condition: Box::new(cond),
+        body,
+        span: Span { start: 0, end: 0, file_id: 0 },
+    }
+};
+
+MatchExpr: Expr = {
+    "match" <expr:Expr> "{" <arms:MatchArm*> "}" => Expr::Match {
+        expr: Box::new(expr),
+        arms,
+        span: Span { start: 0, end: 0, file_id: 0 },
+    }
+};
+
+MatchArm: MatchArm = {
+    <pattern:Pattern> <guard:("if" <Expr>)?> "=>" <body:Expr> ","? => MatchArm {
+        pattern,
+        guard,
+        body,
+    }
+};
+
 StructField: (Ident, Type) = {
     <name:Ident> ":" <ty:Type> => (name, ty),
 };
@@ -206,7 +273,7 @@ Import: Import = {
         path,
         items,
         span: Span { start: 0, end: 0, file_id: 0 },
-        file_type: FileType::RustScript, // Default for now
+        file_type: FileType::RustScript,
     }
 };
 

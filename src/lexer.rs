@@ -2,8 +2,7 @@ use logos::{Logos, Span};
 use crate::ast::Ident;
 use std::rc::Rc;
 
-/// Tokens produced by the lexer.
-/// Uses `logos` for efficient tokenization.
+/// The complete set of tokens for RustScript.
 #[derive(Logos, Debug, Clone, PartialEq)]
 #[logos(skip r"[ \t\n\f]+")] // Skip whitespace
 #[logos(skip r"//[^\n]*")]   // Skip line comments
@@ -143,10 +142,10 @@ impl<'input> Iterator for Lexer<'input> {
     fn next(&mut self) -> Option<Self::Item> {
         let token = self.inner.next()?;
         let span = self.inner.span();
-        // Handle errors from logos if necessary, but for now we assume valid tokens or error variant
+        
         match token {
              Ok(t) => Some((t, span)),
-             Err(_) => None, // Or handle error token
+             Err(_) => None, // Logos error variant (e.g. invalid token)
         }
     }
 }

@@ -62,7 +62,7 @@ impl BorrowChecker {
 
     fn check_stmt(&mut self, stmt: &ast::Stmt) {
         match stmt {
-            ast::Stmt::Let { pattern, value, .. } => {
+            ast::Stmt::Let { pattern, value, span: _, type_ann: _, mutable: _ } => {
                 if let Some(expr) = value {
                     self.check_expr(expr);
                 }
@@ -82,23 +82,43 @@ impl BorrowChecker {
             ast::Expr::Ident(ident) => {
                 self.check_use(&ident.name, &ident.span);
             }
-            ast::Expr::Binary { left, right, .. } => {
+            ast::Expr::Binary { left, right, span: _, op: _ } => {
                 self.check_expr(left);
                 self.check_expr(right);
             }
-            ast::Expr::Call { func, args, .. } => {
+            ast::Expr::Call { func, args, span: _ } => {
                 self.check_expr(func);
                 for arg in args {
                     self.check_expr(arg);
                 }
             }
-            // Other expressions are currently safe or don't involve ownership transfers
-            _ => {}
-        }
-    }
-
-    fn check_use(&mut self, name: &str, span: &Span) {
-        // Find variable in scopes (inner to outer)
+            ast::Expr::If { condition, then_branch, else_branch, span: _ } => {
+                self.check_expr(condition);
+                self.check_block(then_branch);
+                if let Some(else_block) = else_branch {
+                    self.check_block(else_block);
+                }
+            }
+            ast::Expr::Loop { body, span: _ } => {
+                self.check_block(body);
+            }
+            ast::Expr::While { condition, body, span: _ } => {
+                self.check_expr(condition);
+                self.check_block(body);
+            }
+            ast::Expr::Match { expr: value, arms, span: _ } => {
+                self.check_expr(value);
+                for arm in arms {
+                    // Pattern bindings are not yet supported in this version
+                    self.check_expr(&arm.body);
+                }
+            }
+            ast::Expr::StructInit { fields, span: _, name: _ } => {
+                for (_, expr) in fields {
+                    self.check_expr(expr);
+                }
+            }
+            ast::Expr::FieldAccess { expr, span: _, field: _ } => {
         for scope in self.scopes.iter_mut().rev() {
             if let Some(state) = scope.get_mut(name) {
                 match state {
@@ -131,7 +151,7 @@ impl BorrowChecker {
                 }
             }
             _ => {
-                // Complex pattern binding analysis omitted for brevity
+                // Pattern binding not implemented
             }
         }
     }

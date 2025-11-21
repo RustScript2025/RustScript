@@ -18,8 +18,8 @@ impl StdLib {
             (
                 Ident { name: "log".into(), span: Span { start: 0, end: 0, file_id: 0 } },
                 Type::Function {
-                    params: vec![Type::String], // Simplified: accepts one string
-                    return_type: Box::new(Type::Tuple(vec![])), // Returns unit
+                    params: vec![Type::String],
+                    return_type: Box::new(Type::Tuple(vec![])),
                 }
             ),
             (
@@ -32,7 +32,7 @@ impl StdLib {
         ]);
         globals.insert("console".into(), console_type);
         
-        // Math object (simplified)
+        // Math object
         let math_type = Type::Record(vec![
             (
                 Ident { name: "PI".into(), span: Span { start: 0, end: 0, file_id: 0 } },

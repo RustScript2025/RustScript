@@ -33,7 +33,7 @@ impl DiagnosticManager {
                 Label::primary(span.file_id, span.start..span.end).with_message("here"),
             ]);
 
-        // In a real CLI, we'd write to stderr. For WASM/Library, we return a string.
+        // Capture output to a buffer for WASM compatibility/library usage.
         let mut writer = codespan_reporting::term::termcolor::NoColor::new(Vec::new());
         let config = codespan_reporting::term::Config::default();
 

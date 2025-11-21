@@ -68,23 +68,6 @@ impl Cli {
                 }
             }
         })
-    }
-}
-
-fn main() -> anyhow::Result<()> {
-    let cli = Cli::parse();
-    
-    // Validate input file extension
-    cli.validate_extension()?;
-    
-    // Determine project root
-    let project_root = if cli.input.is_dir() {
-        cli.input.clone()
-    } else {
-        cli.input.parent().unwrap_or(&PathBuf::from(".")).to_path_buf()
-    };
-    
-    // Create compiler instance
     let compiler = Compiler::new(project_root);
     
     // Compile the project

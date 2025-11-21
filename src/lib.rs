@@ -43,22 +43,6 @@ pub fn compile_to_wasm(source: &str) -> Result<Vec<u8>, JsValue> {
         .map_err(|e| JsValue::from_str(&format!("Parse Error: {:?}", e)))?;
         
     // 2. Safety Checks (Borrow Checker)
-    let mut borrow_checker = borrow_checker::BorrowChecker::new();
-    if let Err(errors) = borrow_checker.check_module(&ast) {
-        let error_msg = errors.join("\n");
-        return Err(JsValue::from_str(&format!("Borrow Check Error:\n{}", error_msg)));
-    }
-        
-    // 3. Code Generation (WASM)
-    let generator = codegen_wasm::WasmGenerator::new();
-    let wasm_bytes = generator.generate(&ast)
-        .map_err(|e| JsValue::from_str(&format!("Codegen Error: {}", e)))?;
-    
-    Ok(wasm_bytes)
-}
-
-/// Compiles and executes RustScript source code immediately.
-#[wasm_bindgen]
 pub async fn run_script(source: &str) -> Result<(), JsValue> {
     let wasm_bytes = compile_to_wasm(source)?;
     

@@ -77,7 +77,7 @@ impl Compiler {
         let source = std::fs::read_to_string(file_path)?;
         
         // 1. Parse
-        // Note: This requires main.rs to have `lalrpop_mod!(pub parser)`
+        // Parse source
         let parser = crate::parser::ProgramParser::new();
         let ast = parser.parse(&source)
             .map_err(|e| anyhow::anyhow!("Parse Error: {:?}", e))?;
@@ -89,9 +89,15 @@ impl Compiler {
             anyhow::bail!("Borrow Check Error:\n{}", error_msg);
         }
         
-        // 3. Code Generation (WASM)
+        // 3. Type Check
+        let type_checker = crate::typechecker::TypeChecker::new();
+        let expr_types = type_checker.check(&ast)
+            .map_err(|e| anyhow::anyhow!("Type Error: {}", e))?;
+
+        // 4. Code Generation (WASM)
         let generator = crate::codegen_wasm::WasmGenerator::new();
-        let wasm_bytes = generator.generate(&ast);
+        let wasm_bytes = generator.generate(&ast, expr_types)
+            .map_err(|e| anyhow::anyhow!("Codegen Error: {}", e))?;
         
         if let Some(parent) = output_path.parent() {
             std::fs::create_dir_all(parent)?;
