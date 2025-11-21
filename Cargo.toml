@@ -1,0 +1,38 @@
+[package]
+name = "RustScript"
+version = "0.1.0"
+edition = "2024"
+authors = ["Michael Lauzon"]
+license = "GPL-2.0"
+description = "A Rust/ECMAScript mashup language compiler"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[[bin]]
+name = "rjsc"
+path = "src/main.rs"
+
+[dependencies]
+logos = "0.15.1"
+logos-derive = "0.15.1"
+lalrpop = "0.22.2"
+lalrpop-util = "0.22.2"
+codespan = "0.11.1"
+codespan-reporting = "0.13.1"
+ariadne = "0.6.0"
+indexmap = "2.12.0"
+fxhash = "0.2.1"
+thiserror = "2.0.17"
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0"
+clap = { version = "4.5.52", features = ["derive"] }
+anyhow = "1.0.100"
+pathdiff = "0.2.3"
+glob = "0.3.3"
+wasm-bindgen = "0.2.105"
+console_error_panic_hook = "0.1.7"
+wasm-encoder = "0.221.0"
+
+[build-dependencies]
+lalrpop = "0.22.2"
