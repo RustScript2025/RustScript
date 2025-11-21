@@ -1,0 +1,308 @@
+// Parser grammar for RustScript
+grammar;
+
+// Import AST types
+use crate::ast::*;
+use std::rc::Rc;
+use std::path::PathBuf;
+
+// Parser entry points
+pub Program: Module = {
+    <items:Item*> => Module {
+        name: Ident { name: "main".into(), span: Span { start: 0, end: 0, file_id: 0 } },
+        items: items,
+        span: Span { start: 0, end: 0, file_id: 0 },
+        file_path: PathBuf::from("main.rjsc"),
+        exports: Vec::new(),
+    }
+};
+
+Item: Item = {
+    <f:Function> => Item::Function(f),
+    <s:Struct> => Item::Struct(s),
+    <i:Import> => Item::Import(i),
+};
+
+Function: Function = {
+    <async_:Async?> "fn" <name:Ident> <params:ParamList> <return_type:ReturnType?> <body:Block> => {
+        Function {
+            name,
+            params,
+            return_type,
+            body,
+            async_: async_.is_some(),
+            span: Span { start: 0, end: 0, file_id: 0 },
+        }
+    }
+};
+
+Async: () = {
+    "async" => (),
+};
+
+ParamList: Vec<(Pattern, Option<Type>)> = {
+    "(" <params:Comma<Param>> ")" => params,
+};
+
+Param: (Pattern, Option<Type>) = {
+    <pattern:Pattern> <type_ann:TypeAnnotation?> => (pattern, type_ann),
+};
+
+TypeAnnotation: Type = {
+    ":" <ty:Type> => ty,
+};
+
+ReturnType: Type = {
+    "->" <ty:Type> => ty,
+};
+
+Pattern: Pattern = {
+    <ident:Ident> => Pattern::Ident(ident),
+    "_" => Pattern::Wildcard(Span { start: 0, end: 0, file_id: 0 }),
+    <literal:Literal> => Pattern::Literal(literal),
+};
+
+Type: Type = {
+    "number" => Type::Number,
+    "string" => Type::String,
+    "boolean" => Type::Boolean,
+    <ident:Ident> => Type::Generic(ident),
+};
+
+Block: Block = {
+    "{" <stmts:Stmt*> <expr:Expr?> "}" => Block {
+        stmts,
+        expr: expr.map(Box::new),
+        span: Span { start: 0, end: 0, file_id: 0 },
+    }
+};
+
+};
+
+Pipeline: (BinaryOp, Expr) = {
+    "|>" <expr:LogicalOr> => (BinaryOp::Pipeline, expr),
+};
+
+LogicalOr: Expr = {
+    <l:LogicalAnd> <or:OrChain*> => {
+        or.into_iter().fold(l, |acc, next| {
+            Expr::Binary {
+                left: Box::new(acc),
+                op: BinaryOp::Or,
+                right: Box::new(next),
+                span: Span { start: 0, end: 0, file_id: 0 },
+            }
+        })
+    }
+};
+
+OrChain: Expr = {
+    "||" <expr:LogicalAnd> => expr,
+};
+
+LogicalAnd: Expr = {
+    <l:Equality> <and:AndChain*> => {
+        and.into_iter().fold(l, |acc, next| {
+            Expr::Binary {
+                left: Box::new(acc),
+                op: BinaryOp::And,
+                right: Box::new(next),
+                span: Span { start: 0, end: 0, file_id: 0 },
+            }
+        })
+    }
+};
+
+AndChain: Expr = {
+    "&&" <expr:Equality> => expr,
+};
+
+Equality: Expr = {
+    <l:Comparison> <eq:EqChain*> => {
+        eq.into_iter().fold(l, |acc, (op, next)| {
+            Expr::Binary {
+                left: Box::new(acc),
+                op,
+                right: Box::new(next),
+                span: Span { start: 0, end: 0, file_id: 0 },
+            }
+        })
+    }
+};
+
+EqChain: (BinaryOp, Expr) = {
+    "==" <expr:Comparison> => (BinaryOp::Eq, expr),
+    "!=" <expr:Comparison> => (BinaryOp::Neq, expr),
+};
+
+Comparison: Expr = {
+    <l:Additive> <comp:CompChain*> => {
+        comp.into_iter().fold(l, |acc, (op, next)| {
+            Expr::Binary {
+                left: Box::new(acc),
+                op,
+                right: Box::new(next),
+                span: Span { start: 0, end: 0, file_id: 0 },
+            }
+        })
+    }
+};
+
+CompChain: (BinaryOp, Expr) = {
+    "<" <expr:Additive> => (BinaryOp::Lt, expr),
+    ">" <expr:Additive> => (BinaryOp::Gt, expr),
+    "<=" <expr:Additive> => (BinaryOp::Leq, expr),
+    ">=" <expr:Additive> => (BinaryOp::Geq, expr),
+};
+
+Additive: Expr = {
+    <l:Multiplicative> <add:AddChain*> => {
+        add.into_iter().fold(l, |acc, (op, next)| {
+            Expr::Binary {
+                left: Box::new(acc),
+                op,
+                right: Box::new(next),
+                span: Span { start: 0, end: 0, file_id: 0 },
+            }
+        })
+    }
+};
+
+AddChain: (BinaryOp, Expr) = {
+    "+" <expr:Multiplicative> => (BinaryOp::Add, expr),
+    "-" <expr:Multiplicative> => (BinaryOp::Sub, expr),
+};
+
+Multiplicative: Expr = {
+    <l:Primary> <mul:MulChain*> => {
+        mul.into_iter().fold(l, |acc, (op, next)| {
+            Expr::Binary {
+                left: Box::new(acc),
+                op,
+                right: Box::new(next),
+                span: Span { start: 0, end: 0, file_id: 0 },
+            }
+        })
+    }
+};
+
+MulChain: (BinaryOp, Expr) = {
+    "*" <expr:Primary> => (BinaryOp::Mul, expr),
+    "/" <expr:Primary> => (BinaryOp::Div, expr),
+};
+
+Primary: Expr = {
+    <literal:Literal> => Expr::Literal(literal, Span { start: 0, end: 0, file_id: 0 }),
+    <ident:Ident> => Expr::Ident(ident),
+    "(" <expr:Expr> ")" => expr,
+    "async" <expr:Primary> => Expr::Async(Box::new(expr), Span { start: 0, end: 0, file_id: 0 }),
+    <s:StructInit> => s,
+    <f:FieldAccess> => f,
+
+StructInit: Expr = {
+    <name:Ident> "{" <fields:Comma<StructInitField>> "}" => Expr::StructInit {
+        name,
+        fields,
+        span: Span { start: 0, end: 0, file_id: 0 },
+    }
+};
+
+StructInitField: (Ident, Expr) = {
+    <name:Ident> ":" <expr:Expr> => (name, expr),
+};
+
+FieldAccess: Expr = {
+    <expr:Primary> "." <field:Ident> => Expr::FieldAccess {
+        expr: Box::new(expr),
+        field,
+        span: Span { start: 0, end: 0, file_id: 0 },
+    }
+};
+    <i:IfExpr> => i,
+    <m:MatchExpr> => m,
+    <l:LoopExpr> => l,
+    <w:WhileExpr> => w,
+    "{" <b:Block> "}" => Expr::Block(b),
+
+IfExpr: Expr = {
+    "if" <cond:Expr> <then_block:Block> <else_block:("else" <Block>)?> => Expr::If {
+        condition: Box::new(cond),
+        then_branch: then_block,
+        else_branch: else_block,
+        span: Span { start: 0, end: 0, file_id: 0 },
+    }
+};
+
+LoopExpr: Expr = {
+    "loop" <body:Block> => Expr::Loop {
+        body,
+        span: Span { start: 0, end: 0, file_id: 0 },
+    }
+};
+
+WhileExpr: Expr = {
+    "while" <cond:Expr> <body:Block> => Expr::While {
+        condition: Box::new(cond),
+        body,
+        span: Span { start: 0, end: 0, file_id: 0 },
+    }
+};
+
+MatchExpr: Expr = {
+    "match" <expr:Expr> "{" <arms:MatchArm*> "}" => Expr::Match {
+        expr: Box::new(expr),
+        arms,
+        span: Span { start: 0, end: 0, file_id: 0 },
+    }
+};
+
+MatchArm: MatchArm = {
+    <pattern:Pattern> <guard:("if" <Expr>)?> "=>" <body:Expr> ","? => MatchArm {
+        pattern,
+        guard,
+        body,
+    }
+};
+
+StructField: (Ident, Type) = {
+    <name:Ident> ":" <ty:Type> => (name, ty),
+};
+
+Import: Import = {
+    "import" "{" <items:Comma<ImportItem>> "}" "from" <path:String> ";" => Import {
+        path,
+        items,
+        span: Span { start: 0, end: 0, file_id: 0 },
+        file_type: FileType::RustScript,
+    }
+};
+
+ImportItem: ImportItem = {
+    <name:Ident> => ImportItem { name, alias: None },
+};
+
+Ident: Ident = {
+    <s:r"[a-zA-Z_][a-zA-Z0-9_]*"> => Ident {
+        name: s.into(),
+        span: Span { start: 0, end: 0, file_id: 0 },
+    }
+};
+
+String: Rc<str> = {
+    <s:r#""([^"\\]|\\["\\bnfrt]|\\u[0-9a-fA-F]{4})*""#> => s[1..s.len()-1].into(),
+};
+
+Number: f64 = {
+    <s:r"-?[0-9]+(\.[0-9]+)?([eE][+-]?[0-9]+)?"> => s.parse().unwrap(),
+};
+
+// Comma-separated list helper
+Comma<T>: Vec<T> = {
+    <v:(<T> ",")*> <e:T?> => {
+        let mut result = v.into_iter().map(|(x, _)| x).collect::<Vec<_>>();
+        if let Some(e) = e {
+            result.push(e);
+        }
+        result
+    }
+};
