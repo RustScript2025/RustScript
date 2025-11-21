@@ -63,8 +63,8 @@ impl Compiler {
         if let Some(parent) = output_path.parent() {
             std::fs::create_dir_all(parent)?;
         }
-        let js_code = format!("// Compiled from RustScript\n// Features: Named Args, Guard, Defer, Extend, Regex Literals\n// Original: {}\n\n{}", 
-                             file_path.display(), source);
+        let js_code = format!("// Compiled from RustScript\n// Features: Named Args, Guard, Defer, Extend, Regex Literals\n\n{}", 
+                             source);
         std::fs::write(&output_path, js_code)?;
         println!("Generated: {}", output_path.display());
         Ok(())

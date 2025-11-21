@@ -59,16 +59,83 @@ impl SourceMapGenerator {
     }
 
     /// Generate the VLQ-encoded mappings string.
-    /// (Simplified implementation for demonstration)
     pub fn generate(&self) -> SourceMap {
-        // In a real implementation, this would perform VLQ encoding
-        // For now, we return a placeholder to satisfy the requirement
+        let mut mappings = String::new();
+        let mut last_gen_line = 0;
+        let mut last_gen_col = 0;
+        let mut last_source_idx = 0;
+        let mut last_orig_line = 0;
+        let mut last_orig_col = 0;
+        let mut last_name_idx = 0;
+
+        for (i, mapping) in self.mappings.iter().enumerate() {
+            if i > 0 {
+                if mapping.generated_line != last_gen_line {
+                    for _ in 0..(mapping.generated_line - last_gen_line) {
+                        mappings.push(';');
+                    }
+                    last_gen_col = 0;
+                } else {
+                    mappings.push(',');
+                }
+            }
+
+            // Generated column
+            self.encode_vlq(&mut mappings, (mapping.generated_column as i32) - (last_gen_col as i32));
+            last_gen_col = mapping.generated_column;
+
+            // Original source index
+            self.encode_vlq(&mut mappings, (mapping.original_file_index as i32) - (last_source_idx as i32));
+            last_source_idx = mapping.original_file_index;
+
+            // Original line
+            self.encode_vlq(&mut mappings, (mapping.original_line as i32) - (last_orig_line as i32));
+            last_orig_line = mapping.original_line;
+
+            // Original column
+            self.encode_vlq(&mut mappings, (mapping.original_column as i32) - (last_orig_col as i32));
+            last_orig_col = mapping.original_column;
+
+            // Name index (optional)
+            if let Some(name_idx) = mapping.name_index {
+                self.encode_vlq(&mut mappings, (name_idx as i32) - (last_name_idx as i32));
+                last_name_idx = name_idx;
+            }
+            
+            last_gen_line = mapping.generated_line;
+        }
+
         SourceMap {
             version: 3,
             file: self.file.clone(),
             sources: self.sources.clone(),
             names: Vec::new(),
-            mappings: String::new(), // VLQ encoding disabled for initial release
+            mappings,
         }
+    }
+
+    fn encode_vlq(&self, output: &mut String, value: i32) {
+        let mut value = if value < 0 {
+            ((-value) << 1) | 1
+        } else {
+            value << 1
+        };
+
+        loop {
+            let mut digit = value & 0x1F;
+            value >>= 5;
+            if value > 0 {
+                digit |= 0x20;
+            }
+            output.push(self.base64_char(digit));
+            if value == 0 {
+                break;
+            }
+        }
+    }
+
+    fn base64_char(&self, value: i32) -> char {
+        const CHARS: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+        CHARS[value as usize] as char
     }
 }

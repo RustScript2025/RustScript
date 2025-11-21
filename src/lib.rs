@@ -16,11 +16,6 @@ pub mod memory;
 use lalrpop_util::lalrpop_mod;
 lalrpop_mod!(pub parser);
 
-// When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
-// allocator.
-#[cfg(feature = "wee_alloc")]
-#[global_allocator]
-static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 #[wasm_bindgen]
 extern "C" {
@@ -69,15 +64,14 @@ pub async fn run_script(source: &str) -> Result<(), JsValue> {
     
     // Instantiate the WASM module
     // We need to provide imports if the generated WASM expects them (e.g. console.log)
-    // For now, our codegen doesn't generate imports, but we'll likely need them soon.
     // Create imports for the WASM module
     let imports = js_sys::Object::new();
     let console_obj = js_sys::Object::new();
     
     // Helper to create a simple logging function
-    // Note: Real string decoding requires access to the instance's memory, 
-    // which is tricky to wire up here without a JS shim. 
-    // For now, we just log that it was called.
+    // Helper to create a simple logging function
+    // Note: Logs raw pointer and length. Full string decoding requires 
+    // accessing the WASM instance's memory buffer.
     let log_fn = js_sys::Function::new_with_args_and_body(
         "ptr, len",
         "console.log('RustScript log (ptr, len):', ptr, len);"
