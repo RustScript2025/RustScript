@@ -1,3 +1,7 @@
+<p align="center">
+<img src="logo.jpg" alt="RustScript Logo">
+</p>
+
 # RustScript
 
 ![Version](https://img.shields.io/badge/version-0.2.0-blue)
@@ -503,3 +507,4 @@ By learning from scripting language history, RustScript avoids repeating past mi
 - 📖 [Phase 3 Features](docs/PHASE3_FEATURES.md) - Safety & metaprogramming
 - 💻 [Examples Directory](examples/) - Working code examples ([see examples README](examples/README.md))
 - 🤝 [Contributing Guide](CONTRIBUTING.md) - How to contribute to RustScript
+
