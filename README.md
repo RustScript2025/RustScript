@@ -1,12 +1,12 @@
-<p align="center">
-<img src="logo.jpg" alt="RustScript Logo">
-</p>
-
-# RustScript
-
 ![Version](https://img.shields.io/badge/version-0.2.0-blue)
 ![Rust](https://img.shields.io/badge/rust-1.91.1%2B-orange)
 ![License](https://img.shields.io/badge/license-GPL--2.0-green)
+
+<p align="center">
+<img src="logo.jpg" alt="RustScript">
+</p>
+
+# RustScript
 
 **Author**: Michael Lauzon
 
@@ -507,4 +507,5 @@ By learning from scripting language history, RustScript avoids repeating past mi
 - 📖 [Phase 3 Features](docs/PHASE3_FEATURES.md) - Safety & metaprogramming
 - 💻 [Examples Directory](examples/) - Working code examples ([see examples README](examples/README.md))
 - 🤝 [Contributing Guide](CONTRIBUTING.md) - How to contribute to RustScript
+
 
