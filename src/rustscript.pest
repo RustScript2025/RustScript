@@ -1,0 +1,281 @@
+// RustScript Grammar for pest
+// Author: Michael Lauzon
+//
+// This grammar defines the complete RustScript language syntax.
+// The grammar uses PEG (Parsing Expression Grammar) semantics where
+// alternatives are tried in order and the first match succeeds.
+
+WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
+COMMENT = _{ "//" ~ (!"\n" ~ ANY)* }
+
+// ============================================================================
+// LITERALS
+// ============================================================================
+
+number = @{ "-"? ~ ASCII_DIGIT+ ~ ("." ~ ASCII_DIGIT+)? }
+string = @{ "\"" ~ (!"\"" ~ ANY)* ~ "\"" }
+boolean = { "true" | "false" }
+
+// ============================================================================
+// IDENTIFIERS AND KEYWORDS
+// ============================================================================
+
+ident = @{ !keyword ~ (ASCII_ALPHA | "_") ~ (ASCII_ALPHANUMERIC | "_")* }
+
+keyword = {
+    "let" | "mut" | "const" | "fn" | "async" | "await" | "match" | "if" | "else" |
+    "for" | "guard" | "defer" | "extend" | "in" | "while" | "loop" | "return" |
+    "yield" | "gen" | "struct" | "impl" | "mod" | "use" | "requires" | "ensures" |
+    "invariant" | "comptime" | "pure" | "effect" | "true" | "false"
+}
+
+// ============================================================================
+// TYPES
+// ============================================================================
+
+type_expr = {
+    type_array |
+    type_tuple |
+    type_function |
+    type_generic
+}
+
+type_array = { "[" ~ type_expr ~ "]" }
+type_tuple = { "(" ~ (type_expr ~ ("," ~ type_expr)*)? ~ ","? ~ ")" }
+type_function = { "(" ~ (type_expr ~ ("," ~ type_expr)*)? ~ ")" ~ "->" ~ type_expr }
+type_generic = { ident }
+
+// ============================================================================
+// PATTERNS
+// ============================================================================
+
+pattern = {
+    pattern_wildcard |
+    pattern_literal |
+    pattern_tuple |
+    pattern_record |
+    pattern_ident
+}
+
+pattern_wildcard = { "_" }
+pattern_literal = { number | string | boolean }
+pattern_tuple = { "(" ~ (pattern ~ ("," ~ pattern)*)? ~ ","? ~ ")" }
+pattern_record = { "{" ~ (pattern_field ~ ("," ~ pattern_field)*)? ~ ","? ~ "}" }
+pattern_field = { ident ~ ":" ~ pattern }
+pattern_ident = { ident }
+
+// ============================================================================
+// EXPRESSIONS
+// ============================================================================
+
+expr = { expr_pipeline }
+
+// Pipeline has lowest precedence
+expr_pipeline = { expr_null_coalesce ~ ("|>" ~ expr_null_coalesce)* }
+
+// Null coalescing
+expr_null_coalesce = { expr_logical_or ~ ("??" ~ expr_logical_or)* }
+
+// Logical operators
+expr_logical_or = { expr_logical_and ~ ("||" ~ expr_logical_and)* }
+expr_logical_and = { expr_comparison ~ ("&&" ~ expr_comparison)* }
+
+// Comparison operators
+expr_comparison = { expr_additive ~ (comparison_op ~ expr_additive)? }
+comparison_op = { "==" | "!=" | "<=" | ">=" | "<" | ">" }
+
+// Arithmetic operators
+expr_additive = { expr_multiplicative ~ (("+"|"-") ~ expr_multiplicative)* }
+expr_multiplicative = { expr_postfix ~ (("*"|"/") ~ expr_postfix)* }
+
+// Postfix expressions (field access, method calls, await)
+expr_postfix = {
+    expr_primary ~ (
+        field_access |
+        optional_chain |
+        method_call |
+        await_expr
+    )*
+}
+
+field_access = { "." ~ ident }
+optional_chain = { "?." ~ ident }
+method_call = { "(" ~ call_args? ~ ")" }
+await_expr = { ".await" }
+
+// Primary expressions
+expr_primary = {
+    literal |
+    expr_if |
+    expr_match |
+    expr_loop |
+    expr_while |
+    expr_block |
+    expr_struct_init |
+    expr_list_comp |
+    expr_yield |
+    expr_async |
+    expr_comptime |
+    ident |
+    "(" ~ expr ~ ")"
+}
+
+// Block expression - wraps a block for use in expression context
+expr_block = { block }
+
+// Literals
+literal = {
+    number |
+    string |
+    boolean |
+    array_literal |
+    tuple_literal
+}
+
+array_literal = { "[" ~ (expr ~ ("," ~ expr)*)? ~ ","? ~ "]" }
+tuple_literal = { "(" ~ expr ~ ("," ~ expr)+ ~ ","? ~ ")" }
+
+// Control flow expressions
+expr_if = {
+    "if" ~ expr ~ block ~ ("else" ~ (expr_if | block))?
+}
+
+expr_match = {
+    "match" ~ expr ~ "{" ~ match_arm+ ~ "}"
+}
+
+match_arm = {
+    pattern ~ ("if" ~ expr)? ~ "=>" ~ match_arm_body ~ ","?
+}
+
+match_arm_body = {
+    block | expr_primary
+}
+
+expr_loop = { "loop" ~ block }
+
+expr_while = { "while" ~ expr ~ block }
+
+// Struct initialization
+expr_struct_init = {
+    ident ~ "{" ~ (struct_field ~ ("," ~ struct_field)*)? ~ ","? ~ "}"
+}
+
+struct_field = { ident ~ ":" ~ expr }
+
+// List comprehension
+expr_list_comp = {
+    "[" ~ expr ~ "for" ~ pattern ~ "in" ~ expr ~ ("if" ~ expr)? ~ "]"
+}
+
+// Special expressions
+expr_yield = { "yield" ~ expr? }
+expr_async = { "async" ~ block }
+expr_comptime = { "comptime" ~ block }
+
+// Call arguments
+call_args = { call_arg ~ ("," ~ call_arg)* ~ ","? }
+call_arg = { (ident ~ ":")? ~ expr }
+
+// ============================================================================
+// STATEMENTS
+// ============================================================================
+
+stmt = {
+    stmt_let |
+    stmt_return |
+    stmt_guard |
+    stmt_defer |
+    stmt_expr
+}
+
+stmt_let = {
+    "let" ~ "mut"? ~ pattern ~ (":" ~ type_expr)? ~ ("=" ~ expr)? ~ ";"
+}
+
+stmt_return = { "return" ~ expr? ~ ";" }
+
+stmt_guard = {
+    "guard" ~ expr ~ "else" ~ block
+}
+
+stmt_defer = { "defer" ~ block }
+
+stmt_expr = { expr ~ ";"? }
+
+// ============================================================================
+// BLOCKS
+// ============================================================================
+
+block = {
+    "{" ~ stmt* ~ expr? ~ "}"
+}
+
+// ============================================================================
+// FUNCTIONS
+// ============================================================================
+
+function = {
+    "async"? ~ "gen"? ~ "pure"? ~
+    "fn" ~ ident ~
+    "(" ~ params? ~ ")" ~
+    ("->" ~ type_expr)? ~
+    contract* ~
+    block
+}
+
+params = { param ~ ("," ~ param)* ~ ","? }
+param = { pattern ~ (":" ~ type_expr)? }
+
+contract = {
+    "@" ~ contract_kind ~ "(" ~ expr ~ ")"
+}
+
+contract_kind = { "requires" | "ensures" | "invariant" }
+
+// ============================================================================
+// STRUCTS
+// ============================================================================
+
+struct_def = {
+    "struct" ~ ident ~ "{" ~ (struct_field_def ~ ("," ~ struct_field_def)*)? ~ ","? ~ "}"
+}
+
+struct_field_def = { ident ~ ":" ~ type_expr }
+
+// ============================================================================
+// IMPORTS
+// ============================================================================
+
+import = {
+    "use" ~ import_path ~ ";"
+}
+
+import_path = { ident ~ ("::" ~ ident)* }
+
+// ============================================================================
+// EXTEND BLOCKS
+// ============================================================================
+
+extend_block = {
+    "extend" ~ type_expr ~ "{" ~ function* ~ "}"
+}
+
+// ============================================================================
+// TOP LEVEL ITEMS
+// ============================================================================
+
+item = {
+    function |
+    struct_def |
+    extend_block |
+    import
+}
+
+// ============================================================================
+// MODULE
+// ============================================================================
+
+program = {
+    SOI ~ item* ~ EOI
+}

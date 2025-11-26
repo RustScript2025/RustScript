@@ -1,0 +1,12 @@
+// Hello, World! - Your First RustScript Programme
+// Author: Michael Lauzon
+// 
+// This is the traditional first programme in any language.
+// It demonstrates the basic structure of a RustScript programme.
+
+fn main() {
+    console.log("Hello, World!");
+}
+
+// Call the main function to run the programme
+main();

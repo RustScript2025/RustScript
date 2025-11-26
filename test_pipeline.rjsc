@@ -1,0 +1,8 @@
+fn add_one(x: i32) -> i32 {
+    x + 1
+}
+
+fn main() {
+    let result = 5 |> add_one;
+    console.log("Result: " + result);
+}

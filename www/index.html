@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <title>RustScript Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a2e;
+            color: #eee;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+        }
+        h1 {
+            color: #e94560;
+        }
+        #output {
+            background: #16213e;
+            border: 1px solid #e94560;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            min-width: 400px;
+            min-height: 100px;
+            text-align: left;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 16px;
+            white-space: pre-wrap;
+        }
+        #output .log {
+            color: #0f0;
+        }
+        #output .error {
+            color: #f44;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>RustScript Output</h1>
+        <div id="output"></div>
+    </div>
+
+    <script type="text/rustscript">
+fn main() {
+    console.log("Hello from RustScript!");
+}
+    </script>
+
+    <script type="module">
+        import init, { run_script } from './pkg/RustScript.js';
+        
+        const outputEl = document.getElementById('output');
+        
+        function writeOutput(text, type = 'log') {
+            if (outputEl) {
+                const line = document.createElement('div');
+                line.className = type;
+                line.textContent = text;
+                outputEl.appendChild(line);
+            }
+        }
+        
+        // Store reference to globalThis for RustScript memory
+        globalThis.__rustscript_writeOutput = writeOutput;
+        
+        async function main() {
+            await init();
+            console.log('🦀 RustScript Runtime Initialised 🦀');
+            
+            const scripts = document.querySelectorAll('script[type="text/rustscript"]');
+            
+            for (const script of scripts) {
+                const source = script.textContent.trim();
+                if (source) {
+                    try {
+                        await run_script(source);
+                    } catch (e) {
+                        writeOutput('Error: ' + e, 'error');
+                    }
+                }
+            }
+        }
+        
+        main();
+    </script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+// RustScript Sample
+// Demonstrates new features: Named Args, Guard, Defer, Extend, Regex
+
+extend String {
+    fn is_email(&this) -> bool {
+        let pattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        pattern.test(this)
+    }
+}
+
+fn process_user(name: string, email: string) {
+    defer {
+        console.log("Finished processing user");
+    }
+
+    guard email.is_email() else {
+        console.error("Invalid email");
+        return;
+    }
+
+    console.log("User valid: " + name);
+}
+
+fn main() {
+    // Named arguments
+    process_user(name: "Alice", email: "alice@example.com");
+}
