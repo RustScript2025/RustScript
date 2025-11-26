@@ -1,8 +1,18 @@
+// Pipeline Operator Test
+// Author: Michael Lauzon
+//
+// This file tests the pipeline operator (|>), which allows chaining
+// function calls in a left-to-right readable manner.
+// Instead of writing add_one(5), you can write 5 |> add_one.
+
+// Simple function that adds one to its input.
 fn add_one(x: i32) -> i32 {
     x + 1
 }
 
 fn main() {
+    // The pipeline operator passes the left value as the first argument
+    // to the function on the right.
     let result = 5 |> add_one;
     console.log("Result: " + result);
 }

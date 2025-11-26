@@ -1,5 +1,12 @@
-// RustScript Sample
-// Demonstrates new features: Named Args, Guard, Defer, Extend, Regex
+// RustScript Sample Programme
+// Author: Michael Lauzon
+//
+// This sample demonstrates several RustScript features:
+// - Named arguments for clearer function calls
+// - Guard clauses for early validation
+// - Defer blocks for cleanup code
+// - Extend blocks for adding methods to existing types
+// - Regular expressions for pattern matching
 
 extend String {
     fn is_email(&this) -> bool {

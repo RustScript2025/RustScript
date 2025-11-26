@@ -1,9 +1,21 @@
-// RustScript Grammar for pest
+// RustScript Grammar for Pest
 // Author: Michael Lauzon
 //
-// This grammar defines the complete RustScript language syntax.
-// The grammar uses PEG (Parsing Expression Grammar) semantics where
-// alternatives are tried in order and the first match succeeds.
+// This grammar defines the complete RustScript language syntax using PEG
+// (Parsing Expression Grammar) semantics. In PEG, alternatives are tried
+// in order and the first match succeeds (ordered choice).
+//
+// The grammar is organised into logical sections:
+// - Literals: Numbers, strings, booleans
+// - Identifiers and Keywords: Variable names and reserved words
+// - Types: Type annotations and generic types
+// - Patterns: Destructuring patterns for match and let
+// - Expressions: All expression forms with proper precedence
+// - Statements: Variable declarations, returns, guards, defers
+// - Functions: Function definitions with contracts and effects
+// - Structs: Data structure definitions
+// - Imports: Module imports
+// - Top-level: Programme structure
 
 WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
 COMMENT = _{ "//" ~ (!"\n" ~ ANY)* }

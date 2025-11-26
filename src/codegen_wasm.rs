@@ -1,6 +1,19 @@
-//! WebAssembly Code Generator for RustScript
-//! 
+//! WebAssembly Code Generator for RustScript.
+//!
 //! Author: Michael Lauzon
+//!
+//! This module generates WebAssembly bytecode from a RustScript AST. It handles
+//! the translation of all language constructs into WASM instructions, including
+//! functions, control flow, expressions, and memory management.
+//!
+//! The generator uses the `wasm-encoder` crate to produce valid WASM binary format.
+//! It supports:
+//! - Function definitions and calls
+//! - Struct allocation and field access
+//! - String literals (interned in linear memory)
+//! - Control flow (if/else, loops, match expressions)
+//! - Binary operations and comparisons
+//! - Console output via imported JavaScript functions
 
 use wasm_encoder::{
     CodeSection, DataSection, ExportKind, ExportSection, Function, FunctionSection, 
@@ -11,44 +24,79 @@ use crate::ast::{self, Type};
 use std::collections::HashMap;
 
 /// Generates WebAssembly bytecode from a RustScript AST.
+///
+/// The generator maintains state for building a complete WASM module, including
+/// type definitions, imports, function bodies, and data segments for string literals.
+///
+/// # Architecture
+///
+/// The WASM module is built incrementally:
+/// 1. Import console.log, console.error, and malloc from the host environment
+/// 2. Process struct definitions to calculate memory layouts
+/// 3. Process function definitions, generating WASM instructions for each
+/// 4. Assemble all sections into the final binary
 pub struct WasmGenerator {
+    /// The WASM module being constructed.
     module: Module,
+    /// Type section containing function signatures.
     types: TypeSection,
+    /// Import section for host functions (console, malloc).
     imports: ImportSection,
+    /// Function section mapping functions to their type indices.
     funcs: FunctionSection,
+    /// Export section for functions accessible from JavaScript.
     exports: ExportSection,
+    /// Code section containing function bodies.
     codes: CodeSection,
+    /// Data section for string literals and static data.
     data: DataSection,
+    /// Memory section defining linear memory.
     memory: MemorySection,
-    
+
+    /// Interned string literals: string content -> (offset, length).
     string_literals: HashMap<String, (u32, u32)>,
+    /// Next available offset in the data segment.
     next_data_offset: u32,
-    
+
+    /// Maps function names to their indices in the module.
     func_map: HashMap<String, u32>,
+    /// Maps imported function names to their indices.
     import_map: HashMap<String, u32>,
-    
-    /// Count of user-defined functions (manual counter)
+
+    /// Count of user-defined functions (used to calculate indices).
     func_count: u32,
-    
-    /// Number of imported functions
+
+    /// Number of imported functions (offsets user function indices).
     num_imports: u32,
-    
+
+    /// Struct layouts: name -> (total_size, field_offsets).
     struct_map: HashMap<String, (u32, HashMap<String, (u32, ValType)>)>,
+    /// Expression types from the type checker (used for field access).
     expr_types: HashMap<ast::Span, Type>,
+    /// Counter for type indices.
     type_count: u32,
 }
 
 impl WasmGenerator {
+    /// Creates a new WASM generator with standard imports configured.
+    ///
+    /// The generator is initialised with imports for:
+    /// - `console.log(ptr, len)` - Output a string to the console
+    /// - `console.error(ptr, len)` - Output an error message
+    /// - `malloc(size)` - Allocate memory on the heap
     pub fn new() -> Self {
         let mut imports = ImportSection::new();
         let mut import_map = HashMap::new();
-        
-        imports.import("console", "log", EntityType::Function(0)); 
+
+        // Import console.log: takes pointer and length, returns nothing.
+        imports.import("console", "log", EntityType::Function(0));
         import_map.insert("console.log".to_string(), 0);
-        
+
+        // Import console.error: same signature as console.log.
         imports.import("console", "error", EntityType::Function(0));
         import_map.insert("console.error".to_string(), 1);
 
+        // Import malloc: takes size, returns pointer.
         imports.import("env", "malloc", EntityType::Function(1));
         import_map.insert("malloc".to_string(), 2);
 
@@ -75,6 +123,10 @@ impl WasmGenerator {
         }
     }
 
+    /// Adds a function type signature to the type section.
+    ///
+    /// Returns the index of the newly added type, which is used when
+    /// declaring functions that have this signature.
     fn add_function_type(&mut self, params: Vec<ValType>, results: Vec<ValType>) -> u32 {
         self.types.ty().function(params, results);
         let idx = self.type_count;
@@ -82,6 +134,19 @@ impl WasmGenerator {
         idx
     }
 
+    /// Generates a complete WASM binary from the AST.
+    ///
+    /// This is the main entry point for code generation. It processes all
+    /// items in the module and assembles them into a valid WASM binary.
+    ///
+    /// # Arguments
+    ///
+    /// * `ast_module` - The parsed AST to generate code from
+    /// * `expr_types` - Type information from the type checker
+    ///
+    /// # Returns
+    ///
+    /// The WASM binary as a byte vector, or an error message.
     pub fn generate(mut self, ast_module: &ast::Module, expr_types: HashMap<ast::Span, Type>) -> Result<Vec<u8>, String> {
         self.expr_types = expr_types;
         
@@ -123,29 +188,42 @@ impl WasmGenerator {
         Ok(self.module.finish())
     }
 
+    /// Processes a function definition and generates its WASM code.
+    ///
+    /// This method:
+    /// 1. Creates a type signature for the function
+    /// 2. Registers the function in the module
+    /// 3. Exports the function if it's named "main"
+    /// 4. Analyses local variables needed
+    /// 5. Generates WASM instructions for the function body
     fn process_function(&mut self, func_def: &ast::Function) -> Result<(), String> {
+        // Map RustScript parameter types to WASM value types.
         let params: Vec<ValType> = func_def.params.iter()
             .map(|(_, ty)| self.map_type(ty.as_ref()))
             .collect();
-            
+
+        // Map return type (empty vector if void).
         let results: Vec<ValType> = func_def.return_type.as_ref()
             .map(|ty| vec![self.map_type(Some(ty))])
             .unwrap_or_default();
 
+        // Register the function's type signature.
         let type_idx = self.add_function_type(params.clone(), results.clone());
 
-        // Calculate function index using manual counter
+        // Calculate function index (imports come first, then user functions).
         let func_idx = self.num_imports + self.func_count;
         self.func_count += 1;
-        
+
         self.funcs.function(type_idx);
         self.func_map.insert(func_def.name.name.to_string(), func_idx);
 
-        // Export main function
+        // The main function is exported so JavaScript can call it.
         if func_def.name.name.as_ref() == "main" {
             self.exports.export("main", ExportKind::Func, func_idx);
         }
 
+        // Analyse local variables and create the function body.
+        // The scratch local (index 0) is used for temporary values.
         let (locals_map, local_types) = self.analyze_locals(&func_def.body);
         let mut func_body = Function::new(local_types.iter().map(|&vt| (1, vt)));
         let scratch_local = params.len() as u32;
@@ -170,6 +248,10 @@ impl WasmGenerator {
         Ok(())
     }
 
+    /// Generates WASM instructions for a statement.
+    ///
+    /// Statements include variable declarations, expression statements,
+    /// returns, guards, and defers.
     fn generate_stmt(&mut self, func: &mut Function, stmt: &ast::Stmt, scratch_local: u32, locals: &HashMap<String, u32>) -> Result<(), String> {
         match stmt {
             ast::Stmt::Let { pattern, value, .. } => {
@@ -209,6 +291,10 @@ impl WasmGenerator {
         Ok(())
     }
 
+    /// Generates WASM instructions for an expression.
+    ///
+    /// Expressions leave their result on the WASM stack. The type of value
+    /// depends on the expression (f64 for numbers, i32 for booleans and pointers).
     fn generate_expr(&mut self, func: &mut Function, expr: &ast::Expr, scratch_local: u32, locals: &HashMap<String, u32>) -> Result<(), String> {
         match expr {
             ast::Expr::Literal(lit, _) => {
@@ -495,13 +581,20 @@ impl WasmGenerator {
         Ok(())
     }
 
+    /// Analyses a block to determine what local variables are needed.
+    ///
+    /// Returns a map from variable names to local indices, and a list of
+    /// WASM value types for each local. The first local is always a scratch
+    /// variable used for temporary storage.
     fn analyze_locals(&self, block: &ast::Block) -> (HashMap<String, u32>, Vec<ValType>) {
         let mut locals_map = HashMap::new();
-        let mut local_types = vec![ValType::I32]; // scratch local
+        // Reserve local 0 as a scratch variable for intermediate values.
+        let mut local_types = vec![ValType::I32];
         self.collect_locals(block, &mut locals_map, &mut local_types);
         (locals_map, local_types)
     }
 
+    /// Recursively collects local variable declarations from a block.
     fn collect_locals(&self, block: &ast::Block, locals_map: &mut HashMap<String, u32>, local_types: &mut Vec<ValType>) {
         for stmt in &block.stmts {
             if let ast::Stmt::Let { pattern, type_ann, .. } = stmt {
@@ -514,20 +607,28 @@ impl WasmGenerator {
         }
     }
 
+    /// Maps a RustScript type to a WASM value type.
+    ///
+    /// Numbers are represented as f64, whilst booleans, strings, arrays,
+    /// and other reference types are represented as i32 pointers.
     fn map_type(&self, ty: Option<&Type>) -> ValType {
         match ty {
             Some(Type::Number) => ValType::F64,
             Some(Type::Boolean) => ValType::I32,
-            Some(Type::String) => ValType::I32,
-            Some(Type::Array(_)) => ValType::I32,
-            Some(Type::Tuple(_)) => ValType::I32,
-            Some(Type::Record(_)) => ValType::I32,
-            Some(Type::Generic(_)) => ValType::I32,
-            Some(Type::Function { .. }) => ValType::I32,
-            Some(Type::Infer) | None => ValType::F64,
+            Some(Type::String) => ValType::I32,  // Pointer to string data.
+            Some(Type::Array(_)) => ValType::I32,  // Pointer to array.
+            Some(Type::Tuple(_)) => ValType::I32,  // Pointer to tuple.
+            Some(Type::Record(_)) => ValType::I32,  // Pointer to record.
+            Some(Type::Generic(_)) => ValType::I32,  // Pointer to struct instance.
+            Some(Type::Function { .. }) => ValType::I32,  // Function reference.
+            Some(Type::Infer) | None => ValType::F64,  // Default to number.
         }
     }
 
+    /// Interns a string literal in the data section.
+    ///
+    /// Returns the offset and length of the string in linear memory.
+    /// Duplicate strings are deduplicated to save space.
     fn intern_string(&mut self, s: &str) -> (u32, u32) {
         if let Some(&loc) = self.string_literals.get(s) {
             return loc;
@@ -552,18 +653,28 @@ impl WasmGenerator {
         (offset, len)
     }
 
+    /// Processes a struct definition and calculates its memory layout.
+    ///
+    /// Fields are laid out sequentially with appropriate alignment:
+    /// - f64 fields are 8-byte aligned
+    /// - i32 fields are 4-byte aligned
+    ///
+    /// The total struct size is padded to 8-byte alignment.
     fn process_struct(&mut self, s: &ast::Struct) -> Result<(), String> {
         let mut field_offsets = HashMap::new();
         let mut current_offset = 0u32;
-        
+
         for (name, ty) in &s.fields {
             let val_type = self.map_type(Some(ty));
+            // Align the field to its natural alignment.
             let align = match val_type { ValType::F64 => 8, ValType::I32 => 4, _ => 8 };
             while current_offset % align != 0 { current_offset += 1; }
             field_offsets.insert(name.name.to_string(), (current_offset, val_type));
+            // Advance by the field's size.
             let size = match val_type { ValType::F64 => 8, ValType::I32 => 4, _ => 8 };
             current_offset += size;
         }
+        // Pad the struct to 8-byte alignment for consistent allocation.
         while current_offset % 8 != 0 { current_offset += 1; }
         self.struct_map.insert(s.name.name.to_string(), (current_offset, field_offsets));
         Ok(())

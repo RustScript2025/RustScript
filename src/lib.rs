@@ -1,6 +1,25 @@
 //! RustScript compiler library.
-//! 
+//!
 //! Author: Michael Lauzon
+//!
+//! This module provides the WebAssembly interface for the RustScript compiler,
+//! allowing RustScript programmes to be compiled and executed directly in web
+//! browsers. It exposes functions via `wasm-bindgen` that can be called from
+//! JavaScript.
+//!
+//! # Browser Usage
+//!
+//! The library is loaded as a WASM module and provides:
+//! - `compile_to_wasm(source)` - Compiles RustScript source to WASM bytes
+//! - `run_script(source)` - Compiles and executes a RustScript programme
+//!
+//! # Example
+//!
+//! ```javascript
+//! import init, { run_script } from './pkg/RustScript.js';
+//! await init();
+//! await run_script('fn main() { console.log("Hello!"); }');
+//! ```
 
 use wasm_bindgen::prelude::*;
 use std::panic;
@@ -17,6 +36,7 @@ pub mod std_lib;
 pub mod borrow_checker;
 pub mod memory;
 
+// Import JavaScript console functions for logging.
 #[wasm_bindgen]
 extern "C" {
     #[wasm_bindgen(js_namespace = console)]
@@ -25,12 +45,31 @@ extern "C" {
     fn error(s: &str);
 }
 
+/// Initialises the WASM module when it's first loaded.
+///
+/// Sets up a panic hook to display Rust panics in the browser console,
+/// which is invaluable for debugging.
 #[wasm_bindgen(start)]
 pub fn main_js() -> Result<(), JsValue> {
     panic::set_hook(Box::new(console_error_panic_hook::hook));
     Ok(())
 }
 
+/// Compiles RustScript source code to WebAssembly bytecode.
+///
+/// This function runs the full compilation pipeline:
+/// 1. Parse the source into an AST
+/// 2. Run the borrow checker for memory safety
+/// 3. Run the type checker for type safety
+/// 4. Generate WASM bytecode
+///
+/// # Arguments
+///
+/// * `source` - The RustScript source code to compile
+///
+/// # Returns
+///
+/// The compiled WASM binary as a byte vector, or a JavaScript error.
 #[wasm_bindgen]
 pub fn compile_to_wasm(source: &str) -> Result<Vec<u8>, JsValue> {
     let ast = parser::parse_program(source)
@@ -53,15 +92,31 @@ pub fn compile_to_wasm(source: &str) -> Result<Vec<u8>, JsValue> {
     Ok(wasm_bytes)
 }
 
+/// Compiles and executes a RustScript programme in the browser.
+///
+/// This is the main entry point for running RustScript in web pages. It:
+/// 1. Compiles the source to WASM
+/// 2. Sets up the import object with console and memory functions
+/// 3. Instantiates the WASM module
+/// 4. Calls the `main` function if it exists
+///
+/// Output from `console.log` is written to both the browser console and
+/// any element with id="output" on the page.
+///
+/// # Arguments
+///
+/// * `source` - The RustScript source code to execute
 #[wasm_bindgen]
 pub async fn run_script(source: &str) -> Result<(), JsValue> {
     let wasm_bytes = compile_to_wasm(source)?;
-    
+
+    // Build the import object that provides host functions to WASM.
     let imports = js_sys::Object::new();
     let console_obj = js_sys::Object::new();
     let env_obj = js_sys::Object::new();
     
-    // Console.log writes to page output AND console
+    // Console.log implementation: reads string from WASM memory and outputs it.
+    // Writes to both the page output element and the browser console.
     let log_fn = js_sys::Function::new_with_args(
         "ptr, len",
         r#"
@@ -89,6 +144,7 @@ pub async fn run_script(source: &str) -> Result<(), JsValue> {
         "#
     );
     
+    // Console.error implementation: similar to log but styled as an error.
     let error_fn = js_sys::Function::new_with_args(
         "ptr, len",
         r#"
@@ -115,6 +171,8 @@ pub async fn run_script(source: &str) -> Result<(), JsValue> {
         "#
     );
     
+    // Simple bump allocator for WASM memory.
+    // Starts at offset 1024 to leave room for static data.
     let malloc_fn = js_sys::Function::new_with_args(
         "size",
         r#"
@@ -125,30 +183,35 @@ pub async fn run_script(source: &str) -> Result<(), JsValue> {
         "#
     );
     
+    // Wire up the import object with our functions.
     js_sys::Reflect::set(&console_obj, &"log".into(), &log_fn)?;
     js_sys::Reflect::set(&console_obj, &"error".into(), &error_fn)?;
     js_sys::Reflect::set(&env_obj, &"malloc".into(), &malloc_fn)?;
     js_sys::Reflect::set(&imports, &"console".into(), &console_obj)?;
     js_sys::Reflect::set(&imports, &"env".into(), &env_obj)?;
-    
+
+    // Instantiate the WASM module with our imports.
     let promise = js_sys::WebAssembly::instantiate_buffer(&wasm_bytes, &imports);
     let result = wasm_bindgen_futures::JsFuture::from(promise).await?;
-    
+
+    // Extract the instance and its exports.
     let instance = js_sys::Reflect::get(&result, &"instance".into())?;
     let exports = js_sys::Reflect::get(&instance, &"exports".into())?;
-    
+
+    // Store the WASM memory globally so console functions can access it.
     if let Ok(memory) = js_sys::Reflect::get(&exports, &"memory".into()) {
         js_sys::Reflect::set(&js_sys::global(), &"__rustscript_memory".into(), &memory)?;
     }
-    
+
+    // Call the main function if it exists.
     let main_fn = js_sys::Reflect::get(&exports, &"main".into())?;
-    
+
     if main_fn.is_function() {
         let func = js_sys::Function::from(main_fn);
         func.call0(&JsValue::NULL)?;
     } else {
         log("Warning: No 'main' function found in script.");
     }
-    
+
     Ok(())
 }

@@ -57,11 +57,19 @@ impl Compiler {
     }
 
     /// Compiles all RustScript files in the project to the specified target.
-    /// 
-    /// Supported targets:
-    /// - "js" - JavaScript (ES2020+)
-    /// - "wasm" - WebAssembly binary
-    /// - "native" - Native executable (future)
+    ///
+    /// This method discovers all `.rjsc` files in the project directory and
+    /// compiles each one to the specified output format.
+    ///
+    /// # Supported Targets
+    ///
+    /// - `"js"` - JavaScript (ES2020+) for Node.js or browsers
+    /// - `"wasm"` - WebAssembly binary for high-performance web apps
+    /// - `"native"` - Native executable (planned for future releases)
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if no source files are found or if compilation fails.
     pub fn compile_project(&self, target: &str) -> anyhow::Result<()> {
         let files = self.file_resolver.find_rustscript_files()?;
         
@@ -83,12 +91,19 @@ impl Compiler {
         Ok(())
     }
 
+    /// Generates JavaScript output for a source file.
+    ///
+    /// Note: JavaScript code generation is not yet implemented.
     fn generate_js(&self, file_path: &Path) -> anyhow::Result<()> {
         let output_path = self.get_output_path(file_path, "js");
         println!("Would generate JS: {}", output_path.display());
         Ok(())
     }
 
+    /// Generates WebAssembly output for a source file.
+    ///
+    /// This runs the full compilation pipeline: parsing, borrow checking,
+    /// type checking, and WASM code generation.
     fn generate_wasm(&self, file_path: &Path) -> anyhow::Result<()> {
         use std::fs;
         
@@ -128,12 +143,19 @@ impl Compiler {
         Ok(())
     }
     
+    /// Generates native executable output for a source file.
+    ///
+    /// Note: Native code generation is planned for future releases.
     fn generate_native(&self, file_path: &Path) -> anyhow::Result<()> {
         let output_path = self.get_output_path(file_path, "");
         println!("Would generate native: {}", output_path.display());
         Ok(())
     }
-    
+
+    /// Calculates the output path for a compiled file.
+    ///
+    /// Output files are placed in a `dist` directory, preserving the
+    /// relative path structure from the project root.
     fn get_output_path(&self, file_path: &Path, extension: &str) -> PathBuf {
         let relative_path = pathdiff::diff_paths(file_path, &self.file_resolver.project_root)
             .unwrap_or_else(|| file_path.to_path_buf());
