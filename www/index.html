@@ -56,10 +56,19 @@ fn main() {
     </script>
 
     <script type="module">
+        // ====================================================================
+        // RustScript Runtime Loader
+        // ====================================================================
+        // This script initialises the RustScript WebAssembly runtime and
+        // executes any embedded RustScript code on the page.
+        // ====================================================================
+
         import init, { run_script } from './pkg/RustScript.js';
         
+        // Reference to the output element for displaying results.
         const outputEl = document.getElementById('output');
         
+        // Writes output to the display element with optional styling.
         function writeOutput(text, type = 'log') {
             if (outputEl) {
                 const line = document.createElement('div');
@@ -69,9 +78,10 @@ fn main() {
             }
         }
         
-        // Store reference to globalThis for RustScript memory
+        // Store reference to globalThis for RustScript memory access.
         globalThis.__rustscript_writeOutput = writeOutput;
         
+        // Main initialisation function - loads the WASM module and runs scripts.
         async function main() {
             await init();
             console.log('🦀 RustScript Runtime Initialised 🦀');

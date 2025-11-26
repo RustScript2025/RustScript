@@ -1,10 +1,20 @@
+// ============================================================================
 // Phase 1 Features Demo: String & Syntax Enhancements
+// ============================================================================
 // Author: Michael Lauzon
-// This file demonstrates all Phase 1 features of RustScript
+// 
+// This file demonstrates all Phase 1 features of RustScript, including:
+//   - String interpolation for dynamic text
+//   - Optional chaining for safe navigation
+//   - Null coalescing for default values
+//   - List comprehensions for data transformation
+// ============================================================================
 
 // ============================================================================
 // Feature 1: String Interpolation
 // ============================================================================
+// String interpolation allows embedding expressions directly within strings
+// using curly braces. This provides a cleaner alternative to concatenation.
 
 fn demo_string_interpolation() {
     let name = "Alice";
@@ -27,6 +37,9 @@ fn demo_string_interpolation() {
 // ============================================================================
 // Feature 2: Optional Chaining
 // ============================================================================
+// Optional chaining (?.) allows safe navigation through potentially null
+// values without causing runtime errors. If any part of the chain is null,
+// the entire expression returns null gracefully.
 
 struct Address {
     street: string,
@@ -62,6 +75,9 @@ fn demo_optional_chaining() {
 // ============================================================================
 // Feature 3: Null Coalescing
 // ============================================================================
+// The null coalescing operator (??) provides a default value when the
+// left-hand side is null or undefined. This simplifies handling optional
+// values without verbose conditional checks.
 
 fn demo_null_coalescing() {
     let maybe_name: string = get_optional_name();
@@ -95,6 +111,9 @@ fn second_option() -> string {
 // ============================================================================
 // Feature 4: List Comprehensions
 // ============================================================================
+// List comprehensions provide a concise way to create lists by transforming
+// and filtering existing collections. Inspired by Python, they combine
+// mapping and filtering into a single, readable expression.
 
 fn demo_list_comprehensions() {
     let numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
@@ -115,15 +134,20 @@ fn demo_list_comprehensions() {
     let pairs = [(x, y) for x in [1, 2, 3] for y in [4, 5, 6]];
     console.log("Pairs: {pairs}");
     
-    // String manipulation with comprehension
+    // String manipulation with comprehension.
     let names = ["alice", "bob", "charlie"];
     let capitalised = [name.uppercase() for name in names];
     console.log("Capitalised: {capitalised}");
 }
 
+// Helper functions for null coalescing demo.
+
 // ============================================================================
 // Combined Example: All Features Together
 // ============================================================================
+// This example demonstrates how Phase 1 features work together in a
+// realistic shopping cart scenario, combining interpolation, optional
+// chaining, null coalescing, and list comprehensions.
 
 struct Product {
     name: string,
@@ -169,6 +193,9 @@ fn demo_combined_features() {
 // ============================================================================
 // Real-World Example: Data Processing Pipeline
 // ============================================================================
+// This example shows how Phase 1 features can be used to build a log
+// processing pipeline, filtering errors and formatting output using
+// comprehensions and string interpolation.
 
 struct LogEntry {
     timestamp: number,
@@ -202,6 +229,7 @@ fn process_logs(logs: [LogEntry]) {
 // ============================================================================
 // Main Entry Point
 // ============================================================================
+// Runs all the Phase 1 feature demonstrations in sequence.
 
 fn main() {
     console.log("=== Phase 1 Features Demo ===");

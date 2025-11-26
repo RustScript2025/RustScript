@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <title>Hide and Seek v3 - RustScript Game</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            background: #0a0a12;
+            color: #00ff00;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .game-layout {
+            display: flex;
+            gap: 25px;
+            align-items: flex-start;
+            flex-wrap: nowrap;
+        }
+        .game-main { flex: 1; min-width: 0; }
+        .game-sidebar {
+            width: 300px;
+            flex-shrink: 0;
+            position: sticky;
+            top: 20px;
+        }
+        h1 {
+            color: #ff3355;
+            text-align: center;
+            text-shadow: 0 0 10px #ff3355;
+            margin-bottom: 5px;
+        }
+        .subtitle { text-align: center; color: #666; margin-bottom: 20px; }
+        #game-output {
+            background: #0d0d1a;
+            border: 2px solid #22cc66;
+            border-radius: 8px;
+            padding: 20px;
+            min-height: 400px;
+            max-height: 500px;
+            overflow-y: auto;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            box-shadow: 0 0 20px rgba(34, 204, 102, 0.2);
+        }
+        #game-output .log { color: #00ff00; }
+        #game-output .error { color: #ff4444; }
+        #game-output .highlight { color: #ffff00; font-weight: bold; }
+        #game-output .info { color: #3399ff; }
+        .input-area { margin-top: 15px; display: flex; gap: 10px; }
+        #command-input {
+            flex: 1;
+            background: #0d0d1a;
+            border: 2px solid #3399ff;
+            border-radius: 4px;
+            color: #00ff00;
+            font-family: inherit;
+            font-size: 16px;
+            padding: 12px 15px;
+            outline: none;
+        }
+        #command-input:focus {
+            border-color: #00ff00;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+        }
+        #command-input::placeholder { color: #444; }
+        button {
+            background: #22cc66;
+            border: none;
+            border-radius: 4px;
+            color: #000;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: bold;
+            padding: 12px 25px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        button:hover {
+            background: #33dd77;
+            box-shadow: 0 0 15px rgba(34, 204, 102, 0.5);
+        }
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+        .controls button {
+            background: #1a1a2e;
+            border: 1px solid #3399ff;
+            color: #3399ff;
+            padding: 8px 15px;
+            font-size: 12px;
+        }
+        .controls button:hover { background: #3399ff; color: #000; }
+        .help {
+            padding: 18px;
+            background: #0d0d1a;
+            border: 2px solid #22cc66;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #aaa;
+            box-shadow: 0 0 15px rgba(34, 204, 102, 0.15);
+        }
+        .help h3 {
+            color: #ff3355;
+            margin-top: 0;
+            margin-bottom: 12px;
+            font-size: 16px;
+            text-shadow: 0 0 8px rgba(255, 51, 85, 0.5);
+        }
+        .help h4 {
+            color: #3399ff;
+            margin: 15px 0 8px 0;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .help p { margin: 6px 0; line-height: 1.5; }
+        .help kbd {
+            background: #1a1a2e;
+            border: 1px solid #3399ff;
+            border-radius: 3px;
+            padding: 2px 8px;
+            color: #3399ff;
+            font-weight: bold;
+        }
+        .version-badge {
+            background: #22cc66;
+            color: #000;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 HIDE AND SEEK 🔍 <span class="version-badge">v3 - Full Game</span></h1>
+        <p class="subtitle">Playable Game with Async Input</p>
+        
+        <div class="game-layout">
+            <div class="game-main">
+                <div id="game-output"></div>
+                
+                <div class="input-area">
+                    <input type="text" id="command-input" placeholder="Enter command..." autofocus>
+                    <button onclick="submitCommand()">Enter</button>
+                </div>
+                
+                <div class="controls">
+                    <button onclick="sendCommand('n')">↑ North</button>
+                    <button onclick="sendCommand('s')">↓ South</button>
+                    <button onclick="sendCommand('e')">→ East</button>
+                    <button onclick="sendCommand('w')">← West</button>
+                    <button onclick="sendCommand('u')">⬆ Up</button>
+                    <button onclick="sendCommand('d')">⬇ Down</button>
+                    <button onclick="sendCommand('l')">👁 Look</button>
+                    <button onclick="sendCommand('m')">🗺 Map</button>
+                    <button onclick="sendCommand('h')">💡 Hint</button>
+                </div>
+            </div>
+            
+            <div class="game-sidebar">
+                <div class="help">
+                    <h3>How to Play</h3>
+                    <p>Find all your hidden friends before you run out of turns!</p>
+                    <h4>Movement</h4>
+                    <p><kbd>N</kbd> <kbd>S</kbd> <kbd>E</kbd> <kbd>W</kbd> - Directions</p>
+                    <p><kbd>U</kbd> <kbd>D</kbd> - Up/Down (Hallway only)</p>
+                    <h4>Actions</h4>
+                    <p><kbd>L</kbd> - Look around for hiding spots</p>
+                    <p><kbd>1-9</kbd> - Search a hiding spot</p>
+                    <p><kbd>H</kbd> - Get hint (free, then costs pts)</p>
+                    <p><kbd>M</kbd> - Show map</p>
+                    <p><kbd>Q</kbd> - Quit game</p>
+                    <h4>Scoring by Difficulty</h4>
+                    <p>Easy: +100 find, -50 miss</p>
+                    <p>Medium: +75 find, -75 miss</p>
+                    <p>Hard: +50 find, -100 miss</p>
+                    <h4>Hints by Difficulty</h4>
+                    <p>Easy: 3 free, then -25 pts</p>
+                    <p>Medium: 2 free, then -50 pts</p>
+                    <p>Hard: 1 free, then -75 pts</p>
+                    <h4>Other Versions</h4>
+                    <p><a href="hideseek.html" style="color: #22cc66;">v1</a> - JavaScript</p>
+                    <p><a href="hideseek_v2.html" style="color: #22cc66;">v2</a> - RustScript WASM demo</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================== -->
+    <!-- Game Engine - Full playable game with async input system           -->
+    <!-- ================================================================== -->
+    <script type="module">
+        const outputEl = document.getElementById('game-output');
+        const inputEl = document.getElementById('command-input');
+        
+        // Output functions.
+        function writeOutput(text, type = 'log') {
+            const line = document.createElement('div');
+            line.className = type;
+            line.textContent = text;
+            outputEl.appendChild(line);
+            outputEl.scrollTop = outputEl.scrollHeight;
+        }
+        
+        // Game data.
+        const rooms = [
+            { name: "Living Room", desc: "A cosy living room with a fireplace.", n: 10, s: 0, e: 2, w: 0 },
+            { name: "Kitchen", desc: "A modern kitchen with stainless steel appliances.", n: 0, s: 8, e: 11, w: 1 },
+            { name: "Bedroom", desc: "A bedroom with a large bed and wooden furniture.", n: 0, s: 10, e: 4, w: 12 },
+            { name: "Bathroom", desc: "A clean bathroom with white tiles.", n: 0, s: 0, e: 0, w: 3 },
+            { name: "Basement", desc: "A dark basement filled with old boxes.", n: 10, s: 0, e: 0, w: 0 },
+            { name: "Attic", desc: "A dusty attic with old furniture.", n: 0, s: 10, e: 0, w: 0 },
+            { name: "Garage", desc: "A garage with tools and a car.", n: 0, s: 0, e: 10, w: 0 },
+            { name: "Garden", desc: "A beautiful garden with flowers.", n: 2, s: 0, e: 0, w: 0 },
+            { name: "Study", desc: "A quiet study lined with bookshelves.", n: 0, s: 0, e: 0, w: 10 },
+            { name: "Hallway", desc: "A long hallway connecting various rooms.", n: 3, s: 1, e: 9, w: 7 },
+            { name: "Dining Room", desc: "An elegant dining room with a large table.", n: 0, s: 0, e: 0, w: 2 },
+            { name: "Closet", desc: "A small closet filled with clothes.", n: 0, s: 0, e: 3, w: 0 },
+        ];
+        
+        const hidingSpots = [
+            { name: "Behind the couch", room: 1 }, { name: "Under the coffee table", room: 1 }, { name: "Behind the curtains", room: 1 },
+            { name: "In the pantry", room: 2 }, { name: "Under the sink", room: 2 }, { name: "Behind the door", room: 2 },
+            { name: "Under the bed", room: 3 }, { name: "In the wardrobe", room: 3 }, { name: "Under the blankets", room: 3 },
+            { name: "In the shower", room: 4 }, { name: "In the linen closet", room: 4 },
+            { name: "Behind the furnace", room: 5 }, { name: "In the storage boxes", room: 5 }, { name: "Under the stairs", room: 5 },
+            { name: "In the old trunk", room: 6 }, { name: "Behind the boxes", room: 6 },
+            { name: "Behind the car", room: 7 }, { name: "Under the workbench", room: 7 },
+            { name: "Behind the bushes", room: 8 }, { name: "In the shed", room: 8 },
+            { name: "Behind the bookshelf", room: 9 }, { name: "Under the desk", room: 9 },
+            { name: "In the coat closet", room: 10 },
+            { name: "Under the table", room: 11 }, { name: "Behind the curtains", room: 11 },
+            { name: "Behind the clothes", room: 12 }, { name: "In the shoe box", room: 12 },
+        ];
+        
+        let game = {
+            playerName: "Player", currentRoom: 1, score: 0, turnsLeft: 30,
+            totalHidden: 5, found: 0, hintsUsed: 0, freeHints: 3,
+            hintCost: 25, findReward: 100, missPenalty: 50,
+            spots: [], gameOver: false, inputCallback: null,
+        };
+        
+        // Async input system.
+        function asyncInput(prompt) {
+            return new Promise((resolve) => {
+                if (prompt) writeOutput(prompt, 'info');
+                game.inputCallback = resolve;
+                inputEl.focus();
+            });
+        }
+        
+        window.submitCommand = function() {
+            const cmd = inputEl.value.trim();
+            inputEl.value = '';
+            if (game.inputCallback) {
+                writeOutput('> ' + cmd, 'info');
+                const cb = game.inputCallback;
+                game.inputCallback = null;
+                cb(cmd);
+            }
+            inputEl.focus();
+        };
+        
+        window.sendCommand = function(cmd) {
+            if (game.inputCallback) {
+                writeOutput('> ' + cmd, 'info');
+                const cb = game.inputCallback;
+                game.inputCallback = null;
+                cb(cmd);
+            }
+            inputEl.focus();
+        };
+        
+        inputEl.addEventListener('keypress', (e) => { if (e.key === 'Enter') window.submitCommand(); });
+
+        
+        // Game functions.
+        function initSpots() {
+            game.spots = hidingSpots.map(s => ({ ...s, hasPerson: false, searched: false }));
+            let placed = 0;
+            while (placed < game.totalHidden) {
+                const idx = Math.floor(Math.random() * game.spots.length);
+                if (!game.spots[idx].hasPerson) { game.spots[idx].hasPerson = true; placed++; }
+            }
+        }
+        
+        function displayTitle() {
+            writeOutput("===============================================");
+            writeOutput("     H I D E   A N D   S E E K                ");
+            writeOutput("        A RustScript Adventure Game           ");
+            writeOutput("===============================================");
+        }
+        
+        function displayRoom() {
+            const room = rooms[game.currentRoom - 1];
+            writeOutput("");
+            writeOutput("===============================================");
+            writeOutput(`  Location: ${room.name}`);
+            writeOutput("===============================================");
+            writeOutput(room.desc);
+            let exits = "Exits: ";
+            if (room.n > 0) exits += "North "; if (room.s > 0) exits += "South ";
+            if (room.e > 0) exits += "East "; if (room.w > 0) exits += "West ";
+            if (game.currentRoom === 10) exits += "Up Down ";
+            writeOutput(exits);
+        }
+        
+        function displayStatus() {
+            writeOutput("-----------------------------------------------");
+            writeOutput(`Found: ${game.found}/${game.totalHidden} | Turns: ${game.turnsLeft} | Score: ${game.score}`);
+            writeOutput("-----------------------------------------------");
+        }
+        
+        function displayCommands() {
+            writeOutput("Commands: [N/S/E/W] Move  [U/D] Up/Down  [L] Look  [1-9] Search  [H] Hint  [M] Map  [Q] Quit");
+        }
+        
+        function displayMap() {
+            writeOutput("");
+            writeOutput("=== MAP ===");
+            writeOutput("              [Attic]");
+            writeOutput("                 |");
+            writeOutput("   [Closet]-[Bedroom]    [Study]");
+            writeOutput("               |            |");
+            writeOutput("   [Garage]-[Hallway]-------+");
+            writeOutput("               |");
+            writeOutput("          [Living Room]-[Kitchen]-[Dining]");
+            writeOutput("                            |");
+            writeOutput("                        [Garden]");
+            writeOutput("[Bathroom] connects to Bedroom, [Basement] from Hallway (Down)");
+        }
+        
+        function displaySpots() {
+            const roomSpots = game.spots.filter(s => s.room === game.currentRoom);
+            writeOutput(""); writeOutput("Hiding spots here:");
+            roomSpots.forEach((spot, i) => {
+                writeOutput(`  ${i + 1}. ${spot.name}${spot.searched ? " (searched)" : ""}`);
+            });
+        }
+        
+        function movePlayer(dir) {
+            const room = rooms[game.currentRoom - 1];
+            let newRoom = 0;
+            if (dir === 'n') newRoom = room.n; else if (dir === 's') newRoom = room.s;
+            else if (dir === 'e') newRoom = room.e; else if (dir === 'w') newRoom = room.w;
+            else if (dir === 'u' && game.currentRoom === 10) newRoom = 6;
+            else if (dir === 'd' && game.currentRoom === 10) newRoom = 5;
+            if (newRoom > 0) { game.currentRoom = newRoom; game.turnsLeft--; }
+            else writeOutput("You can't go that way!");
+        }
+        
+        function searchSpot(num) {
+            const roomSpots = game.spots.filter(s => s.room === game.currentRoom);
+            if (num < 1 || num > roomSpots.length) { writeOutput("Invalid spot!"); return; }
+            const spot = roomSpots[num - 1];
+            const actualIdx = game.spots.findIndex(s => s === spot);
+            if (spot.searched) { writeOutput("Already searched there!"); return; }
+            game.spots[actualIdx].searched = true; game.turnsLeft--;
+            if (spot.hasPerson) {
+                game.found++; game.score += game.findReward;
+                writeOutput("*** YOU FOUND SOMEONE! ***", 'highlight');
+                writeOutput(`+${game.findReward} points!`, 'highlight');
+            } else {
+                game.score -= game.missPenalty;
+                writeOutput("Nobody there.", 'error');
+                writeOutput(`-${game.missPenalty} points!`, 'error');
+            }
+        }
+        
+        function getHint() {
+            const unfound = game.spots.find(s => s.hasPerson && !s.searched);
+            if (!unfound) { writeOutput("No hints - you found everyone!"); return; }
+            writeOutput(`Hint: Someone is in the ${rooms[unfound.room - 1].name}...`);
+            game.hintsUsed++;
+            if (game.hintsUsed <= game.freeHints) writeOutput(`Free hint! (${game.freeHints - game.hintsUsed} left)`);
+            else { game.score -= game.hintCost; writeOutput(`-${game.hintCost} points`, 'error'); }
+        }
+        
+        // Main game loop.
+        async function gameLoop() {
+            while (!game.gameOver) {
+                if (game.found >= game.totalHidden) {
+                    writeOutput(""); writeOutput("*** CONGRATULATIONS! ***", 'highlight');
+                    writeOutput(`Final Score: ${game.score}`); game.gameOver = true; break;
+                }
+                if (game.turnsLeft <= 0) {
+                    writeOutput(""); writeOutput("*** GAME OVER ***", 'error');
+                    writeOutput(`Found: ${game.found}/${game.totalHidden}, Score: ${game.score}`);
+                    game.gameOver = true; break;
+                }
+                displayRoom(); displayStatus(); displayCommands();
+                const cmd = (await asyncInput("")).toLowerCase();
+                if ('nsewud'.includes(cmd)) movePlayer(cmd);
+                else if (cmd === 'l') displaySpots();
+                else if (cmd === 'h') getHint();
+                else if (cmd === 'm') displayMap();
+                else if (cmd === 'q') { writeOutput("Thanks for playing!"); game.gameOver = true; }
+                else if ('123456789'.includes(cmd)) searchSpot(parseInt(cmd));
+                else writeOutput("Unknown command.");
+            }
+            writeOutput("Refresh to play again.");
+        }
+        
+        // Game init.
+        async function main() {
+            displayTitle(); writeOutput("");
+            writeOutput("Difficulty: 1=Easy  2=Medium  3=Hard");
+            const choice = await asyncInput("Choose (1-3): ");
+            if (choice === '2') { game.totalHidden=8; game.turnsLeft=25; game.freeHints=2; game.hintCost=50; game.findReward=75; game.missPenalty=75; }
+            else if (choice === '3') { game.totalHidden=12; game.turnsLeft=20; game.freeHints=1; game.hintCost=75; game.findReward=50; game.missPenalty=100; }
+            const name = await asyncInput("Your name: ");
+            game.playerName = name || "Player";
+            initSpots();
+            writeOutput(`\n${game.playerName}, find ${game.totalHidden} friends! ${game.freeHints} free hints.`);
+            await asyncInput("Press Enter to start...");
+            await gameLoop();
+        }
+        main();
+    </script>
+</body>
+</html>

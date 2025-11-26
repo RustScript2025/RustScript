@@ -32,7 +32,17 @@ boolean = { "true" | "false" }
 // IDENTIFIERS AND KEYWORDS
 // ============================================================================
 
-ident = @{ !keyword ~ (ASCII_ALPHA | "_") ~ (ASCII_ALPHANUMERIC | "_")* }
+ident = @{ !keyword_boundary ~ (ASCII_ALPHA | "_") ~ (ASCII_ALPHANUMERIC | "_")* }
+
+// Keywords must be followed by a word boundary (non-alphanumeric) to match.
+// This prevents "input" from being rejected because it starts with "in".
+keyword_boundary = {
+    ("let" | "mut" | "const" | "fn" | "async" | "await" | "match" | "if" | "else" |
+    "for" | "guard" | "defer" | "extend" | "in" | "while" | "loop" | "return" |
+    "yield" | "gen" | "struct" | "impl" | "mod" | "use" | "requires" | "ensures" |
+    "invariant" | "comptime" | "pure" | "effect" | "true" | "false")
+    ~ !(ASCII_ALPHANUMERIC | "_")
+}
 
 keyword = {
     "let" | "mut" | "const" | "fn" | "async" | "await" | "match" | "if" | "else" |

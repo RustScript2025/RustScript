@@ -1,12 +1,22 @@
+// ============================================================================
 // Phase 2 Features Demo: Function Enhancements
+// ============================================================================
 // Author: Michael Lauzon
-// This file demonstrates all Phase 2 features of RustScript
+// 
+// This file demonstrates all Phase 2 features of RustScript, including:
+//   - Pattern matching in function heads (Erlang-style)
+//   - Generators for lazy evaluation (Python/JavaScript-style)
+//   - Multiple dispatch for type-based polymorphism (Julia-style)
+// ============================================================================
 
 // ============================================================================
 // Feature 1: Pattern Matching in Function Heads (Erlang-style)
 // ============================================================================
+// Pattern matching in function heads allows defining multiple versions of a
+// function that handle different input patterns. The runtime automatically
+// selects the appropriate version based on the arguments provided.
 
-// Factorial with pattern-matched function heads
+// Factorial with pattern-matched function heads.
 fn factorial(0) -> number {
     1
 }
@@ -62,8 +72,11 @@ fn demo_pattern_matching() {
 // ============================================================================
 // Feature 2: Generators (Python/JavaScript-style)
 // ============================================================================
+// Generators are functions that can pause execution and yield values one at
+// a time. They enable lazy evaluation, allowing efficient processing of
+// large or infinite sequences without loading everything into memory.
 
-// Simple generator
+// Simple generator that counts from 0 up to a maximum value.
 gen fn count_up_to(max: number) {
     let i = 0;
     while i < max {
@@ -133,8 +146,11 @@ fn demo_generators() {
 // ============================================================================
 // Feature 3: Multiple Dispatch (Julia-style)
 // ============================================================================
+// Multiple dispatch selects which function implementation to call based on
+// the types of all arguments, not just the first one. This enables elegant
+// handling of operations that behave differently for different type combinations.
 
-// Process different types differently
+// Process different types differently based on argument types.
 fn process(x: number, y: number) -> string {
     "Adding numbers: {x + y}"
 }
@@ -248,8 +264,11 @@ fn demo_multiple_dispatch() {
 // ============================================================================
 // Combined Example: All Features Together
 // ============================================================================
+// This example demonstrates how Phase 2 features work together, combining
+// pattern matching, generators, and multiple dispatch for powerful and
+// expressive code.
 
-// Pattern-matched generator with multiple dispatch
+// Pattern-matched generator with multiple dispatch.
 gen fn range(start: number, end: number) if start < end {
     let current = start;
     while current < end {
@@ -342,6 +361,8 @@ fn demo_combined() {
 // ============================================================================
 // Real-World Example: Data Processing Pipeline
 // ============================================================================
+// This example shows how Phase 2 features can be used to build a streaming
+// data processing pipeline with validation, filtering, and aggregation.
 
 struct DataPoint {
     timestamp: number,
@@ -432,6 +453,7 @@ fn process_data_pipeline() {
 // ============================================================================
 // Main Entry Point
 // ============================================================================
+// Runs all the Phase 2 feature demonstrations in sequence.
 
 fn main() {
     console.log("=== Phase 2 Features Demo ===");

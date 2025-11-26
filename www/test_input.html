@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Input</title>
+</head>
+<body>
+    <h1>Testing input() function</h1>
+    <pre id="output"></pre>
+    
+    <script type="text/rustscript">
+fn main() {
+    console.log("Starting test...");
+    let x = input("Enter something: ");
+    console.log("Done!");
+}
+    </script>
+    
+    <script type="module">
+        import init, { run_script } from './pkg/RustScript.js';
+        
+        const output = document.getElementById('output');
+        
+        async function main() {
+            try {
+                await init();
+                output.textContent += 'WASM initialized\n';
+                
+                const script = document.querySelector('script[type="text/rustscript"]');
+                const source = script.textContent.trim();
+                
+                output.textContent += 'Source:\n' + source + '\n\n';
+                output.textContent += 'Running...\n';
+                
+                await run_script(source);
+                
+                output.textContent += 'Success!\n';
+            } catch (e) {
+                output.textContent += 'Error: ' + e + '\n';
+            }
+        }
+        
+        main();
+    </script>
+</body>
+</html>

@@ -1,12 +1,22 @@
+// ============================================================================
 // Phase 3 Features Demo: Safety & Contracts
+// ============================================================================
 // Author: Michael Lauzon
-// This file demonstrates all Phase 3 features of RustScript
+// 
+// This file demonstrates all Phase 3 features of RustScript, including:
+//   - Design by Contract (preconditions, postconditions, invariants)
+//   - Effect System for tracking side effects
+//   - Compile-time Execution for optimisation and metaprogramming
+// ============================================================================
 
 // ============================================================================
 // Feature 1: Design by Contract
 // ============================================================================
+// Design by Contract allows specifying preconditions (requires), postconditions
+// (ensures), and invariants that must hold true. These contracts are checked
+// at runtime and help catch bugs early by validating assumptions.
 
-// Preconditions with requires
+// Preconditions with requires - the divisor must not be zero.
 fn divide(a: number, b: number) -> number
     requires b != 0, "Divisor cannot be zero"
     ensures result * b ≈ a, "Result must satisfy a/b * b ≈ a"
@@ -106,8 +116,11 @@ fn demo_contracts() {
 // ============================================================================
 // Feature 2: Effect System
 // ============================================================================
+// The effect system tracks what side effects a function may have, such as
+// I/O operations, state mutations, or exceptions. This enables the compiler
+// to verify that pure functions remain pure and helps reason about code behaviour.
 
-// Pure function (no side effects)
+// Pure function (no side effects) - only performs computation.
 effect [pure]
 fn add(a: number, b: number) -> number {
     a + b
@@ -212,8 +225,11 @@ fn map<T, U, E>(items: [T], f: fn(T) -> U effect [E]) -> [U] effect [E] {
 // ============================================================================
 // Feature 3: Compile-time Execution
 // ============================================================================
+// Compile-time execution allows running code during compilation rather than
+// at runtime. This enables constant folding, code generation, and compile-time
+// validation, resulting in faster and safer programmes.
 
-// Compile-time constants
+// Compile-time constants - evaluated during compilation.
 comptime {
     const BUFFER_SIZE = 1024;
     const MAX_USERS = 100;
@@ -328,8 +344,10 @@ comptime {
 // ============================================================================
 // Combined Example: All Features Together
 // ============================================================================
+// This example demonstrates how Phase 3 features work together, combining
+// contracts, effects, and compile-time execution for robust, verifiable code.
 
-// Compile-time configuration
+// Compile-time configuration for the combined example.
 comptime {
     const MAX_RETRIES = 3;
     const TIMEOUT_MS = 5000;
@@ -429,6 +447,9 @@ fn demo_combined() {
 // ============================================================================
 // Real-World Example: Safe Database Operations
 // ============================================================================
+// This example shows how Phase 3 features can be used to build safe database
+// operations with contracts ensuring proper connection state and effect
+// tracking for I/O operations.
 
 struct Database {
     connection_string: string,
@@ -514,6 +535,7 @@ fn safe_database_operation() {
 // ============================================================================
 // Main Entry Point
 // ============================================================================
+// Runs all the Phase 3 feature demonstrations in sequence.
 
 fn main() {
     console.log("=== Phase 3 Features Demo ===");

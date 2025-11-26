@@ -183,10 +183,55 @@ pub async fn run_script(source: &str) -> Result<(), JsValue> {
         "#
     );
     
+    // Input function: prompts user for input and returns the string.
+    // Uses window.prompt() for synchronous input in the browser.
+    let input_fn = js_sys::Function::new_with_args(
+        "ptr, len",
+        r#"
+        try {
+            const memory = globalThis.__rustscript_memory;
+            let promptText = "";
+            if (memory && memory.buffer && len > 0) {
+                const bytes = new Uint8Array(memory.buffer, ptr, len);
+                promptText = new TextDecoder().decode(bytes);
+            }
+            
+            // Use custom input handler if available, otherwise use prompt().
+            let result = "";
+            if (globalThis.__rustscript_input) {
+                result = globalThis.__rustscript_input(promptText) || "";
+            } else {
+                result = window.prompt(promptText) || "";
+            }
+            
+            // Write result to WASM memory and return pointer.
+            const encoder = new TextEncoder();
+            const encoded = encoder.encode(result);
+            
+            // Allocate memory for the result.
+            if (!globalThis.__rustscript_heap_ptr) globalThis.__rustscript_heap_ptr = 1024;
+            const resultPtr = globalThis.__rustscript_heap_ptr;
+            globalThis.__rustscript_heap_ptr += encoded.length + 8;
+            
+            // Write length and string data.
+            const view = new DataView(memory.buffer);
+            view.setUint32(resultPtr, encoded.length, true);
+            const resultBytes = new Uint8Array(memory.buffer, resultPtr + 4, encoded.length);
+            resultBytes.set(encoded);
+            
+            return resultPtr;
+        } catch (e) {
+            console.error('[RustScript] Input error:', e);
+            return 0;
+        }
+        "#
+    );
+    
     // Wire up the import object with our functions.
     js_sys::Reflect::set(&console_obj, &"log".into(), &log_fn)?;
     js_sys::Reflect::set(&console_obj, &"error".into(), &error_fn)?;
     js_sys::Reflect::set(&env_obj, &"malloc".into(), &malloc_fn)?;
+    js_sys::Reflect::set(&env_obj, &"input".into(), &input_fn)?;
     js_sys::Reflect::set(&imports, &"console".into(), &console_obj)?;
     js_sys::Reflect::set(&imports, &"env".into(), &env_obj)?;
 

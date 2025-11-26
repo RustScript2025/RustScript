@@ -100,7 +100,12 @@ impl WasmGenerator {
         imports.import("env", "malloc", EntityType::Function(1));
         import_map.insert("malloc".to_string(), 2);
 
-        let num_imports = 3u32;
+        // Import input: takes prompt pointer and length, returns string pointer.
+        // Type 2: (i32, i32) -> (i32) - takes ptr/len, returns result pointer.
+        imports.import("env", "input", EntityType::Function(2));
+        import_map.insert("input".to_string(), 3);
+
+        let num_imports = 4u32;
 
         Self {
             module: Module::new(),
@@ -154,6 +159,8 @@ impl WasmGenerator {
         self.add_function_type(vec![ValType::I32, ValType::I32], vec![]);
         // Type 1: (i32) -> (i32) for malloc
         self.add_function_type(vec![ValType::I32], vec![ValType::I32]);
+        // Type 2: (i32, i32) -> (i32) for input
+        self.add_function_type(vec![ValType::I32, ValType::I32], vec![ValType::I32]);
         
         self.memory.memory(MemoryType {
             minimum: 1,
@@ -340,7 +347,29 @@ impl WasmGenerator {
                     }
                 }
                 
-                // Handle regular function calls
+                // Handle input() built-in function.
+                if let ast::Expr::Ident(fn_id) = callee.as_ref() {
+                    if fn_id.name.as_ref() == "input" {
+                        if let Some(&idx) = self.import_map.get("input") {
+                            // Pass the prompt string if provided.
+                            if let Some((_, arg)) = args.first() {
+                                self.generate_expr(func, arg, scratch_local, locals)?;
+                            } else {
+                                // No prompt - pass empty string.
+                                let (ptr, len) = self.intern_string("");
+                                func.instruction(&Instruction::I32Const(ptr as i32));
+                                func.instruction(&Instruction::I32Const(len as i32));
+                            }
+                            func.instruction(&Instruction::Call(idx));
+                            // Convert i32 pointer to f64 for storage in untyped locals.
+                            // The pointer value is preserved as a float for later use.
+                            func.instruction(&Instruction::F64ConvertI32U);
+                            return Ok(());
+                        }
+                    }
+                }
+                
+                // Handle regular function calls.
                 if let ast::Expr::Ident(fn_id) = callee.as_ref() {
                     if let Some(&idx) = self.func_map.get(fn_id.name.as_ref()) {
                         for (_, arg) in args {

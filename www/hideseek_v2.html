@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <title>Hide and Seek v2 - RustScript WASM Demo</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            background: #0a0a12;
+            color: #00ff00;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .game-layout {
+            display: flex;
+            gap: 25px;
+            align-items: flex-start;
+            flex-wrap: nowrap;
+        }
+        .game-main { flex: 1; min-width: 0; }
+        .game-sidebar {
+            width: 300px;
+            flex-shrink: 0;
+            position: sticky;
+            top: 20px;
+        }
+        h1 {
+            color: #ff3355;
+            text-align: center;
+            text-shadow: 0 0 10px #ff3355;
+            margin-bottom: 5px;
+        }
+        .subtitle { text-align: center; color: #666; margin-bottom: 20px; }
+        #game-output {
+            background: #0d0d1a;
+            border: 2px solid #22cc66;
+            border-radius: 8px;
+            padding: 20px;
+            min-height: 400px;
+            max-height: 500px;
+            overflow-y: auto;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            box-shadow: 0 0 20px rgba(34, 204, 102, 0.2);
+        }
+        #game-output .log { color: #00ff00; }
+        #game-output .error { color: #ff4444; }
+        #game-output .highlight { color: #ffff00; font-weight: bold; }
+        #game-output .info { color: #3399ff; }
+        .input-area { margin-top: 15px; display: flex; gap: 10px; }
+        #command-input {
+            flex: 1;
+            background: #0d0d1a;
+            border: 2px solid #3399ff;
+            border-radius: 4px;
+            color: #00ff00;
+            font-family: inherit;
+            font-size: 16px;
+            padding: 12px 15px;
+            outline: none;
+        }
+        #command-input:focus {
+            border-color: #00ff00;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+        }
+        #command-input::placeholder { color: #444; }
+        button {
+            background: #22cc66;
+            border: none;
+            border-radius: 4px;
+            color: #000;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: bold;
+            padding: 12px 25px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        button:hover {
+            background: #33dd77;
+            box-shadow: 0 0 15px rgba(34, 204, 102, 0.5);
+        }
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+        .controls button {
+            background: #1a1a2e;
+            border: 1px solid #3399ff;
+            color: #3399ff;
+            padding: 8px 15px;
+            font-size: 12px;
+        }
+        .controls button:hover { background: #3399ff; color: #000; }
+        .help {
+            padding: 18px;
+            background: #0d0d1a;
+            border: 2px solid #22cc66;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #aaa;
+            box-shadow: 0 0 15px rgba(34, 204, 102, 0.15);
+        }
+        .help h3 {
+            color: #ff3355;
+            margin-top: 0;
+            margin-bottom: 12px;
+            font-size: 16px;
+            text-shadow: 0 0 8px rgba(255, 51, 85, 0.5);
+        }
+        .help h4 {
+            color: #3399ff;
+            margin: 15px 0 8px 0;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .help p { margin: 6px 0; line-height: 1.5; }
+        .help kbd {
+            background: #1a1a2e;
+            border: 1px solid #3399ff;
+            border-radius: 3px;
+            padding: 2px 8px;
+            color: #3399ff;
+            font-weight: bold;
+        }
+        .version-badge {
+            background: #22cc66;
+            color: #000;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 HIDE AND SEEK 🔍 <span class="version-badge">RustScript WASM</span></h1>
+        <p class="subtitle">Running Native RustScript Code via WebAssembly</p>
+        
+        <div class="game-layout">
+            <div class="game-main">
+                <div id="game-output"></div>
+                
+                <div class="input-area">
+                    <input type="text" id="command-input" placeholder="Enter command..." autofocus>
+                    <button onclick="submitCommand()">Enter</button>
+                </div>
+                
+                <div class="controls">
+                    <button onclick="sendCommand('n')">↑ North</button>
+                    <button onclick="sendCommand('s')">↓ South</button>
+                    <button onclick="sendCommand('e')">→ East</button>
+                    <button onclick="sendCommand('w')">← West</button>
+                    <button onclick="sendCommand('u')">⬆ Up</button>
+                    <button onclick="sendCommand('d')">⬇ Down</button>
+                    <button onclick="sendCommand('l')">👁 Look</button>
+                    <button onclick="sendCommand('m')">🗺 Map</button>
+                    <button onclick="sendCommand('h')">💡 Hint</button>
+                </div>
+            </div>
+            
+            <div class="game-sidebar">
+                <div class="help">
+                    <h3>RustScript WASM Demo</h3>
+                    <p>This page demonstrates RustScript code compiled to WebAssembly and running in the browser.</p>
+                    <h4>Features Demonstrated</h4>
+                    <p>• console.log() output</p>
+                    <p>• input() function with prompts</p>
+                    <p>• Variables and control flow</p>
+                    <p>• Function calls</p>
+                    <h4>Limitations</h4>
+                    <p>Full game requires arrays, structs, and mutable loops not yet in WASM backend.</p>
+                    <h4>Other Versions</h4>
+                    <p><a href="hideseek.html" style="color: #22cc66;">v1</a> - Full game (JavaScript)</p>
+                    <p><a href="hideseek_v3.html" style="color: #22cc66;">v3</a> - Full game (playable)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================== -->
+    <!-- RustScript Game Code - Compiled to WASM and executed in browser    -->
+    <!-- ================================================================== -->
+    <script type="text/rustscript">
+fn main() {
+    console.log("===============================================");
+    console.log("                                               ");
+    console.log("     H I D E   A N D   S E E K                ");
+    console.log("                                               ");
+    console.log("        A RustScript Adventure Game           ");
+    console.log("                                               ");
+    console.log("===============================================");
+    console.log("");
+    console.log("This game is running NATIVE RustScript code");
+    console.log("compiled to WebAssembly!");
+    console.log("");
+    
+    let name = input("Enter your name: ");
+    console.log("");
+    console.log("Hello there! Welcome to Hide and Seek!");
+    console.log("");
+    
+    console.log("Select Difficulty:");
+    console.log("  1. Easy   (5 hidden, 30 turns, 3 free hints)");
+    console.log("  2. Medium (8 hidden, 25 turns, 2 free hints)");
+    console.log("  3. Hard   (12 hidden, 20 turns, 1 free hint)");
+    console.log("");
+    
+    let choice = input("Choose (1-3): ");
+    console.log("");
+    console.log("Great choice!");
+    console.log("");
+    console.log("The full game requires arrays and structs which");
+    console.log("are not yet supported in the WASM backend.");
+    console.log("");
+    console.log("For the full playable game, try:");
+    console.log("  - hideseek.html (JavaScript version)");
+    console.log("  - hideseek_v3.html (Full game)");
+    console.log("");
+    console.log("===============================================");
+    console.log("  RustScript WASM Demo Complete!");
+    console.log("===============================================");
+}
+    </script>
+
+    <!-- ================================================================== -->
+    <!-- RustScript Runtime Loader                                          -->
+    <!-- ================================================================== -->
+    <script type="module">
+        import init, { run_script } from './pkg/RustScript.js';
+        
+        const outputEl = document.getElementById('game-output');
+        const inputEl = document.getElementById('command-input');
+        
+        function writeOutput(text, type = 'log') {
+            const line = document.createElement('div');
+            line.className = type;
+            line.textContent = text;
+            outputEl.appendChild(line);
+            outputEl.scrollTop = outputEl.scrollHeight;
+        }
+        
+        // Intercept console.log to capture RustScript output.
+        const originalLog = console.log;
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            writeOutput(args.map(a => String(a)).join(' '), 'log');
+        };
+        
+        async function main() {
+            try {
+                await init();
+                writeOutput('🦀 RustScript WASM Runtime Initialised 🦀', 'info');
+                writeOutput('', 'log');
+                
+                const scripts = document.querySelectorAll('script[type="text/rustscript"]');
+                for (const script of scripts) {
+                    const source = script.textContent.trim();
+                    if (source) await run_script(source);
+                }
+            } catch (e) {
+                writeOutput('Error: ' + e, 'error');
+            }
+        }
+        
+        main();
+        
+        window.submitCommand = function() {
+            const cmd = inputEl.value;
+            inputEl.value = '';
+            if (cmd) writeOutput('> ' + cmd, 'info');
+            inputEl.focus();
+        };
+        
+        window.sendCommand = function(cmd) {
+            writeOutput('> ' + cmd, 'info');
+            inputEl.focus();
+        };
+        
+        inputEl.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') window.submitCommand();
+        });
+    </script>
+</body>
+</html>

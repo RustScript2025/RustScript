@@ -6,8 +6,6 @@
 <img src="logo.jpg" alt="RustScript">
 </p>
 
-# RustScript
-
 **Author**: Michael Lauzon
 
 RustScript is a modern scripting language that synthesises the best ideas from 60+ years of scripting language evolution. Starting with Rust's memory safety and JavaScript's ergonomic syntax as a foundation, RustScript incorporates powerful features from scripting languages spanning LISP (1958) to Zig (2016).
@@ -75,6 +73,36 @@ RustScript programmes can execute directly in web browsers via WebAssembly:
 3. Open `http://localhost:8000` in your browser
 
 The runtime automatically compiles and executes `<script type="text/rustscript">` tags, similar to how browsers handle JavaScript.
+
+## Example Games
+
+RustScript includes example games demonstrating the language's capabilities. **Hide and Seek**, a complete text adventure game, is available in three versions showcasing different aspects of RustScript:
+
+### 🎮 [Hide and Seek v1](www/hideseek.html) - JavaScript Version
+The original full-featured game implemented in JavaScript. Demonstrates the game design that was then ported to RustScript.
+- **File**: `www/hideseek.html`
+- **Features**: Complete game with 12 rooms, 27 hiding spots, 3 difficulty levels
+- **Tech**: Pure JavaScript implementation
+
+### 🦀 [Hide and Seek v2](www/hideseek_v2.html) - RustScript WASM Demo
+Demonstrates RustScript code compiled to WebAssembly and running in the browser. Shows the `input()` and `console.log()` functions working via WASM.
+- **File**: `www/hideseek_v2.html`
+- **Features**: RustScript code in `<script type="text/rustscript">` tags
+- **Tech**: Native RustScript → WASM compilation
+- **Note**: Full game logic requires arrays/structs not yet in WASM backend
+
+### 🎯 [Hide and Seek v3](www/hideseek_v3.html) - Full Playable Game
+The complete playable game with async input system and all features.
+- **File**: `www/hideseek_v3.html`
+- **Features**: Full game, difficulty selection, scoring, hints, map
+- **Tech**: JavaScript with RustScript-style async input
+
+### RustScript Source Code
+The game logic is also available as pure RustScript source:
+- **File**: `examples/hideseek.rjsc`
+- **Features**: Complete game implementation showcasing structs, pattern matching, loops, and more
+
+To play, start the development server (`python serve.py`) and visit `http://localhost:8000`.
 
 ## Usage
 
@@ -507,5 +535,3 @@ By learning from scripting language history, RustScript avoids repeating past mi
 - 📖 [Phase 3 Features](docs/PHASE3_FEATURES.md) - Safety & metaprogramming
 - 💻 [Examples Directory](examples/) - Working code examples ([see examples README](examples/README.md))
 - 🤝 [Contributing Guide](CONTRIBUTING.md) - How to contribute to RustScript
-
-
