@@ -6,6 +6,8 @@
 <img src="logo.jpg" alt="RustScript">
 </p>
 
+# RustScript
+
 **Author**: Michael Lauzon
 
 RustScript is a modern scripting language that synthesises the best ideas from 60+ years of scripting language evolution. Starting with Rust's memory safety and JavaScript's ergonomic syntax as a foundation, RustScript incorporates powerful features from scripting languages spanning LISP (1958) to Zig (2016).
@@ -535,3 +537,4 @@ By learning from scripting language history, RustScript avoids repeating past mi
 - 📖 [Phase 3 Features](docs/PHASE3_FEATURES.md) - Safety & metaprogramming
 - 💻 [Examples Directory](examples/) - Working code examples ([see examples README](examples/README.md))
 - 🤝 [Contributing Guide](CONTRIBUTING.md) - How to contribute to RustScript
+
