@@ -15,9 +15,12 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
+            padding: 20px;
         }
         .container {
             text-align: center;
+            max-width: 600px;
+            width: 100%;
         }
         h1 {
             color: #e94560;
@@ -41,12 +44,43 @@
         #output .error {
             color: #f44;
         }
+        .game-links {
+            margin-top: 40px;
+            text-align: left;
+        }
+        .game-links h2 {
+            color: #e94560;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+        .game-links a {
+            display: block;
+            color: #4ecca3;
+            text-decoration: none;
+            padding: 10px;
+            margin: 5px 0;
+            border-left: 3px solid #4ecca3;
+            transition: all 0.2s;
+        }
+        .game-links a:hover {
+            background: #16213e;
+            padding-left: 20px;
+            border-left-color: #e94560;
+            color: #e94560;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>RustScript Output</h1>
         <div id="output"></div>
+        
+        <div class="game-links">
+            <h2>Games</h2>
+            <a href="hideseek.html">🔍 Hide and Seek</a>
+            <a href="hideseek_v2.html">🔍 Hide and Seek v2</a>
+            <a href="hideseek_v3.html">🔍 Hide and Seek v3</a>
+        </div>
     </div>
 
     <script type="text/rustscript">
