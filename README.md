@@ -567,7 +567,7 @@ RustScript now includes **10 major features** across 3 phases:
 **Phase 2 - Functions:** Pattern matching, Generators, Multiple dispatch  
 **Phase 3 - Safety:** Design by Contract, Effect system, Compile-time execution
 
-Drawing inspiration from 60+ years of programming language evolution, from LISP (1958) to Zig (2016).
+Drawing inspiration from 60+ years of scripting language evolution, from LISP (1958) to Zig (2016).
 
 
 ## Feature Attribution
