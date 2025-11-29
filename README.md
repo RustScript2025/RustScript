@@ -388,38 +388,49 @@ RustScript's feature set represents a curated selection from scripting language 
 
 ### From the 1950s-1960s
 - **LISP (1958)**: First-class functions, REPL, homoiconicity
+- **SNOBOL (1962)**: Pattern matching and string manipulation, data processing
 - **APL (1966)**: Array-oriented operations
 - **MUMPS (1966)**: Persistent data structures
 
 ### From the 1970s
+- **Forth (1970)**: Stack-based operations, concatenative programming
 - **ML (1973)**: Type inference, algebraic data types
 - **Scheme (1975)**: Lexical scoping, tail call optimisation
-- **Forth (1970)**: Stack-based operations, concatenative programming
 - **AWK (1977)**: Pattern-action paradigm, implicit iteration
 - **Icon (1977)**: Generators, goal-directed evaluation
 
 ### From the 1980s
+- **Ada (1983)**: Design by Contract, strong typing
+- **Common Lisp (1984)**: Standardised Lisp dialect
 - **Eiffel (1986)**: Design by Contract (requires/ensures/invariant)
 - **Erlang (1986)**: Pattern matching in function heads, actor model
+- **Common Lisp Object System (CLOS) (1988)**: Multiple dispatch, method combinations
 
 ### From the 1990s
+- **Haskell (1990)**: Pure functional programming, lazy evaluation, advanced type systems
 - **Python (1991)**: List comprehensions, generators, clean syntax
+- **Dylan (1992)**: Multiple dispatch, object-oriented functional programming
 - **Ruby (1995)**: String interpolation, blocks, method chaining
+- **JavaScript (1995)**: Dynamic typing, first-class functions, prototypal inheritance
+- **OCaml (1996)**: Functional and object-oriented programming, pattern matching
 - **Rebol (1997)**: Dialects, minimal syntax
 
 ### From the 2000s
 - **C# (2000)**: Null coalescing operator, LINQ
+- **D (2001)**: Compile-time function execution, metaprogramming, contracts
 - **Scala (2004)**: Hybrid functional/OOP, pattern matching
 - **F# (2005)**: Computation expressions, type providers
 - **Clojure (2007)**: Immutable data structures, persistent collections
+- **Nim (2008)**: Effect system, metaprogramming
 
 ### From the 2010s
+- **Kotlin (2011)**: Null safety, extension functions
+- **Elixir (2011)**: Pattern matching, functional programming on BEAM VM
 - **Julia (2012)**: Multiple dispatch, performance
 - **TypeScript (2012)**: Gradual typing, structural types
-- **Kotlin (2011)**: Null safety, extension functions
+- **Koka (2012)**: Effect system, algebraic effects
 - **Swift (2014)**: Optional chaining, protocol extensions
 - **Zig (2016)**: Compile-time execution (comptime)
-- **Nim (2008)**: Effect system, metaprogramming
 
 ## Contributing
 
