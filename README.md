@@ -12,7 +12,7 @@
 
 RustScript is a modern **web-scripting language** that compiles to WebAssembly for browser-based applications. It synthesises the best ideas from 60+ years of programming language evolution, starting with Rust's memory safety and JavaScript's ergonomic syntax as a foundation, whilst incorporating powerful features from languages spanning LISP (1958) to Zig (2016).
 
-**Important**: RustScript is designed for **web development** (running in browsers via WebAssembly), not for shell scripting or command-line automation. If you're looking for a Rust-based tool to replace bash, Python scripts, or PowerShell for system administration tasks, RustScript is not the right tool. For shell scripting needs, consider writing regular Rust programmes with `cargo`, using the `rust-script` tool for single-file scripts, or sticking with traditional shell scripting languages.
+**Important**: RustScript is designed for **web development** (running in browsers via WebAssembly), not for shell scripting or command-line automation. If you're looking for a Rust-based tool to replace bash, Python scripts, or PowerShell for system administration tasks, RustScript is not the right tool. For shell scripting needs, consider writing regular Rust programmes with `cargo`, using script runners like `rust-script` or `cargo-script` for single-file scripts, using `evcxr` for interactive Rust REPL sessions, or sticking with traditional shell scripting languages.
 
 ## Language Heritage
 
@@ -177,10 +177,12 @@ The tutorial covers:
 ### "I thought RustScript was for shell scripting"
 RustScript is focused on **web development** (browser-based applications that run via WebAssembly), not system scripting or command-line automation. The name can be misleading if you're expecting a bash or Python replacement.
 
-**For shell scripting**, consider these alternatives:
-- Writing regular Rust programmes with `cargo` (compile to native binaries)
-- Using `rust-script` for quick Rust scripts
-- Shell scripting with traditional tools (bash, Python, PowerShell, etc.)
+**For shell scripting and command-line automation**, consider these Rust alternatives:
+- **Regular Rust programmes with `cargo`** - Compile to native binaries for maximum performance
+- **`rust-script`** - Run single `.rs` files as scripts without creating a full Cargo project (`cargo install rust-script`)
+- **`cargo-script`** - Similar to `rust-script`, an older but stable alternative for running Rust as scripts (`cargo install cargo-script`)
+- **`evcxr`** - Interactive Rust REPL for experimentation and quick scripting tasks (`cargo install evcxr_repl`)
+- **Traditional shell scripting** - bash, Python, PowerShell, etc., which may be more appropriate for simple automation tasks
 
 ### "How do I know if I have Edition 2024 support?"
 Run `rustc --version` in your terminal. If the version number is 1.85 or higher, you have Edition 2024 support. For example:
