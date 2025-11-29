@@ -10,7 +10,9 @@
 
 **Author**: Michael Lauzon
 
-RustScript is a modern scripting language that synthesises the best ideas from 60+ years of scripting language evolution. Starting with Rust's memory safety and JavaScript's ergonomic syntax as a foundation, RustScript incorporates powerful features from scripting languages spanning LISP (1958) to Zig (2016).
+RustScript is a modern **web-scripting language** that compiles to WebAssembly for browser-based applications. It synthesises the best ideas from 60+ years of programming language evolution, starting with Rust's memory safety and JavaScript's ergonomic syntax as a foundation, whilst incorporating powerful features from languages spanning LISP (1958) to Zig (2016).
+
+**Important**: RustScript is designed for **web development** (running in browsers via WebAssembly), not for shell scripting or command-line automation. If you're looking for a Rust-based tool to replace bash, Python scripts, or PowerShell for system administration tasks, RustScript is not the right tool. For shell scripting needs, consider writing regular Rust programmes with `cargo`, using the `rust-script` tool for single-file scripts, or sticking with traditional shell scripting languages.
 
 ## Language Heritage
 
@@ -48,7 +50,9 @@ RustScript addresses a fundamental tension in modern software development: the t
 
 ### Building from Source
 
-RustScript requires Rust 1.91.1 or later with Edition 2024 support.
+RustScript requires Rust 1.85 or later with Edition 2024 support.
+
+**Checking Your Rust Version**: Run `rustc --version` to see your installed version. Any version 1.85 or higher includes Edition 2024 support. If your version is older, update Rust by running `rustup update`.
 
 ```bash
 git clone https://github.com/RustScript2025/RustScript.git
@@ -62,19 +66,56 @@ The compiler binary will be located at `target/release/rjsc` (or `target/release
 
 ### System Requirements
 
-- Rust 1.91.1+ with cargo (Edition 2024 support)
+- Rust 1.85+ with cargo (Edition 2024 support)
+  - Check your version: `rustc --version`
+  - Update if needed: `rustup update`
 - For WebAssembly builds: wasm-pack (`cargo install wasm-pack`)
 - For browser testing: Python 3.x (for the development server)
+- A modern web browser (Chrome, Firefox, Safari, or Edge)
 
 ## Browser Runtime
 
-RustScript programmes can execute directly in web browsers via WebAssembly:
+RustScript programmes execute in web browsers via WebAssembly. To set up your development environment:
 
-1. Build the WASM package: `wasm-pack build --target web --out-dir www/pkg`
-2. Start the development server: `python serve.py`
-3. Open `http://localhost:8000` in your browser
+### Quick Start
+
+1. **Build the WebAssembly runtime:**
+   ```bash
+   # On Windows
+   build_wasm.bat
+   
+   # On Linux/Mac
+   ./build_wasm.sh
+   ```
+   
+   This creates the `www` directory structure and builds the necessary WebAssembly components.
+
+2. **Start the development server:**
+   ```bash
+   python3 serve.py
+   ```
+   
+   **Important**: The `serve.py` script must be run from the RustScript root directory (where the `www` folder exists).
+
+3. **Open your browser:**
+   Navigate to `http://localhost:8000`
 
 The runtime automatically compiles and executes `<script type="text/rustscript">` tags, similar to how browsers handle JavaScript.
+
+### Troubleshooting
+
+**"Directory 'www' not found" error?**  
+You need to run the build script first (`build_wasm.bat` on Windows or `./build_wasm.sh` on Linux/Mac) to create the WebAssembly runtime and `www` directory structure.
+
+**Compiler hangs and never finishes?**  
+This is a known bug we're actively investigating. If `rjsc hello.rjsc` hangs indefinitely:
+- Stop the process with Ctrl+C
+- Please report this issue on GitHub with:
+  - Your operating system and Rust version
+  - The exact command you ran
+  - The contents of your `.rjsc` file
+  
+This should not happen, and we need your help to track down and fix this issue.
 
 ## Example Games
 
@@ -104,7 +145,7 @@ The game logic is also available as pure RustScript source:
 - **File**: `examples/hideseek.rjsc`
 - **Features**: Complete game implementation showcasing structs, pattern matching, loops, and more
 
-To play, start the development server (`python serve.py`) and visit `http://localhost:8000`.
+To play, start the development server (`python3 serve.py`) and visit `http://localhost:8000`.
 
 ## Usage
 
@@ -131,6 +172,65 @@ The tutorial covers:
 - All Phase 1, 2, and 3 features with detailed explanations
 - Real-world application examples
 
+## Common Issues for Beginners
+
+### "I thought RustScript was for shell scripting"
+RustScript is focused on **web development** (browser-based applications that run via WebAssembly), not system scripting or command-line automation. The name can be misleading if you're expecting a bash or Python replacement.
+
+**For shell scripting**, consider these alternatives:
+- Writing regular Rust programmes with `cargo` (compile to native binaries)
+- Using `rust-script` for quick Rust scripts
+- Shell scripting with traditional tools (bash, Python, PowerShell, etc.)
+
+### "How do I know if I have Edition 2024 support?"
+Run `rustc --version` in your terminal. If the version number is 1.85 or higher, you have Edition 2024 support. For example:
+```bash
+$ rustc --version
+rustc 1.91.1 (ed61e7d7e 2024-11-07)
+```
+
+This version (1.91.1) includes Edition 2024 support. If your version is lower than 1.85, update Rust:
+```bash
+rustup update
+```
+
+### "The compiler hangs and never finishes"
+When you run `rjsc hello.rjsc`, it should compile in seconds. If it hangs indefinitely, this is a **critical bug** that we're tracking.
+
+**What to do:**
+1. Stop the process with Ctrl+C
+2. Please report the issue on GitHub with:
+   - Your operating system (Windows, Linux, macOS)
+   - Your Rust version (`rustc --version`)
+   - The exact command you ran
+   - The contents of your `.rjsc` file
+
+We need reports from users experiencing this to track down and fix the issue.
+
+### "Directory 'www' not found when running serve.py"
+The development server expects a `www` directory that doesn't exist until you build it.
+
+**Solution:**
+```bash
+# On Windows
+build_wasm.bat
+
+# On Linux/Mac
+./build_wasm.sh
+```
+
+This creates the `www` directory structure and builds the WebAssembly runtime. After running the build script, `python3 serve.py` will work correctly.
+
+**Note**: Always run `serve.py` from the RustScript root directory (the directory containing the `www` folder).
+
+### "I don't understand git/cargo/wasm-pack"
+That's perfectly fine! You don't need to be an expert in these tools to learn RustScript. Here are some helpful resources:
+- **Git basics**: [Official Git Book](https://git-scm.com/book/en/v2/Getting-Started-Git-Basics)
+- **Cargo (Rust's package manager)**: [The Cargo Book](https://doc.rust-lang.org/cargo/)
+- **wasm-pack**: Installed via `cargo install wasm-pack` — you don't need deep knowledge to use it
+
+The important thing is following the step-by-step instructions in our tutorial. You'll pick up the necessary tool knowledge along the way.
+
 ## Language Guide & Examples
 
 ### 1. Variables and Types
@@ -145,7 +245,7 @@ RustScript uses `let` for immutable variables and `let mut` for mutable ones.
 let name = "Alice";
 
 // Mutable variable
-// We explicitly opt-in to mutation.
+// We explicitly opt in to mutation.
 let mut count: i32 = 0;
 count += 1;
 
@@ -352,7 +452,7 @@ The RustScript compiler is built with modern Rust practices:
 
 ## License
 
-This project is licensed under the GPL-2.0 License.
+This project is licensed under the GPL-2.0 Licence.
 
 
 ## Phase 1 Features (NEW!)
