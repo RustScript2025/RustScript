@@ -10,7 +10,7 @@
 
 **Author**: Michael Lauzon
 
-RustScript is a modern **web-scripting language** that compiles to WebAssembly for browser-based applications. It synthesises the best ideas from 60+ years of programming language evolution, starting with Rust's memory safety and JavaScript's ergonomic syntax as a foundation, whilst incorporating powerful features from languages spanning LISP (1958) to Zig (2016).
+RustScript is a modern **web-scripting language** that compiles to WebAssembly for browser-based applications. It synthesises the best ideas from 60+ years of scripting language evolution, starting with Rust's memory safety and JavaScript's ergonomic syntax as a foundation, whilst incorporating powerful features from languages spanning LISP (1958) to Zig (2016).
 
 **Important**: RustScript is designed for **web development** (running in browsers via WebAssembly), not for shell scripting or command-line automation. If you're looking for a Rust-based tool to replace bash, Python scripts, or PowerShell for system administration tasks, RustScript is not the right tool. For shell scripting needs, consider writing regular Rust programmes with `cargo`, using script runners like `rust-script` or `cargo-script` for single-file scripts, using `evcxr` for interactive Rust REPL sessions, or sticking with traditional shell scripting languages.
 
