@@ -171,6 +171,12 @@ pub enum Expr {
         field: Ident,
         span: Span,
     },
+    /// Array/tuple indexing: expr[index]
+    Index {
+        expr: Box<Expr>,
+        index: Box<Expr>,
+        span: Span,
+    },
     /// Optional chaining operator: expr?.field
     OptionalChain {
         expr: Box<Expr>,
@@ -432,9 +438,10 @@ pub enum FileType {
 }
 
 impl FileType {
+    #[allow(dead_code)]
     pub fn from_path(path: &PathBuf) -> Self {
         match path.extension().and_then(|ext| ext.to_str()) {
-            Some("rjsc") => FileType::RustScript,
+            Some("rscc") => FileType::RustScript,
             Some("js") | Some("mjs") | Some("cjs") => FileType::JavaScript,
             Some("ts") | Some("tsx") => FileType::TypeScript,
             Some("json") => FileType::JSON,
@@ -443,10 +450,12 @@ impl FileType {
         }
     }
     
+    #[allow(dead_code)]
     pub fn is_rustscript(&self) -> bool {
         matches!(self, FileType::RustScript)
     }
     
+    #[allow(dead_code)]
     pub fn expected_output_extension(&self, target: &str) -> &'static str {
         match (self, target) {
             (FileType::RustScript, "js") => "js",
@@ -460,6 +469,7 @@ impl FileType {
 }
 
 /// Dialect rule for DSL (domain-specific language) definitions.
+#[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct DialectRule {
     pub pattern: Pattern,
@@ -470,6 +480,7 @@ pub struct DialectRule {
 /// Extended type system utilities.
 impl Type {
     /// Creates a union type (TypeScript-style: A | B | C).
+    #[allow(dead_code)]
     pub fn union(types: Vec<Type>) -> Self {
         let len = types.len();
         Type::Generic(Ident {
@@ -479,6 +490,7 @@ impl Type {
     }
     
     /// Creates an intersection type (TypeScript-style: A & B & C).
+    #[allow(dead_code)]
     pub fn intersection(types: Vec<Type>) -> Self {
         let len = types.len();
         Type::Generic(Ident {

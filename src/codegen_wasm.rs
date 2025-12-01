@@ -494,6 +494,13 @@ impl WasmGenerator {
                     }
                 }
             },
+            ast::Expr::Index { expr: arr, index, .. } => {
+                // For now, just generate a placeholder - full array support would require more work
+                self.generate_expr(func, arr, scratch_local, locals)?;
+                self.generate_expr(func, index, scratch_local, locals)?;
+                // Drop the index and return the array (simplified)
+                func.instruction(&Instruction::Drop);
+            },
             ast::Expr::OptionalChain { expr: obj, field, .. } => {
                 self.generate_expr(func, obj, scratch_local, locals)?;
                 if let Some(expr_type) = self.expr_types.get(obj.span()) {

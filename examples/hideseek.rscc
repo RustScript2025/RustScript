@@ -1,0 +1,577 @@
+// ============================================================================
+// Hide and Seek Adventure Game
+// ============================================================================
+// Converted from BASIC to RustScript.
+// RustScript's first game!
+//
+// This game demonstrates RustScript's capabilities including:
+//   - Structs for data organisation
+//   - Pattern matching for game logic
+//   - String interpolation for dynamic output
+//   - Mutable state management
+//
+// Author: Michael Lauzon
+// Licence: MIT
+// ============================================================================
+
+// ============================================================================
+// Game Data Structures
+// ============================================================================
+
+// Represents a room in the house with navigation links to adjacent rooms.
+// A value of 0 indicates no exit in that direction.
+struct Room {
+    name: string,
+    description: string,
+    north: number,
+    south: number,
+    east: number,
+    west: number,
+}
+
+// Represents a potential hiding spot within a room.
+// Each spot tracks whether someone is hiding there and if it has been searched.
+struct HidingSpot {
+    name: string,
+    room_id: number,
+    has_person: bool,
+    found: bool,
+}
+
+// Tracks the current state of the game including player progress and scoring.
+// Scoring values are configurable based on difficulty level.
+struct GameState {
+    player_name: string,
+    current_room: number,
+    score: number,
+    turns_left: number,
+    total_hidden: number,
+    hints_used: number,
+    free_hints: number,
+    hint_cost: number,
+    find_reward: number,
+    miss_penalty: number,
+}
+
+// ============================================================================
+// Room Setup
+// ============================================================================
+
+// Creates and returns an array of all rooms in the house.
+// Room indices are 1-based for easier reference in the game.
+// Navigation values reference other room indices (0 = no exit).
+fn create_rooms() -> [Room] {
+    [
+        Room { name: "Living Room", description: "A cosy living room with a fireplace and comfortable furniture.", north: 10, south: 0, east: 2, west: 0 },
+        Room { name: "Kitchen", description: "A modern kitchen with stainless steel appliances.", north: 0, south: 8, east: 11, west: 1 },
+        Room { name: "Bedroom", description: "A bedroom with a large bed and wooden furniture.", north: 0, south: 10, east: 4, west: 12 },
+        Room { name: "Bathroom", description: "A clean bathroom with white tiles.", north: 0, south: 0, east: 0, west: 3 },
+        Room { name: "Basement", description: "A dark basement filled with old boxes and equipment.", north: 10, south: 0, east: 0, west: 0 },
+        Room { name: "Attic", description: "A dusty attic with old furniture and memorabilia.", north: 0, south: 10, east: 0, west: 0 },
+        Room { name: "Garage", description: "A garage with tools and a car.", north: 0, south: 0, east: 10, west: 0 },
+        Room { name: "Garden", description: "A beautiful garden with flowers and trees.", north: 2, south: 0, east: 0, west: 0 },
+        Room { name: "Study", description: "A quiet study lined with bookshelves.", north: 0, south: 0, east: 0, west: 10 },
+        Room { name: "Hallway", description: "A long hallway connecting various rooms.", north: 3, south: 1, east: 9, west: 7 },
+        Room { name: "Dining Room", description: "An elegant dining room with a large table.", north: 0, south: 0, east: 0, west: 2 },
+        Room { name: "Closet", description: "A small closet filled with clothes and storage.", north: 0, south: 0, east: 3, west: 0 },
+    ]
+}
+
+// ============================================================================
+// Hiding Spots Setup
+// ============================================================================
+
+// Creates and returns an array of all possible hiding spots in the house.
+// Each spot is associated with a room via room_id.
+// Initially, no spots contain hidden people (has_person: false).
+fn create_hiding_spots() -> [HidingSpot] {
+    [
+        // Living Room (Room 1) - Three hiding spots.
+        HidingSpot { name: "Behind the couch", room_id: 1, has_person: false, found: false },
+        HidingSpot { name: "Under the coffee table", room_id: 1, has_person: false, found: false },
+        HidingSpot { name: "Behind the curtains", room_id: 1, has_person: false, found: false },
+        
+        // Kitchen (Room 2) - Three hiding spots.
+        HidingSpot { name: "In the pantry", room_id: 2, has_person: false, found: false },
+        HidingSpot { name: "Under the sink", room_id: 2, has_person: false, found: false },
+        HidingSpot { name: "Behind the door", room_id: 2, has_person: false, found: false },
+        
+        // Bedroom (Room 3) - Three hiding spots.
+        HidingSpot { name: "Under the bed", room_id: 3, has_person: false, found: false },
+        HidingSpot { name: "In the wardrobe", room_id: 3, has_person: false, found: false },
+        HidingSpot { name: "Under the blankets", room_id: 3, has_person: false, found: false },
+        
+        // Bathroom (Room 4) - Two hiding spots.
+        HidingSpot { name: "In the shower", room_id: 4, has_person: false, found: false },
+        HidingSpot { name: "In the linen closet", room_id: 4, has_person: false, found: false },
+        
+        // Basement (Room 5) - Three hiding spots.
+        HidingSpot { name: "Behind the furnace", room_id: 5, has_person: false, found: false },
+        HidingSpot { name: "In the storage boxes", room_id: 5, has_person: false, found: false },
+        HidingSpot { name: "Under the stairs", room_id: 5, has_person: false, found: false },
+        
+        // Attic (Room 6) - Two hiding spots.
+        HidingSpot { name: "In the old trunk", room_id: 6, has_person: false, found: false },
+        HidingSpot { name: "Behind the boxes", room_id: 6, has_person: false, found: false },
+        
+        // Garage (Room 7) - Two hiding spots.
+        HidingSpot { name: "Behind the car", room_id: 7, has_person: false, found: false },
+        HidingSpot { name: "Under the workbench", room_id: 7, has_person: false, found: false },
+        
+        // Garden (Room 8) - Two hiding spots.
+        HidingSpot { name: "Behind the bushes", room_id: 8, has_person: false, found: false },
+        HidingSpot { name: "In the shed", room_id: 8, has_person: false, found: false },
+        
+        // Study (Room 9) - Two hiding spots.
+        HidingSpot { name: "Behind the bookshelf", room_id: 9, has_person: false, found: false },
+        HidingSpot { name: "Under the desk", room_id: 9, has_person: false, found: false },
+        
+        // Hallway (Room 10) - One hiding spot.
+        HidingSpot { name: "In the coat closet", room_id: 10, has_person: false, found: false },
+        
+        // Dining Room (Room 11) - Two hiding spots.
+        HidingSpot { name: "Under the table", room_id: 11, has_person: false, found: false },
+        HidingSpot { name: "Behind the curtains", room_id: 11, has_person: false, found: false },
+        
+        // Closet (Room 12) - Two hiding spots.
+        HidingSpot { name: "Behind the clothes", room_id: 12, has_person: false, found: false },
+        HidingSpot { name: "In the shoe box", room_id: 12, has_person: false, found: false },
+    ]
+}
+
+// ============================================================================
+// Game Initialisation
+// ============================================================================
+
+// Randomly places hidden people in the available hiding spots.
+// Uses a simple random selection algorithm to distribute people.
+// Returns the modified spots array with people placed.
+fn place_hidden_people(spots: [HidingSpot], count: number) -> [HidingSpot] {
+    let mut result = spots;
+    let mut placed = 0;
+    let total_spots = spots.length;
+    
+    // Keep placing people until we have reached the required count.
+    while placed < count {
+        let idx = Math.floor(Math.random() * total_spots);
+        if !result[idx].has_person {
+            result[idx].has_person = true;
+            placed += 1;
+        }
+    }
+    result
+}
+
+// Initialises the game state based on the selected difficulty level.
+// Difficulty affects: number of hidden people, turns available,
+// free hints, hint cost, find reward, and miss penalty.
+fn init_game(difficulty: string) -> GameState {
+    // Configuration: (total_hidden, turns, free_hints, hint_cost, find_reward, miss_penalty)
+    let (total, turns, free, hint, reward, penalty) = match difficulty {
+        "easy" => (5, 30, 3, 25, 100, 50),
+        "medium" => (8, 25, 2, 50, 75, 75),
+        "hard" => (12, 20, 1, 75, 50, 100),
+        _ => (5, 30, 3, 25, 100, 50),  // Default to easy if unrecognised.
+    };
+    
+    GameState {
+        player_name: "Player",
+        current_room: 1,  // Start in the Living Room.
+        score: 0,
+        turns_left: turns,
+        total_hidden: total,
+        hints_used: 0,
+        free_hints: free,
+        hint_cost: hint,
+        find_reward: reward,
+        miss_penalty: penalty,
+    }
+}
+
+// ============================================================================
+// Display Functions
+// ============================================================================
+
+// Displays the game title screen with ASCII art banner.
+fn display_title() {
+    console.log("===============================================");
+    console.log("                                               ");
+    console.log("     H I D E   A N D   S E E K                ");
+    console.log("                                               ");
+    console.log("        A RustScript Adventure Game           ");
+    console.log("                                               ");
+    console.log("===============================================");
+}
+
+// Displays the current room's name, description, and available exits.
+// The Hallway (Room 10) has special Up/Down exits to Attic and Basement.
+fn display_room(rooms: [Room], room_id: number) {
+    let room = rooms[room_id - 1];
+    console.log("");
+    console.log("===============================================");
+    console.log("  Location: {room.name}");
+    console.log("===============================================");
+    console.log(room.description);
+    console.log("");
+    
+    // Build the exits string based on available directions.
+    let mut exits = "Exits: ";
+    if room.north > 0 { exits += "North "; }
+    if room.south > 0 { exits += "South "; }
+    if room.east > 0 { exits += "East "; }
+    if room.west > 0 { exits += "West "; }
+    if room_id == 10 { exits += "Up Down "; }  // Hallway special exits.
+    console.log(exits);
+}
+
+// Displays the current game status: friends found, turns remaining, and score.
+fn display_status(state: GameState, found_count: number) {
+    console.log("-----------------------------------------------");
+    console.log("Found: {found_count}/{state.total_hidden} | Turns: {state.turns_left} | Score: {state.score}");
+    console.log("-----------------------------------------------");
+}
+
+// Lists all hiding spots in the current room with their search status.
+fn display_spots_in_room(spots: [HidingSpot], room_id: number) {
+    console.log("");
+    console.log("You look around and see these hiding spots:");
+    let mut idx = 1;
+    for spot in spots {
+        if spot.room_id == room_id {
+            let status = if spot.found { " (searched)" } else { "" };
+            console.log("  {idx}. {spot.name}{status}");
+            idx += 1;
+        }
+    }
+}
+
+// Displays the available commands to the player.
+fn display_commands() {
+    console.log("");
+    console.log("Commands:");
+    console.log("  [N]orth [S]outh [E]ast [W]est - Move");
+    console.log("  [U]p [D]own - From Hallway only");
+    console.log("  [L]ook - See hiding spots");
+    console.log("  [1-9] - Search a hiding spot");
+    console.log("  [H]int - Get a hint (free hints, then costs points)");
+    console.log("  [Q]uit - End game");
+}
+
+// Displays an ASCII map of the house layout.
+fn display_map() {
+    console.log("");
+    console.log("===============================================");
+    console.log("                    MAP                        ");
+    console.log("===============================================");
+    console.log("");
+    console.log("              [Attic]                          ");
+    console.log("                 |                             ");
+    console.log("   [Closet]-[Bedroom]    [Study]               ");
+    console.log("               |            |                  ");
+    console.log("   [Garage]-[Hallway]-------+                  ");
+    console.log("               |                               ");
+    console.log("          [Living Room]-[Kitchen]-[Dining]     ");
+    console.log("                            |                  ");
+    console.log("                        [Garden]               ");
+    console.log("");
+    console.log("   [Bathroom] connects to Bedroom              ");
+    console.log("   [Basement] accessible from Hallway (Down)   ");
+    console.log("");
+}
+
+// ============================================================================
+// Game Actions
+// ============================================================================
+
+// Counts how many hidden people have been found so far.
+fn count_found(spots: [HidingSpot]) -> number {
+    let mut count = 0;
+    for spot in spots {
+        if spot.found && spot.has_person {
+            count += 1;
+        }
+    }
+    count
+}
+
+// Moves the player in the specified direction if possible.
+// Returns the updated game state with new room and decremented turns.
+fn move_player(rooms: [Room], state: GameState, direction: string) -> GameState {
+    let room = rooms[state.current_room - 1];
+    let mut new_room = 0;
+    
+    // Determine the target room based on direction.
+    match direction {
+        "n" => { new_room = room.north; },
+        "s" => { new_room = room.south; },
+        "e" => { new_room = room.east; },
+        "w" => { new_room = room.west; },
+        "u" => { if state.current_room == 10 { new_room = 6; } },  // Hallway to Attic.
+        "d" => { if state.current_room == 10 { new_room = 5; } },  // Hallway to Basement.
+        _ => {},
+    }
+    
+    if new_room > 0 {
+        // Valid move - update state.
+        GameState {
+            ...state,
+            current_room: new_room,
+            turns_left: state.turns_left - 1,
+        }
+    } else {
+        // Invalid move - inform player and return unchanged state.
+        console.log("You can't go that way!");
+        state
+    }
+}
+
+// Searches a hiding spot in the current room.
+// Awards points for finding someone, deducts points for a miss.
+// Returns the updated game state and spots array.
+fn search_spot(spots: [HidingSpot], state: GameState, room_id: number, spot_num: number) -> (GameState, [HidingSpot]) {
+    // Find the nth spot in this room.
+    let mut room_spot_idx = 0;
+    let mut actual_idx = -1;
+    
+    for i in 0..spots.length {
+        if spots[i].room_id == room_id {
+            room_spot_idx += 1;
+            if room_spot_idx == spot_num {
+                actual_idx = i;
+                break;
+            }
+        }
+    }
+    
+    // Validate the spot number.
+    if actual_idx < 0 {
+        console.log("Invalid spot number!");
+        return (state, spots);
+    }
+    
+    let mut new_spots = spots;
+    let mut new_state = GameState { ...state, turns_left: state.turns_left - 1 };
+    
+    if new_spots[actual_idx].found {
+        // Already searched this spot.
+        console.log("You already searched there!");
+    } else {
+        // Mark as searched and check for hidden person.
+        new_spots[actual_idx].found = true;
+        
+        if new_spots[actual_idx].has_person {
+            // Found someone! Award points.
+            console.log("");
+            console.log("*** YOU FOUND SOMEONE! ***");
+            console.log("They were hiding {new_spots[actual_idx].name}!");
+            new_state.score += new_state.find_reward;
+            console.log("+{new_state.find_reward} points!");
+        } else {
+            // Nobody there. Deduct points.
+            console.log("Nobody is hiding there.");
+            new_state.score -= new_state.miss_penalty;
+            console.log("-{new_state.miss_penalty} points!");
+        }
+    }
+    
+    (new_state, new_spots)
+}
+
+// Provides a hint about where someone is hiding.
+// Free hints are available based on difficulty; additional hints cost points.
+fn get_hint(spots: [HidingSpot], rooms: [Room], state: GameState) -> GameState {
+    // Find a spot with someone not yet found.
+    for spot in spots {
+        if spot.has_person && !spot.found {
+            let room = rooms[spot.room_id - 1];
+            console.log("Hint: Someone is hiding in the {room.name}...");
+            
+            let new_hints_used = state.hints_used + 1;
+            
+            // Check if this was a free hint or a paid hint.
+            if new_hints_used <= state.free_hints {
+                let remaining = state.free_hints - new_hints_used;
+                console.log("Free hint! ({remaining} free hint(s) left)");
+                return GameState {
+                    ...state,
+                    hints_used: new_hints_used,
+                };
+            } else {
+                // Paid hint - deduct points.
+                console.log("-{state.hint_cost} points for hint");
+                return GameState {
+                    ...state,
+                    score: state.score - state.hint_cost,
+                    hints_used: new_hints_used,
+                };
+            }
+        }
+    }
+    
+    // No unfound people remaining.
+    console.log("No hints available - you've found everyone!");
+    state
+}
+
+// ============================================================================
+// Win/Lose Conditions
+// ============================================================================
+
+// Checks if the player has won by finding all hidden people.
+fn check_win(spots: [HidingSpot], state: GameState) -> bool {
+    count_found(spots) >= state.total_hidden
+}
+
+// Checks if the player has lost by running out of turns.
+fn check_lose(state: GameState) -> bool {
+    state.turns_left <= 0
+}
+
+// Displays the victory screen with final score.
+fn display_win(state: GameState) {
+    console.log("");
+    console.log("===============================================");
+    console.log("        CONGRATULATIONS!                       ");
+    console.log("===============================================");
+    console.log("");
+    console.log("You found everyone!");
+    console.log("Final Score: {state.score}");
+    console.log("Hints Used: {state.hints_used}");
+    console.log("");
+}
+
+// Displays the game over screen with final statistics.
+fn display_lose(state: GameState, found: number) {
+    console.log("");
+    console.log("===============================================");
+    console.log("           GAME OVER                           ");
+    console.log("===============================================");
+    console.log("");
+    console.log("You ran out of turns!");
+    console.log("Found: {found}/{state.total_hidden}");
+    console.log("Final Score: {state.score}");
+    console.log("");
+}
+
+// ============================================================================
+// Main Game Loop
+// ============================================================================
+
+// The main game loop that handles player input and game progression.
+// Continues until the player wins, loses, or quits.
+fn game_loop(rooms: [Room], spots: [HidingSpot], state: GameState) {
+    let mut current_state = state;
+    let mut current_spots = spots;
+    
+    loop {
+        // Check win/lose conditions at the start of each turn.
+        let found = count_found(current_spots);
+        
+        if check_win(current_spots, current_state) {
+            display_win(current_state);
+            break;
+        }
+        
+        if check_lose(current_state) {
+            display_lose(current_state, found);
+            break;
+        }
+        
+        // Display current game state.
+        display_room(rooms, current_state.current_room);
+        display_status(current_state, found);
+        display_commands();
+        
+        // Get and process player input.
+        let cmd = input("Enter command: ");
+        let cmd_lower = cmd.to_lowercase();
+        
+        match cmd_lower {
+            "n" | "s" | "e" | "w" | "u" | "d" => {
+                // Movement commands.
+                current_state = move_player(rooms, current_state, cmd_lower);
+            },
+            "l" => {
+                // Look command - show hiding spots.
+                display_spots_in_room(current_spots, current_state.current_room);
+            },
+            "h" => {
+                // Hint command.
+                current_state = get_hint(current_spots, rooms, current_state);
+            },
+            "m" => {
+                // Map command.
+                display_map();
+            },
+            "q" => {
+                // Quit command.
+                console.log("Thanks for playing!");
+                break;
+            },
+            "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" => {
+                // Search command - search a numbered hiding spot.
+                let spot_num = parseInt(cmd_lower);
+                let (new_state, new_spots) = search_spot(current_spots, current_state, current_state.current_room, spot_num);
+                current_state = new_state;
+                current_spots = new_spots;
+            },
+            _ => {
+                // Unknown command.
+                console.log("Unknown command. Try again.");
+            },
+        }
+    }
+}
+
+// ============================================================================
+// Main Entry Point
+// ============================================================================
+
+// The main function that initialises and starts the game.
+fn main() {
+    display_title();
+    console.log("");
+    
+    // Display difficulty selection menu.
+    console.log("Select Difficulty:");
+    console.log("  1. Easy   (5 hidden, 30 turns, 3 free hints)");
+    console.log("  2. Medium (8 hidden, 25 turns, 2 free hints)");
+    console.log("  3. Hard   (12 hidden, 20 turns, 1 free hint)");
+    console.log("");
+    
+    let choice = input("Choose (1-3): ");
+    
+    // Map choice to difficulty string.
+    let difficulty = match choice {
+        "1" => "easy",
+        "2" => "medium",
+        "3" => "hard",
+        _ => "easy",  // Default to easy for invalid input.
+    };
+    
+    // Get player name.
+    let name = input("Enter your name: ");
+    
+    // Initialise game components.
+    let rooms = create_rooms();
+    let spots = create_hiding_spots();
+    let mut state = init_game(difficulty);
+    state.player_name = if name == "" { "Player" } else { name };
+    
+    // Place hidden people randomly in the spots.
+    let game_spots = place_hidden_people(spots, state.total_hidden);
+    
+    // Display game introduction.
+    console.log("");
+    console.log("Alright {state.player_name}, your friends are hiding!");
+    console.log("Find all {state.total_hidden} of them before you run out of turns!");
+    console.log("You have {state.free_hints} free hint(s)!");
+    console.log("");
+    console.log("Press Enter to start...");
+    input("");
+    
+    // Start the main game loop.
+    game_loop(rooms, game_spots, state);
+    
+    console.log("Thanks for playing Hide and Seek!");
+}

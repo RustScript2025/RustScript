@@ -1,0 +1,6 @@
+// Sample RustScript file
+fn main() {
+    console.log("Sample program");
+}
+
+main();

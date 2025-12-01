@@ -25,7 +25,7 @@ impl FileResolver {
     }
 
     pub fn find_rustscript_files(&self) -> anyhow::Result<Vec<PathBuf>> {
-        let pattern = self.project_root.join("**/*.rjsc");
+        let pattern = self.project_root.join("**/*.rscc");
         let pattern_str = pattern.to_str()
             .ok_or_else(|| anyhow::anyhow!("Invalid path pattern"))?;
         let paths: Vec<PathBuf> = glob(pattern_str)?
@@ -56,9 +56,39 @@ impl Compiler {
         }
     }
 
+    /// Compiles a single RustScript file to the specified target.
+    ///
+    /// This method compiles only the specified file, not the entire project.
+    ///
+    /// # Supported Targets
+    ///
+    /// - `"js"` - JavaScript (ES2020+) for Node.js or browsers
+    /// - `"wasm"` - WebAssembly binary for high-performance web apps
+    /// - `"native"` - Native executable (planned for future releases)
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the file doesn't exist or compilation fails.
+    pub fn compile_file(&self, file_path: &Path, target: &str) -> anyhow::Result<()> {
+        if !file_path.exists() {
+            anyhow::bail!("File not found: {}", file_path.display());
+        }
+
+        println!("Compiling: {}", file_path.display());
+
+        match target {
+            "js" => self.generate_js(file_path)?,
+            "wasm" => self.generate_wasm(file_path)?,
+            "native" => self.generate_native(file_path)?,
+            _ => anyhow::bail!("Unknown target: {}", target),
+        }
+
+        Ok(())
+    }
+
     /// Compiles all RustScript files in the project to the specified target.
     ///
-    /// This method discovers all `.rjsc` files in the project directory and
+    /// This method discovers all `.rscc` files in the project directory and
     /// compiles each one to the specified output format.
     ///
     /// # Supported Targets
@@ -69,12 +99,12 @@ impl Compiler {
     ///
     /// # Errors
     ///
-    /// Returns an error if no source files are found or if compilation fails.
+    /// Returns an error if no source files are found or compilation fails.
     pub fn compile_project(&self, target: &str) -> anyhow::Result<()> {
         let files = self.file_resolver.find_rustscript_files()?;
         
         if files.is_empty() {
-            anyhow::bail!("No .rjsc files found in project");
+            anyhow::bail!("No .rscc files found in project");
         }
 
         println!("Found {} file(s) to compile", files.len());

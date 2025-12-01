@@ -25,6 +25,7 @@ pub enum OwnershipState {
     /// The value has been moved elsewhere. Using it is an error.
     Moved(Span),
     /// The value is currently borrowed. The spans indicate where the borrows are.
+    #[allow(dead_code)]
     Borrowed(Vec<Span>),
 }
 
@@ -177,6 +178,10 @@ impl BorrowChecker {
             }
             ast::Expr::FieldAccess { expr, .. } => {
                 self.check_expr(expr);
+            }
+            ast::Expr::Index { expr, index, .. } => {
+                self.check_expr(expr);
+                self.check_expr(index);
             }
             ast::Expr::OptionalChain { expr, .. } => {
                 self.check_expr(expr);

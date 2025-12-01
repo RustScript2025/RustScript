@@ -14,6 +14,7 @@ use serde::Serialize;
 /// 
 /// Source maps enable debugging of generated code by mapping locations in the
 /// generated output back to the original source files.
+#[allow(dead_code)]
 #[derive(Serialize)]
 pub struct SourceMap {
     /// Source map version (always 3).
@@ -34,10 +35,11 @@ pub struct SourceMap {
 /// 
 /// ```ignore
 /// let mut generator = SourceMapGenerator::new("output.js".to_string());
-/// let source_idx = generator.add_source("input.rjsc".to_string());
+/// let source_idx = generator.add_source("input.rscc".to_string());
 /// generator.add_mapping(0, 0, source_idx, 0, 0);
 /// let source_map = generator.generate();
 /// ```
+#[allow(dead_code)]
 pub struct SourceMapGenerator {
     /// The output file name.
     file: String,
@@ -48,6 +50,7 @@ pub struct SourceMapGenerator {
 }
 
 /// A single mapping from generated code to original source.
+#[allow(dead_code)]
 struct Mapping {
     /// Line number in generated code (0-indexed).
     generated_line: u32,
@@ -64,6 +67,7 @@ struct Mapping {
 }
 
 impl SourceMapGenerator {
+    #[allow(dead_code)]
     pub fn new(file: String) -> Self {
         Self {
             file,
@@ -72,11 +76,13 @@ impl SourceMapGenerator {
         }
     }
 
+    #[allow(dead_code)]
     pub fn add_source(&mut self, source_path: String) -> u32 {
         self.sources.push(source_path);
         (self.sources.len() - 1) as u32
     }
 
+    #[allow(dead_code)]
     pub fn add_mapping(
         &mut self,
         gen_line: u32,
@@ -99,6 +105,7 @@ impl SourceMapGenerator {
     /// 
     /// This method encodes all mappings using Variable-Length Quantity encoding
     /// and produces a complete Source Map v3 structure.
+    #[allow(dead_code)]
     pub fn generate(&self) -> SourceMap {
         let mut mappings = String::new();
         let mut last_gen_line = 0;
@@ -154,6 +161,7 @@ impl SourceMapGenerator {
         }
     }
 
+    #[allow(dead_code)]
     fn encode_vlq(&self, output: &mut String, value: i32) {
         let mut value = if value < 0 {
             ((-value) << 1) | 1
@@ -174,6 +182,7 @@ impl SourceMapGenerator {
         }
     }
 
+    #[allow(dead_code)]
     fn base64_char(&self, value: i32) -> char {
         const CHARS: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
         CHARS[value as usize] as char

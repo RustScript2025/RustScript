@@ -19,13 +19,15 @@ use crate::ast::Span;
 /// 
 /// ```ignore
 /// let mut diagnostics = DiagnosticManager::new();
-/// let file_id = diagnostics.add_file("main.rjsc".to_string(), source);
+/// let file_id = diagnostics.add_file("main.rscc".to_string(), source);
 /// let error_msg = diagnostics.report_error(span, "Type mismatch");
 /// ```
 pub struct DiagnosticManager {
     /// Storage for source files and their contents.
+    #[allow(dead_code)]
     files: SimpleFiles<String, String>,
     /// List of file IDs that have been added.
+    #[allow(dead_code)]
     file_ids: Vec<usize>,
 }
 
@@ -40,6 +42,7 @@ impl DiagnosticManager {
     /// Adds a source file to the diagnostic manager.
     /// 
     /// Returns a file ID that can be used in span information.
+    #[allow(dead_code)]
     pub fn add_file(&mut self, name: String, source: String) -> usize {
         let file_id = self.files.add(name, source);
         self.file_ids.push(file_id);
@@ -61,6 +64,7 @@ impl DiagnosticManager {
     /// # Returns
     /// 
     /// A formatted error message as a string
+    #[allow(dead_code)]
     pub fn report_error(&self, span: Span, message: &str) -> String {
         let diagnostic = Diagnostic::error()
             .with_message(message)

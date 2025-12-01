@@ -17,6 +17,7 @@ use std::collections::HashMap;
 /// This structure contains type information for all built-in globals,
 /// which is used by the type checker to validate code that uses standard
 /// library functions.
+#[allow(dead_code)]
 pub struct StdLib {
     /// Global variables and their types.
     pub globals: HashMap<Rc<str>, Type>,
@@ -30,6 +31,7 @@ impl StdLib {
     /// - `Math` object with mathematical constants and functions
     /// 
     /// Additional standard library features can be added here as the language evolves.
+    #[allow(dead_code)]
     pub fn new() -> Self {
         let mut globals = HashMap::new();
         

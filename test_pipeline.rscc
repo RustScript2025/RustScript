@@ -1,0 +1,6 @@
+// Test pipeline file
+fn main() {
+    console.log("Pipeline test");
+}
+
+main();

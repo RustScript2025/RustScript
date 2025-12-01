@@ -1,4 +1,4 @@
-![Version](https://img.shields.io/badge/version-0.2.0-blue)
+![Version](https://img.shields.io/badge/version-0.3.0-blue)
 ![Rust](https://img.shields.io/badge/rust-1.91.1%2B-orange)
 ![License](https://img.shields.io/badge/license-GPL--2.0-green)
 
@@ -11,6 +11,22 @@
 **Author**: Michael Lauzon
 
 RustScript is a modern **web-scripting language** that compiles to WebAssembly for browser-based applications. It synthesises the best ideas from 60+ years of scripting language evolution, starting with Rust's memory safety and JavaScript's ergonomic syntax as a foundation, whilst incorporating powerful features from languages spanning LISP (1958) to Zig (2016).
+
+## What's New in v0.3.0
+
+### Breaking Changes
+- **File Extension Change**: Source files now use `.rscc` (RustScript Code) instead of `.rjsc`
+- **Compiler Renamed**: `rjsc` → `rsxe` (RustScript Xecutable Engine)
+- **New Executable Extension**: Compiled files use `.rscx` (RustScript codeXecutable)
+
+### Bug Fixes
+- **Fixed Compiler Hanging**: Compiler now only compiles specified files instead of recursively searching entire directory trees
+
+### New Features: Feature-Rich Development Server
+The development server (`serve.py`) now includes 10 advanced features: Hot Reload, Directory Listing, File Upload, HTTPS Support, Proxy Support, Compression, Rate Limiting, Basic Authentication, WebSocket Support, and Request Inspection. See [docs/SERVE.md](docs/SERVE.md) for complete documentation.
+
+### Migration from v0.2.0
+Rename your `.rjsc` files to `.rscc` and use `rsxe` instead of `rjsc` for compilation. See the release notes for detailed migration instructions.
 
 **Important**: RustScript is designed for **web development** (running in browsers via WebAssembly), not for shell scripting or command-line automation. If you're looking for a Rust-based tool to replace bash, Python scripts, or PowerShell for system administration tasks, RustScript is not the right tool. For shell scripting needs, consider writing regular Rust programmes with `cargo`, using script runners like `rust-script` or `cargo-script` for single-file scripts, using `evcxr` for interactive Rust REPL sessions, or sticking with traditional shell scripting languages.
 
@@ -60,7 +76,7 @@ cd RustScript
 cargo build --release
 ```
 
-The compiler binary will be located at `target/release/rjsc` (or `target/release/rjsc.exe` on Windows).
+The compiler binary will be located at `target/release/rsxe` (or `target/release/rsxe.exe` on Windows).
 
 **Note**: RustScript is built using Rust Edition 2024, taking advantage of the latest language features including implicit format arguments, improved error handling, and modern idioms.
 
@@ -95,6 +111,8 @@ RustScript programmes execute in web browsers via WebAssembly. To set up your de
    python3 serve.py
    ```
    
+   The server includes hot reload, directory listing, file upload, HTTPS, and more. See [SERVE.md](docs/SERVE.md) for all features and options.
+   
    **Important**: The `serve.py` script must be run from the RustScript root directory (where the `www` folder exists).
 
 3. **Open your browser:**
@@ -106,16 +124,6 @@ The runtime automatically compiles and executes `<script type="text/rustscript">
 
 **"Directory 'www' not found" error?**  
 You need to run the build script first (`build_wasm.bat` on Windows or `./build_wasm.sh` on Linux/Mac) to create the WebAssembly runtime and `www` directory structure.
-
-**Compiler hangs and never finishes?**  
-This is a known bug we're actively investigating. If `rjsc hello.rjsc` hangs indefinitely:
-- Stop the process with Ctrl+C
-- Please report this issue on GitHub with:
-  - Your operating system and Rust version
-  - The exact command you ran
-  - The contents of your `.rjsc` file
-  
-This should not happen, and we need your help to track down and fix this issue.
 
 ## Example Games
 
@@ -142,21 +150,24 @@ The complete playable game with async input system and all features.
 
 ### RustScript Source Code
 The game logic is also available as pure RustScript source:
-- **File**: `examples/hideseek.rjsc`
+- **File**: `examples/hideseek.rscc`
 - **Features**: Complete game implementation showcasing structs, pattern matching, loops, and more
 
 To play, start the development server (`python3 serve.py`) and visit `http://localhost:8000`.
 
 ## Usage
 
-Compile a RustScript file (`.rjsc`) to JavaScript or WASM:
+Compile a RustScript file (`.rscc`) to JavaScript or WASM:
 
 ```bash
 # Compile to JavaScript (default)
-./target/release/rjsc input.rjsc
+./target/release/rsxe input.rscc
 
 # Compile to WebAssembly
-./target/release/rjsc input.rjsc --target wasm
+./target/release/rsxe input.rscc --target wasm
+
+# Compile to executable
+./target/release/rsxe input.rscc --output output.rscx
 ```
 
 ## Learning RustScript
@@ -195,19 +206,6 @@ This version (1.91.1) includes Edition 2024 support. If your version is lower th
 ```bash
 rustup update
 ```
-
-### "The compiler hangs and never finishes"
-When you run `rjsc hello.rjsc`, it should compile in seconds. If it hangs indefinitely, this is a **critical bug** that we're tracking.
-
-**What to do:**
-1. Stop the process with Ctrl+C
-2. Please report the issue on GitHub with:
-   - Your operating system (Windows, Linux, macOS)
-   - Your Rust version (`rustc --version`)
-   - The exact command you ran
-   - The contents of your `.rjsc` file
-
-We need reports from users experiencing this to track down and fix the issue.
 
 ### "Directory 'www' not found when running serve.py"
 The development server expects a `www` directory that doesn't exist until you build it.
@@ -644,6 +642,7 @@ By learning from scripting language history, RustScript avoids repeating past mi
 ## Further Reading
 
 - 📚 [Tutorial](docs/TUTORIAL.md) - Complete guide from Hello World to advanced features
+- 🚀 [Development Server](docs/SERVE.md) - Feature-rich server with hot reload, HTTPS, and more
 - ⚡ [Quick Reference](docs/QUICK_REFERENCE.md) - Concise syntax reference
 - 📖 [Phase 1 Features](docs/PHASE1_FEATURES.md) - String & syntax enhancements
 - 📖 [Phase 2 Features](docs/PHASE2_FEATURES.md) - Function enhancements

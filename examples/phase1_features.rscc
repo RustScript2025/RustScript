@@ -1,0 +1,259 @@
+// ============================================================================
+// Phase 1 Features Demo: String & Syntax Enhancements
+// ============================================================================
+// Author: Michael Lauzon
+// 
+// This file demonstrates all Phase 1 features of RustScript, including:
+//   - String interpolation for dynamic text
+//   - Optional chaining for safe navigation
+//   - Null coalescing for default values
+//   - List comprehensions for data transformation
+// ============================================================================
+
+// ============================================================================
+// Feature 1: String Interpolation
+// ============================================================================
+// String interpolation allows embedding expressions directly within strings
+// using curly braces. This provides a cleaner alternative to concatenation.
+
+fn demo_string_interpolation() {
+    let name = "Alice";
+    let age = 30;
+    let city = "Toronto";
+    
+    // String interpolation with expressions
+    let greeting = "Hello, {name}! You are {age} years old.";
+    console.log(greeting);
+    
+    // Complex expressions in interpolation
+    let message = "In 5 years, {name} will be {age + 5} years old.";
+    console.log(message);
+    
+    // Nested interpolation
+    let location = "Lives in {city}, Canada";
+    console.log(location);
+}
+
+// ============================================================================
+// Feature 2: Optional Chaining
+// ============================================================================
+// Optional chaining (?.) allows safe navigation through potentially null
+// values without causing runtime errors. If any part of the chain is null,
+// the entire expression returns null gracefully.
+
+struct Address {
+    street: string,
+    city: string,
+    postal_code: string,
+}
+
+struct User {
+    name: string,
+    age: number,
+    address: Address,
+}
+
+fn demo_optional_chaining() {
+    let user = User {
+        name: "Bob",
+        age: 25,
+        address: Address {
+            street: "123 Main St",
+            city: "Vancouver",
+            postal_code: "V6B 1A1",
+        },
+    };
+    
+    // Safe navigation through potentially null values
+    let street = user?.address?.street;
+    console.log("Street: {street}");
+    
+    // Without optional chaining, this would panic if any level is null
+    // With optional chaining, it returns None/null gracefully
+}
+
+// ============================================================================
+// Feature 3: Null Coalescing
+// ============================================================================
+// The null coalescing operator (??) provides a default value when the
+// left-hand side is null or undefined. This simplifies handling optional
+// values without verbose conditional checks.
+
+fn demo_null_coalescing() {
+    let maybe_name: string = get_optional_name();
+    
+    // Provide default value if null/undefined
+    let name = maybe_name ?? "Anonymous";
+    console.log("Name: {name}");
+    
+    // Chain multiple coalescing operators
+    let value = first_option() ?? second_option() ?? "default";
+    console.log("Value: {value}");
+    
+    // Combine with optional chaining
+    let city = user?.address?.city ?? "Unknown";
+    console.log("City: {city}");
+}
+
+fn get_optional_name() -> string {
+    // Simulates returning null/undefined
+    return "";
+}
+
+fn first_option() -> string {
+    return "";
+}
+
+fn second_option() -> string {
+    return "";
+}
+
+// ============================================================================
+// Feature 4: List Comprehensions
+// ============================================================================
+// List comprehensions provide a concise way to create lists by transforming
+// and filtering existing collections. Inspired by Python, they combine
+// mapping and filtering into a single, readable expression.
+
+fn demo_list_comprehensions() {
+    let numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    
+    // Basic list comprehension
+    let doubled = [x * 2 for x in numbers];
+    console.log("Doubled: {doubled}");
+    
+    // List comprehension with filter
+    let evens = [x for x in numbers if x % 2 == 0];
+    console.log("Evens: {evens}");
+    
+    // Complex transformation
+    let squares_of_evens = [x * x for x in numbers if x % 2 == 0];
+    console.log("Squares of evens: {squares_of_evens}");
+    
+    // Nested comprehension (if supported)
+    let pairs = [(x, y) for x in [1, 2, 3] for y in [4, 5, 6]];
+    console.log("Pairs: {pairs}");
+    
+    // String manipulation with comprehension.
+    let names = ["alice", "bob", "charlie"];
+    let capitalised = [name.uppercase() for name in names];
+    console.log("Capitalised: {capitalised}");
+}
+
+// Helper functions for null coalescing demo.
+
+// ============================================================================
+// Combined Example: All Features Together
+// ============================================================================
+// This example demonstrates how Phase 1 features work together in a
+// realistic shopping cart scenario, combining interpolation, optional
+// chaining, null coalescing, and list comprehensions.
+
+struct Product {
+    name: string,
+    price: number,
+    in_stock: bool,
+}
+
+struct ShoppingCart {
+    items: [Product],
+    discount_code: string,
+}
+
+fn demo_combined_features() {
+    let cart = ShoppingCart {
+        items: [
+            Product { name: "Laptop", price: 1200.00, in_stock: true },
+            Product { name: "Mouse", price: 25.00, in_stock: true },
+            Product { name: "Keyboard", price: 75.00, in_stock: false },
+        ],
+        discount_code: "SAVE10",
+    };
+    
+    // List comprehension with filter
+    let available_items = [item for item in cart.items if item.in_stock];
+    
+    // Calculate total with optional chaining and null coalescing
+    let discount = cart?.discount_code ?? "NONE";
+    
+    // String interpolation with complex expressions
+    let summary = "Cart has {available_items.length} available items";
+    console.log(summary);
+    
+    // Combined: comprehension + interpolation
+    let item_names = [item.name for item in available_items];
+    let items_list = "Available: {item_names.join(', ')}";
+    console.log(items_list);
+    
+    // Optional chaining with method calls
+    let first_item_name = cart?.items[0]?.name ?? "No items";
+    console.log("First item: {first_item_name}");
+}
+
+// ============================================================================
+// Real-World Example: Data Processing Pipeline
+// ============================================================================
+// This example shows how Phase 1 features can be used to build a log
+// processing pipeline, filtering errors and formatting output using
+// comprehensions and string interpolation.
+
+struct LogEntry {
+    timestamp: number,
+    level: string,
+    message: string,
+    user_id: string,
+}
+
+fn process_logs(logs: [LogEntry]) {
+    // Filter errors using list comprehension
+    let errors = [log for log in logs if log.level == "ERROR"];
+    
+    // Extract user IDs with optional chaining
+    let user_ids = [log?.user_id ?? "unknown" for log in errors];
+    
+    // Create summary with string interpolation
+    let summary = "Found {errors.length} errors from {user_ids.length} users";
+    console.log(summary);
+    
+    // Format error messages
+    let formatted = [
+        "{log.timestamp}: {log.message} (User: {log.user_id ?? 'anonymous'})"
+        for log in errors
+    ];
+    
+    for msg in formatted {
+        console.error(msg);
+    }
+}
+
+// ============================================================================
+// Main Entry Point
+// ============================================================================
+// Runs all the Phase 1 feature demonstrations in sequence.
+
+fn main() {
+    console.log("=== Phase 1 Features Demo ===");
+    console.log("");
+    
+    console.log("1. String Interpolation:");
+    demo_string_interpolation();
+    console.log("");
+    
+    console.log("2. Optional Chaining:");
+    demo_optional_chaining();
+    console.log("");
+    
+    console.log("3. Null Coalescing:");
+    demo_null_coalescing();
+    console.log("");
+    
+    console.log("4. List Comprehensions:");
+    demo_list_comprehensions();
+    console.log("");
+    
+    console.log("5. Combined Features:");
+    demo_combined_features();
+    console.log("");
+    
+    console.log("=== Demo Complete ===");
+}

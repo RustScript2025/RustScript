@@ -671,6 +671,14 @@ fn parse_postfix_expr(pair: Pair<Rule>) -> Result<Expr, pest::error::Error<Rule>
                     span: Span::default(),
                 };
             }
+            Rule::index_access => {
+                let index_expr = parse_expr(postfix.into_inner().next().unwrap())?;
+                expr = Expr::Index {
+                    expr: Box::new(expr),
+                    index: Box::new(index_expr),
+                    span: Span::default(),
+                };
+            }
             Rule::optional_chain => {
                 let ident = parse_ident(postfix.into_inner().next().unwrap());
                 expr = Expr::OptionalChain {

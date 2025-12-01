@@ -13,6 +13,7 @@ use crate::ast::Ident;
 /// 
 /// The lexer is designed to be fast and memory-efficient, using string interning
 /// for identifiers to reduce allocation overhead.
+#[allow(dead_code)]
 #[derive(Logos, Debug, Clone, PartialEq)]
 #[logos(skip r"[ \t\n\f]+")] // Skip whitespace
 #[logos(skip r"//[^\n]*")]   // Skip line comments
@@ -165,6 +166,7 @@ pub enum Token {
 ///     println!("{:?} at {:?}", token, span);
 /// }
 /// ```
+#[allow(dead_code)]
 pub struct Lexer<'input> {
     inner: logos::Lexer<'input, Token>,
 }
@@ -173,6 +175,7 @@ impl<'input> Lexer<'input> {
     /// Creates a new lexer for the given input string.
     /// 
     /// The lexer will tokenise the entire input on demand as the iterator is consumed.
+    #[allow(dead_code)]
     pub fn new(input: &'input str) -> Self {
         Self {
             inner: Token::lexer(input),

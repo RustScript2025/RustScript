@@ -59,12 +59,12 @@ cd RustScript
 cargo build --release
 ```
 
-This will take a few minutes as Cargo downloads dependencies and compiles the compiler. When it's done, you'll find the `rjsc` compiler at `target/release/rjsc` (or `rjsc.exe` on Windows).
+This will take a few minutes as Cargo downloads dependencies and compiles the compiler. When it's done, you'll find the `rsxe` compiler at `target/release/rsxe` (or `rsxe.exe` on Windows).
 
 **What just happened?**
 - `cargo build` compiles the RustScript compiler (which is written in Rust)
 - `--release` creates an optimised version for better performance
-- The compiler is now ready to transform your `.rjsc` files into JavaScript or WebAssembly
+- The compiler is now ready to transform your `.rscc` files into JavaScript or WebAssembly
 
 ### Setting Up Your First Project
 
@@ -85,7 +85,7 @@ Every programming journey begins with "Hello, World!" - a simple programme that 
 
 ### Writing the Programme
 
-Create a file called `hello.rjsc` and type:
+Create a file called `hello.rscc` and type:
 
 ```rustscript
 fn main() {
@@ -125,7 +125,7 @@ Now let's compile and run it:
 
 ```bash
 # Compile to JavaScript
-../target/release/rjsc hello.rjsc
+../target/release/rsxe hello.rscc
 
 # Run with Node.js
 node hello.js
@@ -137,7 +137,7 @@ Hello, World!
 ```
 
 **What happened behind the scenes?**
-1. The RustScript compiler (`rjsc`) read your `.rjsc` file
+1. The RustScript compiler (`rsxe`) read your `.rscc` file
 2. It parsed the code and checked for errors
 3. It generated equivalent JavaScript code in `hello.js`
 4. Node.js executed that JavaScript
@@ -181,11 +181,58 @@ To view this:
 python ../serve.py
 ```
 
+The development server includes many useful features like hot reload, HTTPS, file uploads, and more. For complete documentation, see [SERVE.md](SERVE.md).
+
 Then open `http://localhost:8000/hello.html` in your browser and press F12 to see the console output.
 
 **Why two targets (JavaScript and WebAssembly)?**
 - **JavaScript**: Great for Node.js servers, command-line tools, and quick prototyping
 - **WebAssembly**: Faster execution in browsers, better for performance-critical web apps
+
+### Troubleshooting
+
+#### Compiler Hangs or Takes Too Long?
+
+If the compiler seems to hang when you run `rsxe hello.rscc`, this is likely because it's searching through a large directory tree. This can happen if you're in a directory with many subdirectories (like a git repository with `.git` folder, or a project with `node_modules`).
+
+**Solution**: Make sure you're compiling a specific file, not a directory:
+
+```bash
+# ✅ Good - compiles just the file you specify
+rsxe hello.rscc
+
+# ❌ Avoid - searches entire directory tree
+rsxe .
+```
+
+If you need to compile multiple files, put them in a dedicated directory without large subdirectories.
+
+#### File Extension Errors?
+
+Make sure your files use the `.rscc` extension (RustScript Code):
+
+```bash
+# ✅ Correct
+rsxe hello.rscc
+
+# ❌ Wrong extension
+rsxe hello.rjsc  # Old extension, no longer supported
+rsxe hello.js    # This is JavaScript, not RustScript
+```
+
+#### Node.js Not Found?
+
+If you get "node: command not found", you need to install Node.js:
+- Download from [nodejs.org](https://nodejs.org/)
+- Or use a package manager: `brew install node` (Mac), `apt install nodejs` (Linux)
+
+#### Python Server Issues?
+
+If `python ../serve.py` doesn't work:
+- Try `python3 ../serve.py` instead
+- Make sure you're in the correct directory
+- Check that the `www` directory exists (run `./build_wasm.sh` first)
+- See [SERVE.md](SERVE.md) for advanced options and troubleshooting
 
 ---
 

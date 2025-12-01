@@ -329,7 +329,7 @@ yield       _
 
 ```rustscript
 // Import
-use "path/to/module.rjsc";
+use "path/to/module.rscc";
 
 // Export (implicit - all top-level items are exported)
 ```
@@ -349,13 +349,13 @@ document.getElementById("app");
 
 ```bash
 # Compile to JavaScript
-rjsc input.rjsc
+rsxe input.rscc
 
 # Compile to WebAssembly
-rjsc input.rjsc --target wasm
+rsxe input.rscc --target wasm
 
 # Specify output
-rjsc input.rjsc --output dist/output.js
+rsxe input.rscc --output dist/output.rscx
 ```
 
 ## Tips

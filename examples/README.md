@@ -11,7 +11,7 @@ This directory contains example programmes demonstrating RustScript features.
 The simplest RustScript programme:
 
 ```bash
-../target/release/rjsc hello_world.rjsc
+../target/release/rsxe hello_world.rscc
 node hello_world.js
 ```
 
@@ -19,7 +19,7 @@ node hello_world.js
 
 ### Phase 1: String & Syntax Enhancements
 
-**File**: `phase1_features.rjsc`
+**File**: `phase1_features.rscc`
 
 Demonstrates:
 - String interpolation with `{expression}` syntax
@@ -29,13 +29,13 @@ Demonstrates:
 
 **Run it:**
 ```bash
-../target/release/rjsc phase1_features.rjsc
+../target/release/rsxe phase1_features.rscc
 node phase1_features.js
 ```
 
 ### Phase 2: Function Enhancements
 
-**File**: `phase2_features.rjsc`
+**File**: `phase2_features.rscc`
 
 Demonstrates:
 - Pattern matching in function heads (Erlang-style)
@@ -45,13 +45,13 @@ Demonstrates:
 
 **Run it:**
 ```bash
-../target/release/rjsc phase2_features.rjsc
+../target/release/rsxe phase2_features.rscc
 node phase2_features.js
 ```
 
 ### Phase 3: Safety & Metaprogramming
 
-**File**: `phase3_features.rjsc`
+**File**: `phase3_features.rscc`
 
 Demonstrates:
 - Design by Contract (`requires`, `ensures`, `invariant`)
@@ -61,7 +61,7 @@ Demonstrates:
 
 **Run it:**
 ```bash
-../target/release/rjsc phase3_features.rjsc
+../target/release/rsxe phase3_features.rscc
 node phase3_features.js
 ```
 
@@ -79,10 +79,10 @@ Each example file follows this structure:
 
 We recommend exploring the examples in this order:
 
-1. **hello_world.rjsc** - Understand basic programme structure
-2. **phase1_features.rjsc** - Learn modern syntax enhancements
-3. **phase2_features.rjsc** - Explore advanced function capabilities
-4. **phase3_features.rjsc** - Master safety and metaprogramming
+1. **hello_world.rscc** - Understand basic programme structure
+2. **phase1_features.rscc** - Learn modern syntax enhancements
+3. **phase2_features.rscc** - Explore advanced function capabilities
+4. **phase3_features.rscc** - Master safety and metaprogramming
 
 ## Compiling to WebAssembly
 
@@ -90,7 +90,7 @@ All examples can also be compiled to WebAssembly:
 
 ```bash
 # Build WASM
-../target/release/rjsc phase1_features.rjsc --target wasm
+../target/release/rsxe phase1_features.rscc --target wasm
 
 # The WASM file can be loaded in a browser
 ```
@@ -107,7 +107,7 @@ Create an HTML file:
 </head>
 <body>
     <h1>Check the Console (F12)</h1>
-    <script type="text/rustscript" src="phase1_features.rjsc"></script>
+    <script type="text/rustscript" src="phase1_features.rscc"></script>
 </body>
 </html>
 ```
@@ -124,7 +124,7 @@ Open `http://localhost:8000` in your browser.
 
 Have a great example? We'd love to include it!
 
-1. Create a new `.rjsc` file
+1. Create a new `.rscc` file
 2. Add comprehensive comments explaining the code
 3. Include a real-world use case
 4. Test that it compiles and runs correctly
@@ -135,12 +135,12 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md) for guidelines.
 ## Example Categories
 
 ### Basic Examples
-- `hello_world.rjsc` - Your first programme
+- `hello_world.rscc` - Your first programme
 
 ### Feature Demonstrations
-- `phase1_features.rjsc` - Syntax enhancements
-- `phase2_features.rjsc` - Function enhancements
-- `phase3_features.rjsc` - Safety features
+- `phase1_features.rscc` - Syntax enhancements
+- `phase2_features.rscc` - Function enhancements
+- `phase3_features.rscc` - Safety features
 
 ### Coming Soon
 - Data structures and algorithms

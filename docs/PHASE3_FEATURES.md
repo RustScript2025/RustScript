@@ -484,4 +484,4 @@ Phase 3 features draw from decades of research in formal methods and metaprogram
 
 - [Phase 1 Features](PHASE1_FEATURES.md) - String & syntax enhancements
 - [Phase 2 Features](PHASE2_FEATURES.md) - Function enhancements
-- [Examples](../examples/phase3_features.rjsc) - Working code examples
+- [Examples](../examples/phase3_features.rscc) - Working code examples

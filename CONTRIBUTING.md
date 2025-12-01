@@ -110,7 +110,7 @@ RustScript/
 │   ├── sourcemap.rs      # Source map generation
 │   └── std_lib.rs        # Standard library definitions
 ├── docs/                 # Documentation
-├── examples/             # Example .rjsc programmes
+├── examples/             # Example .rscc programmes
 ├── www/                  # Browser runtime
 └── Cargo.toml           # Project configuration
 ```

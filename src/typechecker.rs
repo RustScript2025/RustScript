@@ -15,10 +15,12 @@ use std::collections::HashMap;
 #[derive(Error, Debug, Clone, PartialEq)]
 pub enum TypeError {
     /// A type mismatch was detected.
+    #[allow(dead_code)]
     #[error("Type mismatch: expected {expected:?}, found {found:?}")]
     Mismatch { expected: Type, found: Type, span: Span },
     
     /// The type checker couldn't infer a type.
+    #[allow(dead_code)]
     #[error("Cannot infer type")]
     CannotInfer { span: Span },
 }
@@ -331,6 +333,18 @@ impl TypeChecker {
                     Type::Number
                 }
             },
+            crate::ast::Expr::Index { expr: arr, index, .. } => {
+                let arr_ty = self.check_expr(arr, types, scopes)?;
+                self.check_expr(index, types, scopes)?;
+                
+                // If it's an array type, return the element type
+                if let Type::Array(elem_ty) = arr_ty {
+                    *elem_ty
+                } else {
+                    // Default to Number for non-array types
+                    Type::Number
+                }
+            },
             crate::ast::Expr::OptionalChain { expr: obj, field, .. } => {
                 // Optional chaining returns Option<T>
                 let expr_ty = self.check_expr(obj, types, scopes)?;
@@ -438,6 +452,7 @@ impl crate::ast::Expr {
             crate::ast::Expr::Block(block) => &block.span,
             crate::ast::Expr::StructInit { span, .. } => span,
             crate::ast::Expr::FieldAccess { span, .. } => span,
+            crate::ast::Expr::Index { span, .. } => span,
             crate::ast::Expr::OptionalChain { span, .. } => span,
             crate::ast::Expr::NullCoalesce { span, .. } => span,
             crate::ast::Expr::ListComprehension { span, .. } => span,

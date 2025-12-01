@@ -9,13 +9,13 @@
 //! 
 //! ```bash
 //! # Compile to JavaScript
-//! rjsc input.rjsc
+//! rsxe input.rscc
 //! 
 //! # Compile to WebAssembly
-//! rjsc input.rjsc --target wasm
+//! rsxe input.rscc --target wasm
 //! 
 //! # Specify output location
-//! rjsc input.rjsc --output dist/output.js
+//! rsxe input.rscc --output dist/output.rscx
 //! ```
 
 use std::path::PathBuf;
@@ -37,12 +37,12 @@ use crate::compiler::Compiler;
 
 /// RustScript compiler command-line interface.
 #[derive(Parser)]
-#[command(name = "rjsc")]
-#[command(about = "RustScript compiler - Compile RustScript to JavaScript or WebAssembly")]
-#[command(version = "0.1.0")]
+#[command(name = "rsxe")]
+#[command(about = "RustScript Xecutable Engine - Compile RustScript to JavaScript or WebAssembly")]
+#[command(version = "0.3.0")]
 #[command(author = "Michael Lauzon")]
 struct Cli {
-    /// Input .rjsc file or directory to compile
+    /// Input .rscc file or directory to compile
     input: PathBuf,
     
     /// Output file or directory (defaults to input name with appropriate extension)
@@ -69,11 +69,12 @@ impl Cli {
         }
         
         match self.input.extension().and_then(|ext| ext.to_str()) {
-            Some("rjsc") => Ok(()),
-            _ => anyhow::bail!("Input file must have .rjsc extension")
+            Some("rscc") => Ok(()),
+            _ => anyhow::bail!("Input file must have .rscc extension")
         }
     }
     
+    #[allow(dead_code)]
     fn determine_output_path(&self) -> PathBuf {
         self.output.clone().unwrap_or_else(|| {
             if self.input.is_dir() {
@@ -99,19 +100,18 @@ fn main() -> anyhow::Result<()> {
     // Validate input file extension
     cli.validate_extension()?;
     
-    // Determine project root
-    let project_root = if cli.input.is_dir() {
-        cli.input.clone()
+    if cli.input.is_dir() {
+        // Compile all files in directory
+        let compiler = Compiler::new(cli.input.clone());
+        compiler.compile_project(&cli.target)?;
     } else {
-        cli.input.parent()
+        // Compile single file
+        let project_root = cli.input.parent()
             .map(|p| p.to_path_buf())
-            .unwrap_or_else(|| PathBuf::from("."))
-    };
-    
-    let compiler = Compiler::new(project_root);
-    
-    // Compile the project
-    compiler.compile_project(&cli.target)?;
+            .unwrap_or_else(|| PathBuf::from("."));
+        let compiler = Compiler::new(project_root);
+        compiler.compile_file(&cli.input, &cli.target)?;
+    }
     
     println!("Compilation completed successfully!");
     
