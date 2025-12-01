@@ -15,9 +15,9 @@ RustScript is a modern **web-scripting language** that compiles to WebAssembly f
 ## What's New in v0.3.0
 
 ### Breaking Changes
-- **File Extension Change**: Source files now use `.rscc` (RustScript Code) instead of `.rjsc`
+- **File Extension Change**: Source files now use `.rscc` (RustSCript Code) instead of `.rjsc`
 - **Compiler Renamed**: `rjsc` → `rsxe` (RustScript Xecutable Engine)
-- **New Executable Extension**: Compiled files use `.rscx` (RustScript codeXecutable)
+- **New Executable Extension**: Compiled files use `.rscx` (RustScript Code Xecutable)
 
 ### Bug Fixes
 - **Fixed Compiler Hanging**: Compiler now only compiles specified files instead of recursively searching entire directory trees
