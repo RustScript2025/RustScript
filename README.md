@@ -36,7 +36,6 @@ RustScript v0.4.0 adds **Phase 4: 72 advanced features** bringing the total to *
 - 📚 New comprehensive [Phase 4 Features Documentation](docs/PHASE4_FEATURES.md)
 - 📖 Enhanced [Tutorial](docs/TUTORIAL.md) with Phase 4 examples
 - ⚡ Updated [Quick Reference](docs/QUICK_REFERENCE.md) with all 82 features
-- 🎯 New syntax cheat sheet and "Coming from X language" guides
 
 ### Previous Releases
 
