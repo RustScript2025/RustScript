@@ -47,11 +47,11 @@ RustScript v0.4.0 adds **Phase 4: 72 advanced features** bringing the total to *
 ### New Features: Phase 4
 
 **Phase 4** adds 72 advanced features including:
-- Memory safety (lifetimes, borrowing, move semantics, tail call optimization)
+- Memory safety (lifetimes, borrowing, move semantics, tail call optimisation)
 - Advanced type system (union types, GADTs, higher-kinded types, refinement types)
 - Functional programming (partial application, currying, lenses, transducers)
 - Safe concurrency (async/await, channels, parallel iterators, atomic operations)
-- Advanced control flow (try blocks, guard clauses, defer, labeled blocks)
+- Advanced control flow (try blocks, guard clauses, defer, labelled blocks)
 - Metaprogramming (declarative macros, procedural macros, compile-time reflection)
 - Domain-specific features (regex literals, operator overloading, destructuring)
 - Developer utilities (default parameters, const functions, ranges with step)
@@ -78,18 +78,17 @@ RustScript v0.4.0 adds **Phase 4: 72 advanced features** bringing the total to *
 
 RustScript draws inspiration from one systems programming language and over 60 scripting languages across computing history:
 
-**Memory Safety**: Rust (systems programming language)  
-**Type Systems**: ML, Haskell, TypeScript, Eiffel, Scala, F#  
-**Expressiveness**: Python, Ruby, JavaScript, Kotlin, Swift, Rebol  
-**Functional Programming**: LISP, Scheme, Haskell, F#, Scala, Clojure, OCaml  
-**Pattern Matching**: Erlang, Elixir, ML, OCaml, Rust  
-**Metaprogramming**: LISP, Zig, D, Nim, Rust  
-**Multiple Dispatch**: Julia, Common Lisp (CLOS), Dylan  
-**Effects & Contracts**: Eiffel, Koka, Ada, D  
-**Data Processing**: APL, AWK, Icon, SNOBOL, MUMPS  
-**Stack-Based**: Forth  
-**Concurrency**: Go, Erlang, Elixir, Rust  
-**Modern Features**: C#, TypeScript, Swift, Kotlin, Rust  
+**Memory Safety**: C++ RAII (1984), Cyclone (2002), Rust (2010)  
+**Type Systems**: ML (1973), Eiffel (1986), Haskell (1990), Coq (1989), Scala (2004), F# (2005), Agda (2007), Idris (2007), Liquid Haskell (2008), F* (2011), TypeScript (2012)  
+**Expressiveness**: Python (1991), Ruby (1995), JavaScript (1995), Rebol (1997), Kotlin (2011), Swift (2014)  
+**Functional Programming**: LISP (1958), Scheme (1975), Miranda (1985), Haskell (1990), OCaml (1996), Scala (2004), F# (2005), Clojure (2007)  
+**Pattern Matching**: ML (1973), Erlang (1986), Haskell (1990), OCaml (1996), Elixir (2011), Rust (2010)  
+**Metaprogramming**: LISP (1958), D (2001), Nim (2008), Rust (2010), Zig (2016)  
+**Multiple Dispatch**: Common Lisp CLOS (1988), Dylan (1992), Clojure (2007), Julia (2012)  
+**Effects & Contracts**: Ada (1983), Eiffel (1986), D (2001), Spec# (2004), Nim (2008), Koka (2012), Eff (2012)  
+**Data Processing**: SNOBOL (1962), APL (1966), MUMPS (1966), Forth (1970), AWK (1977), Icon (1977)  
+**Concurrency**: Erlang (1986), C++ atomics (2011), Elixir (2011), Go (2009), Rust (2010), Rayon (2016)  
+**Modern Features**: Java (1995), C# (2000), Scala (2004), Rust (2010), Ceylon (2011), Kotlin (2011), TypeScript (2012), Swift (2014)  
 
 ## Design Philosophy
 
@@ -115,13 +114,23 @@ RustScript requires Rust 1.85 or later with Edition 2024 support.
 
 **Checking Your Rust Version**: Run `rustc --version` to see your installed version. Any version 1.85 or higher includes Edition 2024 support. If your version is older, update Rust by running `rustup update`.
 
+**On Windows (PowerShell or Command Prompt):**
+```powershell
+git clone https://github.com/RustScript2025/RustScript.git
+cd RustScript
+cargo build --release
+```
+
+**On Linux/Mac:**
 ```bash
 git clone https://github.com/RustScript2025/RustScript.git
 cd RustScript
 cargo build --release
 ```
 
-The compiler binary will be located at `target/release/rsxe` (or `target/release/rsxe.exe` on Windows).
+The compiler binary will be located at:
+- **Windows**: `target\release\rsxe.exe`
+- **Linux/Mac**: `target/release/rsxe`
 
 **Note**: RustScript is built using Rust Edition 2024, taking advantage of the latest language features including implicit format arguments, improved error handling, and modern idioms.
 
@@ -141,17 +150,27 @@ RustScript programmes execute in web browsers via WebAssembly. To set up your de
 ### Quick Start
 
 1. **Build the WebAssembly runtime:**
-   ```bash
-   # On Windows
-   build_wasm.bat
    
-   # On Linux/Mac
+   **On Windows:**
+   ```powershell
+   build_wasm.bat
+   ```
+   
+   **On Linux/Mac:**
+   ```bash
    ./build_wasm.sh
    ```
    
    This creates the `www` directory structure and builds the necessary WebAssembly components.
 
 2. **Start the development server:**
+   
+   **On Windows:**
+   ```powershell
+   python serve.py
+   ```
+   
+   **On Linux/Mac:**
    ```bash
    python3 serve.py
    ```
@@ -210,6 +229,19 @@ To play, start the development server (`python3 serve.py`) and visit `http://loc
 
 Compile a RustScript file (`.rscc`) to JavaScript or WASM:
 
+**On Windows:**
+```powershell
+# Compile to JavaScript (default)
+.\target\release\rsxe.exe input.rscc
+
+# Compile to WebAssembly
+.\target\release\rsxe.exe input.rscc --target wasm
+
+# Compile to executable
+.\target\release\rsxe.exe input.rscc --output output.rscx
+```
+
+**On Linux/Mac:**
 ```bash
 # Compile to JavaScript (default)
 ./target/release/rsxe input.rscc
@@ -266,16 +298,18 @@ RustScript is focused on **web development** (browser-based applications that ru
 - **Traditional shell scripting** - bash, Python, PowerShell, etc., which may be more appropriate for simple automation tasks
 
 ### "How do I know if I have Edition 2024 support?"
-Run `rustc --version` in your terminal. If the version number is 1.85 or higher, you have Edition 2024 support. For example:
-```bash
-$ rustc --version
+Run `rustc --version` in your terminal (PowerShell, Command Prompt, or bash). If the version number is 1.85 or higher, you have Edition 2024 support. For example:
+```
+rustc --version
 rustc 1.91.1 (ed61e7d7e 2024-11-07)
 ```
 
 This version (1.91.1) includes Edition 2024 support. If your version is lower than 1.85, update Rust:
-```bash
+```
 rustup update
 ```
+
+This command works the same on Windows, Linux, and Mac.
 
 ### "Directory 'www' not found when running serve.py"
 The development server expects a `www` directory that doesn't exist until you build it.
@@ -835,82 +869,82 @@ Each RustScript feature has a rich scripting language heritage:
 ### Phase 1: String & Syntax Enhancements (4 features)
 
 **String Interpolation** (`"Hello, {name}!"`)
-- Inspired by: Ruby (1995), Python (2015), Kotlin (2011), JavaScript ES6 (2015)
+- Inspired by: Ruby (1995), Kotlin (2011), Python (2015), JavaScript ES6 (2015)
 - Why: Eliminates error-prone string concatenation
 
 **Optional Chaining** (`user?.address?.street`)
-- Inspired by: Swift (2014), TypeScript (2020), C# (2015)
+- Inspired by: Swift (2014), C# (2015), TypeScript (2020)
 - Why: Safe navigation through potentially null values
 
 **Null Coalescing** (`value ?? "default"`)
-- Inspired by: C# (2000), Swift (2014), PHP (2009), JavaScript (2020)
+- Inspired by: C# (2000), PHP (2009), Swift (2014), JavaScript (2020)
 - Why: Concise default value handling
 
 **List Comprehensions** (`[x * 2 for x in numbers if x > 0]`)
-- Inspired by: Python (1994), Haskell (1990), Scala (2004), F# (2005)
+- Inspired by: Haskell (1990), Python (1994), Scala (2004), F# (2005)
 - Why: Declarative collection transformation
 
 ### Phase 2: Function Enhancements (3 features)
 
 **Pattern Matching in Function Heads** (Multiple definitions)
-- Inspired by: Erlang (1986), Elixir (2011), Haskell (1990), ML (1973)
+- Inspired by: ML (1973), Erlang (1986), Haskell (1990), Elixir (2011)
 - Why: Elegant handling of different input cases
 
 **Generators** (`gen fn name() { yield value; }`)
-- Inspired by: Python (2001), JavaScript ES6 (2015), C# (2005), Icon (1977)
+- Inspired by: Icon (1977), Python (2001), C# (2005), JavaScript ES6 (2015)
 - Why: Memory-efficient lazy evaluation
 
 **Multiple Dispatch** (Type-based function selection)
-- Inspired by: Julia (2012), Common Lisp CLOS (1988), Dylan (1992), Clojure (2009)
+- Inspired by: Common Lisp CLOS (1988), Dylan (1992), Clojure (2009), Julia (2012)
 - Why: Symmetric treatment of all arguments
 
 ### Phase 3: Safety & Contracts (3 features)
 
 **Design by Contract** (`requires`/`ensures`/`invariant`)
-- Inspired by: Eiffel (1986), D (2001), Ada (1983), Spec# (2004)
+- Inspired by: Ada (1983), Eiffel (1986), D (2001), Spec# (2004)
 - Why: Formal specification of function behaviour
 
 **Effect System** (`effect [pure, io, state, ...]`)
-- Inspired by: Koka (2012), Eff (2012), Nim (2008), Rust traits
+- Inspired by: Nim (2008), Rust traits (2010), Eff (2012), Koka (2012)
 - Why: Track and control side effects
 
 **Compile-time Execution** (`comptime { ... }`)
-- Inspired by: Zig (2016), D CTFE (2007), C++ constexpr (2011), Nim (2008)
+- Inspired by: D CTFE (2007), Nim (2008), C++ constexpr (2011), Zig (2016)
 - Why: Move computation from runtime to compile time
 
 ### Phase 4: Advanced Language Features (72 features)
 
-**Lifetimes** - Rust (2010), Cyclone (2002)
+**Lifetimes** - Cyclone (2002), Rust (2010)
 **Borrowing & References** - Rust (2010)
-**Move Semantics** - Rust (2010), C++ (2011)
+**Move Semantics** - C++ (2011), Rust (2010)
 **Tail Call Optimisation** - Scheme (1975), Lua (1993)
-**Pattern Guards** - Haskell (1990), Erlang (1986)
-**Traits (RAII & Drop)** - Rust (2010), C++ RAII (1984)
-**Const Generics** - Rust (2020), C++ templates (1990)
+**Pattern Guards** - Erlang (1986), Haskell (1990)
+**Traits (RAII & Drop)** - C++ RAII (1984), Rust (2010)
+**Const Generics** - C++ templates (1990), Rust (2020)
 **Algebraic Effects** - Eff (2012), Koka (2012)
-**Inline Assembly** - Rust (2015), C (1972)
-**Complete Trait System** - Rust (2010), Haskell type classes (1988)
-**Union & Intersection Types** - TypeScript (2012), Ceylon (2011)
+**Inline Assembly** - C (1972), Rust (2015)
+**Complete Trait System** - Haskell type classes (1988), Rust (2010)
+**Union & Intersection Types** - Ceylon (2011), TypeScript (2012)
 **Type Aliases** - Haskell (1990), Rust (2010), TypeScript (2012)
 **Newtype Pattern** - Haskell (1990), Rust (2010)
-**Associated Types** - Rust (2015), Haskell (1996)
+**Associated Types** - Haskell (1996), Rust (2015)
 **Higher-Kinded Types** - Haskell (1990), Scala (2004)
 **Phantom Types** - Haskell (1990), Rust (2010)
 **Refinement Types** - Liquid Haskell (2008), F* (2011)
-**Dependent Types** - Idris (2007), Agda (2007), Coq (1989)
+**Dependent Types** - Coq (1989), Agda (2007), Idris (2007)
 **Type-Level Programming** - Haskell (1990), TypeScript (2012)
 **Existential Types** - Haskell (1990), Rust impl Trait (2018)
 **GADTs** - Haskell (2003), OCaml (2004)
 **Variance Annotations** - Scala (2004), Kotlin (2011)
-**Type Bounds** - Rust (2010), Haskell (1988), Java (2004)
+**Type Bounds** - Haskell (1988), Java (2004), Rust (2010)
 **Subtyping** - Scala (2004), TypeScript (2012)
-**Structural Typing** - TypeScript (2012), Go (2009)
-**Partial Application** - Haskell (1990), ML (1973), F# (2005)
+**Structural Typing** - Go (2009), TypeScript (2012)
+**Partial Application** - ML (1973), Haskell (1990), F# (2005)
 **Function Composition** - Haskell (1990), F# (2005), Elixir (2011)
-**Currying** - Haskell (1990), ML (1973), OCaml (1996)
-**Lazy Evaluation** - Haskell (1990), Miranda (1985)
+**Currying** - ML (1973), Haskell (1990), OCaml (1996)
+**Lazy Evaluation** - Miranda (1985), Haskell (1990)
 **Memoisation** - Common Lisp (1984), Python decorators (2004)
-**Immutable Data Structures** - Clojure (2007), Scala (2004)
+**Immutable Data Structures** - Scala (2004), Clojure (2007)
 **Transducers** - Clojure (2014)
 **Do-Notation** - Haskell (1990)
 **Applicative Functors** - Haskell (2008)
@@ -923,61 +957,61 @@ Each RustScript feature has a rich scripting language heritage:
 **Parallel Iterators** - Rayon/Rust (2016)
 **Scoped Threads** - Rust (2022)
 **Select** - Go (2009), Rust (2015)
-**Try Blocks** - Rust (2018), Kotlin (2011)
-**Try Operator (?)** - Rust (2016), Swift (2014)
-**Guard Clauses** - Swift (2014), Ruby (1995)
-**Labelled Blocks** - Rust (2015), Java (1995)
-**Catch Expressions** - Kotlin (2011), Scala (2004)
-**Panic with Backtraces** - Rust (2015), Go (2009)
+**Try Blocks** - Kotlin (2011), Rust (2018)
+**Try Operator (?)** - Swift (2014), Rust (2016)
+**Guard Clauses** - Ruby (1995), Swift (2014)
+**Labelled Blocks** - Java (1995), Rust (2015)
+**Catch Expressions** - Scala (2004), Kotlin (2011)
+**Panic with Backtraces** - Go (2009), Rust (2015)
 **Defer Statements** - Go (2009), Swift (2014), Zig (2016)
-**Conditional Compilation** - Rust (2015), C (1972)
-**Const Assertions** - Rust (2019), C++ (2011)
-**Unreachable Markers** - Rust (2015), Swift (2014)
-**Declarative Macros** - Rust macro_rules! (2015), Lisp (1958)
-**Procedural Macros** - Rust (2018), Lisp (1958)
-**Attribute Macros** - Rust (2018), Java annotations (2004)
-**Compile-Time Reflection** - Zig (2016), D (2001)
-**Code Generation** - Zig comptime (2016), D CTFE (2007)
+**Conditional Compilation** - C (1972), Rust (2015)
+**Const Assertions** - C++ (2011), Rust (2019)
+**Unreachable Markers** - Swift (2014), Rust (2015)
+**Declarative Macros** - Lisp (1958), Rust macro_rules! (2015)
+**Procedural Macros** - Lisp (1958), Rust (2018)
+**Attribute Macros** - Java annotations (2004), Rust (2018)
+**Compile-Time Reflection** - D (2001), Zig (2016)
+**Code Generation** - D CTFE (2007), Zig comptime (2016)
 **Quasiquoting** - Lisp (1960s), Rust quote! (2016)
 **Hygiene** - Scheme (1986), Rust (2015)
-**Syntax Extensions** - Rust (2015), Scala (2004), Nim (2008)
+**Syntax Extensions** - Scala (2004), Nim (2008), Rust (2015)
 **Regex Literals** - Perl (1987), JavaScript (1995), Ruby (1995)
 **Format Strings** - Python f-strings (2015), Rust (2018)
 **String Slicing** - Python (1991), Rust (2015)
-**Operator Overloading** - C++ (1983), Rust (2015), Python (1991)
-**Custom Indexing** - C++ (1983), Rust (2015), Python (1991)
-**Destructuring Assignment** - JavaScript ES6 (2015), Rust (2015), Python (1991)
+**Operator Overloading** - C++ (1983), Python (1991), Rust (2015)
+**Custom Indexing** - C++ (1983), Python (1991), Rust (2015)
+**Destructuring Assignment** - Python (1991), JavaScript ES6 (2015), Rust (2015)
 **Ranges with Step** - Python (1991), Ruby (1995), Rust (2015)
-**Zip Iterator** - Python (1991), Haskell (1990), Rust (2015)
+**Zip Iterator** - Haskell (1990), Python (1991), Rust (2015)
 **Enumerate** - Python (1991), Rust (2015)
 **Default Parameters** - Python (1991), JavaScript (2015), Rust (2021)
-**Const Functions** - Rust (2018), C++ constexpr (2011)
+**Const Functions** - C++ constexpr (2011), Rust (2018)
 
 ## Why These Features?
 
 Each feature was chosen because it solved a real problem elegantly in its original language:
 
 **Phases 1-3 (10 features):**
-1. **String Interpolation** (Ruby 1995, Python 2015, Kotlin 2011, Swift 2014): Embedded expressions are more readable than concatenation
-2. **Optional Chaining** (Swift 2014, TypeScript 2020, C# 2015, Kotlin 2011): Safe navigation prevents null pointer errors
-3. **Null Coalescing** (C# 2000, Swift 2014, PHP 2009, JavaScript 2020): Default values without verbose if-else chains
-4. **List Comprehensions** (Python 1994, Haskell 1990, Scala 2004, F# 2005): Transform collections with mathematical clarity
-5. **Pattern Matching in Function Heads** (Erlang 1986, Elixir 2011, Haskell 1990, ML 1973): Multiple definitions clearer than nested if-else
-6. **Generators** (Python 2001, JavaScript ES6 2015, C# 2005, Icon 1977): Lazy evaluation enables infinite sequences with finite memory
-7. **Multiple Dispatch** (Julia 2012, Common Lisp CLOS 1988, Dylan 1992, Clojure 2009): Symmetric treatment of all arguments
-8. **Design by Contract** (Eiffel 1986, D 2001, Ada 1983, Spec# 2004): Formal specifications catch bugs that tests miss
-9. **Effect System** (Koka 2012, Eff 2012, Nim 2008, Rust traits): Track side effects for easier reasoning
-10. **Compile-time Execution** (Zig 2016, D CTFE 2007, C++ constexpr 2011, Nim 2008): Move work from runtime to compile time
+1. **String Interpolation** (Ruby 1995, Kotlin 2011, Swift 2014, Python 2015): Embedded expressions are more readable than concatenation
+2. **Optional Chaining** (Swift 2014, C# 2015, Kotlin 2011, TypeScript 2020): Safe navigation prevents null pointer errors
+3. **Null Coalescing** (C# 2000, PHP 2009, Swift 2014, JavaScript 2020): Default values without verbose if-else chains
+4. **List Comprehensions** (Haskell 1990, Python 1994, Scala 2004, F# 2005): Transform collections with mathematical clarity
+5. **Pattern Matching in Function Heads** (ML 1973, Erlang 1986, Haskell 1990, Elixir 2011): Multiple definitions clearer than nested if-else
+6. **Generators** (Icon 1977, Python 2001, C# 2005, JavaScript ES6 2015): Lazy evaluation enables infinite sequences with finite memory
+7. **Multiple Dispatch** (Common Lisp CLOS 1988, Dylan 1992, Clojure 2009, Julia 2012): Symmetric treatment of all arguments
+8. **Design by Contract** (Ada 1983, Eiffel 1986, D 2001, Spec# 2004): Formal specifications catch bugs that tests miss
+9. **Effect System** (Nim 2008, Rust traits 2010, Eff 2012, Koka 2012): Track side effects for easier reasoning
+10. **Compile-time Execution** (D CTFE 2007, Nim 2008, C++ constexpr 2011, Zig 2016): Move work from runtime to compile time
 
 **Phase 4 (72 features):**
-- **Memory Safety**: Rust proved that memory safety without garbage collection is practical and performant
-- **Advanced Types**: Haskell, Scala, and TypeScript showed that sophisticated type systems catch bugs at compile time
-- **Functional Programming**: Haskell and ML demonstrated that pure functions and immutability lead to more reliable code
-- **Concurrency**: Go and Rust showed that safe concurrency is achievable with the right abstractions
-- **Control Flow**: Swift and Rust proved that explicit error handling is clearer than exceptions
-- **Metaprogramming**: Lisp, Rust, and Zig demonstrated that compile-time code generation enables zero-cost abstractions
-- **Domain Features**: Python, Rust, and JavaScript showed that language-level support for common patterns improves productivity
-- **Utilities**: Python and Rust proved that small conveniences add up to significant developer experience improvements
+- **Memory Safety** (Scheme TCO 1975, C++ RAII 1984, Cyclone 2002, Rust 2010): Scheme introduced tail call optimisation; C++ established RAII patterns; Cyclone pioneered region-based memory; Rust proved that memory safety without garbage collection is practical and performant
+- **Advanced Types** (Coq 1989, Haskell 1990, OCaml 2004, Scala 2004, Agda 2007, Idris 2007, Liquid Haskell 2008, Ceylon 2011, F* 2011, TypeScript 2012): Sophisticated type systems catch bugs at compile time; dependent types from Idris/Agda enable proofs; refinement types from Liquid Haskell add constraints; GADTs from Haskell/OCaml enable type-safe DSLs
+- **Functional Programming** (ML 1973, Common Lisp 1984, Miranda 1985, Haskell 1990, OCaml 1996, Scala 2004, F# 2005, Clojure 2007): Pure functions and immutability lead to more reliable code; Clojure's persistent data structures enable efficient immutability; Haskell's lenses provide composable data access
+- **Concurrency** (Go 2009, Scala 2010, C++ 2011, C# 2012, Rust 2015, Rayon 2016, JavaScript 2017): Go's channels and Rust's ownership model showed that safe concurrency is achievable; async/await from C#/JavaScript simplified asynchronous code; Rayon demonstrated data parallelism
+- **Control Flow** (Java 1995, Ruby 1995, Go 2009, Kotlin 2011, Swift 2014, Rust 2016, Zig 2016): Swift's guard clauses and Rust's ? operator proved that explicit error handling is clearer than exceptions; Go's defer ensures cleanup; labelled blocks from Java/Rust enable structured exits
+- **Metaprogramming** (Lisp 1958, Scheme 1986, D 2001, Java 2004, Scala 2004, Nim 2008, Rust 2015, Zig 2016): Lisp invented macros; Rust refined them with hygiene from Scheme; Zig's comptime enables arbitrary compile-time computation; Java's annotations inspired attribute macros
+- **Domain Features** (C++ 1983, Perl 1987, Python 1991, JavaScript 1995, Ruby 1995, Rust 2015): C++ introduced operator overloading; Perl pioneered regex literals; Python established string slicing and format strings; JavaScript/Rust refined destructuring
+- **Utilities** (Haskell 1990, Python 1991, Ruby 1995, C++ 2011, JavaScript 2015, Rust 2015): Python's enumerate/zip/ranges became standard patterns; Rust's const functions and C++ constexpr enable compile-time evaluation; default parameters from Python/JavaScript improve API ergonomics
 
 ## Standing on the Shoulders of Giants
 
@@ -995,7 +1029,7 @@ By learning from language history, RustScript avoids repeating past mistakes whi
 - 📖 [Phase 1 Features](docs/PHASE1_FEATURES.md) - String & syntax enhancements
 - 📖 [Phase 2 Features](docs/PHASE2_FEATURES.md) - Function enhancements
 - 📖 [Phase 3 Features](docs/PHASE3_FEATURES.md) - Safety & metaprogramming
-- 📖 [Phase 4 Features](docs/PHASE4_FEATURES.md) - Advanced language features
+- 📖 [Phase 4 Features](docs/PHASE4_FEATURES.md) - Advanced language features (72 features)
 - 📖 [Feature Attribution](docs/FEATURE_ATTRIBUTION.md) - Complete attribution for all 82 RustScript features with language origins
 - 💻 [Examples Directory](examples/) - Working code examples ([see examples README](examples/README.md))
 - 🤝 [Contributing Guide](CONTRIBUTING.md) - How to contribute to RustScript

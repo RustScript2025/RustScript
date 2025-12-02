@@ -1,18 +1,18 @@
-//! Tail Call Optimization for RustScript.
+//! Tail Call Optimisation for RustScript.
 //!
 //! Author: Michael Lauzon
 //!
-//! This module detects and optimizes tail-recursive function calls by converting
+//! This module detects and optimises tail-recursive function calls by converting
 //! them into loops, preventing stack overflow and improving performance.
 //!
-//! Phase 4A: Tail Call Optimization
+//! Phase 4A: Tail Call Optimisation
 
 use crate::ast::*;
 use std::collections::HashSet;
 
-/// Analyzes a function to determine if it's tail-recursive and can be optimized.
+/// Analyses a function to determine if it's tail-recursive and can be optimised.
 pub struct TailCallOptimizer {
-    /// Functions that have been analyzed
+    /// Functions that have been analysed
     analyzed: HashSet<String>,
 }
 
@@ -23,7 +23,7 @@ impl TailCallOptimizer {
         }
     }
 
-    /// Analyzes a module and marks tail-recursive functions for optimization.
+    /// Analyses a module and marks tail-recursive functions for optimisation.
     pub fn optimize_module(&mut self, module: &mut Module) {
         for item in &mut module.items {
             match item {
@@ -69,7 +69,7 @@ impl TailCallOptimizer {
     fn is_tail_recursive(&mut self, func: &Function) -> bool {
         let func_name = func.name.name.as_ref();
         
-        // Mark as analyzed
+        // Mark as analysed
         self.analyzed.insert(func_name.to_string());
         
         // Check if the function body contains tail-recursive calls

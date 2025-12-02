@@ -508,21 +508,34 @@ document.getElementById("app");
 
 ## Compilation
 
-```bash
+**On Windows:**
+```powershell
 # Compile to JavaScript (default)
-rsxe input.rscc
+rsxe.exe input.rscc
 
 # Compile to WebAssembly
-rsxe input.rscc --target wasm
+rsxe.exe input.rscc --target wasm
 
 # Specify output file
-rsxe input.rscc --output dist/output.js
+rsxe.exe input.rscc --output dist\output.js
 
-# Watch mode (recompile on changes)
-rsxe input.rscc --watch
-
-# Development server (see SERVE.md for details)
+# Development server
 python serve.py
+```
+
+**On Linux/Mac:**
+```bash
+# Compile to JavaScript (default)
+./rsxe input.rscc
+
+# Compile to WebAssembly
+./rsxe input.rscc --target wasm
+
+# Specify output file
+./rsxe input.rscc --output dist/output.js
+
+# Development server
+python3 serve.py
 ```
 
 ## Best Practices

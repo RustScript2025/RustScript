@@ -79,7 +79,7 @@ pub fn compile_to_wasm(source: &str) -> Result<Vec<u8>, JsValue> {
     let mut ast = parser::parse_program(source)
         .map_err(|e| JsValue::from_str(&format!("Parse error: {e}")))?;
     
-    // Phase 4A: Tail call optimization
+    // Phase 4A: Tail call optimisation
     let mut tail_optimizer = tail_call_optimizer::TailCallOptimizer::new();
     tail_optimizer.optimize_module(&mut ast);
         

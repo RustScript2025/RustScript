@@ -312,10 +312,10 @@ fn parse_function(pair: Pair<Rule>) -> Result<Function, pest::error::Error<Rule>
         effects: if is_pure { vec![Effect::Pure] } else { Vec::new() },
         lifetimes,
         const_params: Vec::new(), // Phase 4A: Const generics (parsed separately)
-        tail_call_optimized: false, // Phase 4A: Will be set by optimizer
+        tail_call_optimized: false, // Phase 4A: Will be set by optimiser
         where_clause: Vec::new(), // Phase 4B: Where clause (to be parsed)
         param_groups: Vec::new(), // Phase 4C: Curried parameter groups (to be parsed)
-        memoized, // Phase 4C: Memoization flag
+        memoized, // Phase 4C: Memoisation flag
         const_fn, // Phase 4H: Const function flag
         span: Span::default(),
     })
@@ -1571,7 +1571,7 @@ fn parse_expr_primary(pair: Pair<Rule>) -> Result<Expr, pest::error::Error<Rule>
             })
         }
         Rule::expr_labeled_block => {
-            // Phase 4E: Parse labeled block
+            // Phase 4E: Parse labelled block
             let mut label = None;
             let mut block = None;
             

@@ -84,16 +84,23 @@ Don't worry if you're not a Rust expert - RustScript is designed to be approacha
 
 First, let's get RustScript installed on your system. Open your terminal and run:
 
-```bash
-# Clone the repository
+**On Windows (PowerShell or Command Prompt):**
+```powershell
 git clone https://github.com/RustScript2025/RustScript.git
 cd RustScript
-
-# Build the compiler
 cargo build --release
 ```
 
-This will take a few minutes as Cargo downloads dependencies and compiles the compiler. When it's done, you'll find the `rsxe` compiler at `target/release/rsxe` (or `rsxe.exe` on Windows).
+**On Linux/Mac:**
+```bash
+git clone https://github.com/RustScript2025/RustScript.git
+cd RustScript
+cargo build --release
+```
+
+This will take a few minutes as Cargo downloads dependencies and compiles the compiler. When it's done, you'll find the `rsxe` compiler at:
+- **Windows**: `target\release\rsxe.exe`
+- **Linux/Mac**: `target/release/rsxe`
 
 **What just happened?**
 - `cargo build` compiles the RustScript compiler (which is written in Rust)
@@ -104,6 +111,19 @@ This will take a few minutes as Cargo downloads dependencies and compiles the co
 
 Create a new directory for your RustScript projects:
 
+**On Windows (PowerShell):**
+```powershell
+mkdir rustscript-learning
+cd rustscript-learning
+```
+
+**On Windows (Command Prompt):**
+```cmd
+mkdir rustscript-learning
+cd rustscript-learning
+```
+
+**On Linux/Mac:**
 ```bash
 mkdir rustscript-learning
 cd rustscript-learning
@@ -139,7 +159,7 @@ Let's break down what each part means and *why* it's designed this way:
 - `()` means no parameters - this function doesn't need any input
 - `{` starts the function body - everything between `{` and `}` is part of this function
 
-**Why functions?** Functions are the fundamental building blocks of RustScript. They let you organize code into reusable, testable pieces.
+**Why functions?** Functions are the fundamental building blocks of RustScript. They let you organise code into reusable, testable pieces.
 
 **Line 2: `console.log("Hello, World!");`**
 - `console.log()` prints text to the console (borrowed from JavaScript)
@@ -162,11 +182,15 @@ Let's break down what each part means and *why* it's designed this way:
 
 Now let's compile and run it:
 
-```bash
-# Compile to JavaScript
-../target/release/rsxe hello.rscc
+**On Windows:**
+```powershell
+..\target\release\rsxe.exe hello.rscc
+node hello.js
+```
 
-# Run with Node.js
+**On Linux/Mac:**
+```bash
+../target/release/rsxe hello.rscc
 node hello.js
 ```
 
@@ -215,9 +239,15 @@ Create `hello.html`:
 - The output appears in the browser's developer console (press F12 to see it)
 
 To view this:
+
+**On Windows:**
+```powershell
+python ..\serve.py
+```
+
+**On Linux/Mac:**
 ```bash
-# Start the development server
-python ../serve.py
+python3 ../serve.py
 ```
 
 The development server includes many useful features like hot reload, HTTPS, file uploads, and more. For complete documentation, see [SERVE.md](SERVE.md).
@@ -261,16 +291,20 @@ rsxe hello.js    # This is JavaScript, not RustScript
 
 #### Node.js Not Found?
 
-If you get "node: command not found", you need to install Node.js:
-- Download from [nodejs.org](https://nodejs.org/)
-- Or use a package manager: `brew install node` (Mac), `apt install nodejs` (Linux)
+If you get "node: command not found" (or "'node' is not recognized" on Windows), you need to install Node.js:
+- **Windows**: Download from [nodejs.org](https://nodejs.org/) or use `winget install OpenJS.NodeJS`
+- **Mac**: Download from [nodejs.org](https://nodejs.org/) or use `brew install node`
+- **Linux**: Use your package manager: `apt install nodejs` (Debian/Ubuntu) or `dnf install nodejs` (Fedora)
 
 #### Python Server Issues?
 
-If `python ../serve.py` doesn't work:
-- Try `python3 ../serve.py` instead
+If the serve command doesn't work:
+- **Windows**: Try `python ..\serve.py` or `py ..\serve.py`
+- **Linux/Mac**: Try `python3 ../serve.py` instead of `python`
 - Make sure you're in the correct directory
-- Check that the `www` directory exists (run `./build_wasm.sh` first)
+- Check that the `www` directory exists:
+  - **Windows**: Run `build_wasm.bat` first
+  - **Linux/Mac**: Run `./build_wasm.sh` first
 - See [SERVE.md](SERVE.md) for advanced options and troubleshooting
 
 ---
@@ -1496,7 +1530,7 @@ User Alice Johnson (ID: 12345, Email: alice@example.com) performed action: logou
 - **Readability**: Code reads like natural language
 - **Maintainability**: Easy to add or remove variables
 - **Fewer Bugs**: No missing spaces or concatenation errors
-- **Performance**: Compiler can optimize string building
+- **Performance**: Compiler can optimise string building
 
 ### Optional Chaining: Safe Navigation
 
@@ -1853,7 +1887,7 @@ List comprehensions are:
 3. **Less Error-Prone**: No manual array management, no mutable state
 4. **Functional Style**: Encourages thinking about *what* you want, not *how* to get it
 5. **Composable**: Easy to chain transformations
-6. **Optimizable**: Compiler can optimize better than hand-written loops
+6. **Optimisable**: Compiler can optimise better than hand-written loops
 
 **When to use list comprehensions:**
 - ✅ Transforming data (mapping)

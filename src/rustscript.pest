@@ -321,7 +321,7 @@ catch_clause = { "catch" ~ ident? ~ ("as" ~ ident)? ~ block }
 // Phase 4E: Guard clause
 expr_guard = { "guard" ~ expr ~ "else" ~ block }
 
-// Phase 4E: Labeled block
+// Phase 4E: Labelled block
 expr_labeled_block = { label ~ ":" ~ block }
 label = @{ "'" ~ ident }
 
@@ -443,7 +443,7 @@ expr_loop = { "loop" ~ block }
 
 expr_while = { "while" ~ expr ~ block }
 
-// Struct initialization
+// Struct initialisation
 expr_struct_init = {
     ident ~ "{" ~ (struct_field ~ ("," ~ struct_field)*)? ~ ","? ~ "}"
 }

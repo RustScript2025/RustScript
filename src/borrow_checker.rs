@@ -416,7 +416,7 @@ impl BorrowChecker {
                 self.check_block(else_block);
             }
             ast::Expr::LabeledBlock { block, .. } => {
-                // Phase 4E: Labeled block
+                // Phase 4E: Labelled block
                 self.check_block(block);
             }
             ast::Expr::BreakWithValue { value, .. } => {

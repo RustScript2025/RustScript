@@ -16,6 +16,14 @@ Thank you for your interest in contributing to RustScript! This document provide
 ### Getting Started
 
 1. **Fork and Clone**
+   
+   **On Windows (PowerShell or Command Prompt):**
+   ```powershell
+   git clone https://github.com/YOUR_USERNAME/RustScript.git
+   cd RustScript
+   ```
+   
+   **On Linux/Mac:**
    ```bash
    git clone https://github.com/YOUR_USERNAME/RustScript.git
    cd RustScript
@@ -36,6 +44,8 @@ Thank you for your interest in contributing to RustScript! This document provide
    cargo clippy -- -D warnings
    cargo fmt --check
    ```
+   
+   These commands work the same on Windows, Linux, and Mac.
 
 ## Code Style and Standards
 

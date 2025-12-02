@@ -10,6 +10,21 @@ This directory contains example programmes demonstrating RustScript features.
 
 The simplest RustScript programme:
 
+```rustscript
+fn main() {
+    console.log("Hello, World!");
+}
+
+main();
+```
+
+**On Windows:**
+```powershell
+..\target\release\rsxe.exe hello_world.rscc
+node hello_world.js
+```
+
+**On Linux/Mac:**
 ```bash
 ../target/release/rsxe hello_world.rscc
 node hello_world.js
@@ -27,7 +42,30 @@ Demonstrates:
 - Null coalescing with `??` operator
 - List comprehensions for collection transformation
 
+```rustscript
+// String interpolation
+let name = "Alice";
+let greeting = "Hello, {name}!";
+
+// Optional chaining
+let street = user?.address?.street;
+
+// Null coalescing
+let display_name = username ?? "Anonymous";
+
+// List comprehensions
+let squares = [x * x for x in numbers if x > 0];
+```
+
 **Run it:**
+
+**On Windows:**
+```powershell
+..\target\release\rsxe.exe phase1_features.rscc
+node phase1_features.js
+```
+
+**On Linux/Mac:**
 ```bash
 ../target/release/rsxe phase1_features.rscc
 node phase1_features.js
@@ -43,7 +81,34 @@ Demonstrates:
 - Multiple dispatch (Julia-style)
 - Lazy evaluation and infinite sequences
 
+```rustscript
+// Pattern matching in function heads
+fn factorial(0) -> number { 1 }
+fn factorial(n) -> number { n * factorial(n - 1) }
+
+// Generators
+gen fn fibonacci() {
+    let (a, b) = (0, 1);
+    loop {
+        yield a;
+        (a, b) = (b, a + b);
+    }
+}
+
+// Multiple dispatch
+fn process(x: number, y: number) -> string { "Adding: {x + y}" }
+fn process(x: string, y: string) -> string { "Concat: {x}{y}" }
+```
+
 **Run it:**
+
+**On Windows:**
+```powershell
+..\target\release\rsxe.exe phase2_features.rscc
+node phase2_features.js
+```
+
+**On Linux/Mac:**
 ```bash
 ../target/release/rsxe phase2_features.rscc
 node phase2_features.js
@@ -59,7 +124,38 @@ Demonstrates:
 - Compile-time execution with `comptime` blocks
 - Formal verification and safety guarantees
 
+```rustscript
+// Design by Contract
+fn divide(a: number, b: number) -> number
+    requires b != 0, "Divisor cannot be zero"
+    ensures result * b ≈ a
+{
+    a / b
+}
+
+// Effect System
+effect [pure]
+fn add(a: number, b: number) -> number { a + b }
+
+effect [io, throws]
+fn read_file(path: string) -> string { /* ... */ }
+
+// Compile-time Execution
+comptime {
+    const BUFFER_SIZE = 1024;
+    const FIB_10 = fibonacci(10);  // Computed at compile time
+}
+```
+
 **Run it:**
+
+**On Windows:**
+```powershell
+..\target\release\rsxe.exe phase3_features.rscc
+node phase3_features.js
+```
+
+**On Linux/Mac:**
 ```bash
 ../target/release/rsxe phase3_features.rscc
 node phase3_features.js
@@ -70,16 +166,55 @@ node phase3_features.js
 **File**: `phase4_features.rscc`
 
 Demonstrates 72 advanced features across 8 categories:
-- **4A**: Memory safety (lifetimes, borrowing, tail call optimisation)
-- **4B**: Advanced types (union types, GADTs, higher-kinded types)
-- **4C**: Functional programming (partial application, currying, lenses)
-- **4D**: Concurrency (async/await, channels, parallel iterators)
-- **4E**: Control flow (try blocks, guard clauses, defer)
-- **4F**: Metaprogramming (macros, reflection, code generation)
-- **4G**: Domain-specific (regex literals, operator overloading)
-- **4H**: Utilities (default parameters, const functions)
+- Memory safety (lifetimes, borrowing, tail call optimisation)
+- Advanced types (union types, GADTs, higher-kinded types)
+- Functional programming (partial application, currying, lenses)
+- Concurrency (async/await, channels, parallel iterators)
+- Control flow (try blocks, guard clauses, defer)
+- Metaprogramming (macros, reflection, code generation)
+- Domain-specific (regex literals, operator overloading)
+- Utilities (default parameters, const functions)
+
+```rustscript
+// Lifetimes
+fn longest<'a>(x: &'a string, y: &'a string) -> &'a string {
+    if x.length > y.length { x } else { y }
+}
+
+// Partial Application
+let add5 = add(5, _);
+console.log(add5(10));  // 15
+
+// Async/Await
+async fn fetch_user(id: number) -> User {
+    let response = await http.get("/api/users/{id}");
+    await response.json()
+}
+
+// Channels
+let (tx, rx) = channel();
+spawn { tx.send(42); };
+let msg = rx.recv();
+
+// Declarative Macros
+macro_rules! vec {
+    ($($x:expr),*) => {
+        let mut v = Vec::new();
+        $(v.push($x);)*
+        v
+    };
+}
+```
 
 **Run it:**
+
+**On Windows:**
+```powershell
+..\target\release\rsxe.exe phase4_features.rscc
+node phase4_features.js
+```
+
+**On Linux/Mac:**
 ```bash
 ../target/release/rsxe phase4_features.rscc
 node phase4_features.js
@@ -96,7 +231,39 @@ A complete text adventure game demonstrating RustScript in action:
 - User input handling
 - Game state management
 
+```rustscript
+struct Room {
+    name: string,
+    description: string,
+    hiding_spots: [string],
+}
+
+struct GameState {
+    current_room: Room,
+    seeker_location: string,
+    found: bool,
+}
+
+fn check_hiding_spot(state: GameState, spot: string) -> GameState {
+    if spot == state.seeker_location {
+        console.log("Found them!");
+        GameState { ...state, found: true }
+    } else {
+        console.log("Not here...");
+        state
+    }
+}
+```
+
 **Run it:**
+
+**On Windows:**
+```powershell
+..\target\release\rsxe.exe hideseek.rscc
+node hideseek.js
+```
+
+**On Linux/Mac:**
 ```bash
 ../target/release/rsxe hideseek.rscc
 node hideseek.js
@@ -127,12 +294,17 @@ We recommend exploring the examples in this order:
 
 All examples can also be compiled to WebAssembly:
 
-```bash
-# Build WASM
-../target/release/rsxe phase1_features.rscc --target wasm
-
-# The WASM file can be loaded in a browser
+**On Windows:**
+```powershell
+..\target\release\rsxe.exe phase1_features.rscc --target wasm
 ```
+
+**On Linux/Mac:**
+```bash
+../target/release/rsxe phase1_features.rscc --target wasm
+```
+
+The WASM file can be loaded in a browser.
 
 ## Running in the Browser
 
@@ -153,8 +325,14 @@ Create an HTML file:
 
 Then serve it:
 
+**On Windows:**
+```powershell
+python ..\serve.py
+```
+
+**On Linux/Mac:**
 ```bash
-python ../serve.py
+python3 ../serve.py
 ```
 
 Open `http://localhost:8000` in your browser.

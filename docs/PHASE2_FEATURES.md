@@ -430,7 +430,7 @@ fn aggregate(points: [DataPoint], method: "average") -> number {
 
 - **Compile-Time**: Patterns resolved at compile time when possible
 - **Runtime**: Efficient dispatch table for dynamic cases
-- **Optimization**: Dead code elimination for unused patterns
+- **Optimisation**: Dead code elimination for unused patterns
 
 ### Generators
 

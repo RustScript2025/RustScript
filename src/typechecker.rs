@@ -844,7 +844,7 @@ impl TypeChecker {
                 })
             },
             crate::ast::Expr::LabeledBlock { block, .. } => {
-                // Phase 4E: Labeled block returns block's type
+                // Phase 4E: Labelled block returns block's type
                 self.check_block(block, types, scopes)?
             },
             crate::ast::Expr::BreakWithValue { value, .. } => {

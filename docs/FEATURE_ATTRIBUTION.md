@@ -86,7 +86,7 @@ RustScript draws from **60+ languages** spanning **68 years** of computing histo
 *Inspired by*: Rust (2010), C++ (2011)  
 *Why*: Explicit ownership transfer prevents use-after-free
 
-**Tail Call Optimization**  
+**Tail Call Optimisation**  
 *Inspired by*: Scheme (1975), Lua (1993)  
 *Why*: Infinite recursion without stack overflow
 
@@ -156,7 +156,7 @@ RustScript draws from **60+ languages** spanning **68 years** of computing histo
 *Inspired by*: Haskell (1990), Rust impl Trait (2018)  
 *Why*: Hide concrete types behind interfaces
 
-**GADTs (Generalized Algebraic Data Types)**  
+**GADTs (Generalised Algebraic Data Types)**  
 *Inspired by*: Haskell (2003), OCaml (2004)  
 *Why*: Type-safe expression trees
 
@@ -194,7 +194,7 @@ RustScript draws from **60+ languages** spanning **68 years** of computing histo
 *Inspired by*: Haskell (1990), Miranda (1985)  
 *Why*: Defer computation until needed
 
-**Memoization**  
+**Memoisation**  
 *Inspired by*: Common Lisp (1984), Python decorators (2004)  
 *Why*: Cache function results automatically
 
@@ -238,7 +238,7 @@ RustScript draws from **60+ languages** spanning **68 years** of computing histo
 
 **Atomic Operations**  
 *Inspired by*: C++ (2011), Rust (2015)  
-*Why*: Lock-free synchronization primitives
+*Why*: Lock-free synchronisation primitives
 
 **Parallel Iterators**  
 *Inspired by*: Rayon/Rust (2016)  
@@ -390,14 +390,14 @@ RustScript draws from **60+ languages** spanning **68 years** of computing histo
 - **Forth (1970)**: Stack-based operations
 - **C (1972)**: Inline assembly, conditional compilation
 - **ML (1973)**: Type inference, pattern matching
-- **Scheme (1975)**: Tail call optimization, lexical scoping
+- **Scheme (1975)**: Tail call optimisation, lexical scoping
 - **AWK (1977)**: Pattern-action paradigm
 - **Icon (1977)**: Generators
 
 ### 1980s
 - **Ada (1983)**: Design by Contract
 - **C++ (1983)**: RAII, operator overloading
-- **Common Lisp (1984)**: Memoization
+- **Common Lisp (1984)**: Memoisation
 - **Erlang (1986)**: Pattern matching in function heads
 - **Eiffel (1986)**: Design by Contract (requires/ensures)
 - **CLOS (1988)**: Multiple dispatch
@@ -407,7 +407,7 @@ RustScript draws from **60+ languages** spanning **68 years** of computing histo
 - **Haskell (1990)**: Pure functional programming, lazy evaluation, type classes, lenses
 - **Python (1991)**: List comprehensions, generators, default parameters
 - **Dylan (1992)**: Multiple dispatch
-- **Lua (1993)**: Tail call optimization
+- **Lua (1993)**: Tail call optimisation
 - **Ruby (1995)**: String interpolation, guard clauses
 - **JavaScript (1995)**: Async programming, regex literals
 - **OCaml (1996)**: GADTs, functional programming

@@ -315,7 +315,7 @@ impl WasmGenerator {
         let mut func_body = Function::new(local_types.iter().map(|&vt| (1, vt)));
         let scratch_local = params.len() as u32;
         
-        // Phase 4A: Tail call optimization - wrap body in loop for tail-recursive functions
+        // Phase 4A: Tail call optimisation - wrap body in loop for tail-recursive functions
         if func_def.tail_call_optimized {
             func_body.instruction(&Instruction::Loop(wasm_encoder::BlockType::Empty));
         }
@@ -334,7 +334,7 @@ impl WasmGenerator {
             };
         }
         
-        // Phase 4A: Close the loop for tail-optimized functions
+        // Phase 4A: Close the loop for tail-optimised functions
         if func_def.tail_call_optimized {
             func_body.instruction(&Instruction::End); // End loop
         }
@@ -1132,7 +1132,7 @@ impl WasmGenerator {
                 }
             },
             ast::Expr::LabeledBlock { block, .. } => {
-                // Phase 4E: Labeled block - execute block
+                // Phase 4E: Labelled block - execute block
                 for stmt in &block.stmts {
                     self.generate_stmt(func, stmt, scratch_local, locals)?;
                 }
@@ -1187,7 +1187,7 @@ impl WasmGenerator {
                 func.instruction(&Instruction::I32Const(0));
             },
             ast::Expr::Unreachable { message, .. } => {
-                // Phase 4E: Unreachable - optimization hint
+                // Phase 4E: Unreachable - optimisation hint
                 if let Some(msg) = message {
                     self.generate_expr(func, msg, scratch_local, locals)?;
                     func.instruction(&Instruction::Drop);
@@ -1492,7 +1492,7 @@ impl WasmGenerator {
         }
     }
     
-    // Phase 4G: Analyze locals including function parameters
+    // Phase 4G: Analyse locals including function parameters
     fn analyze_locals_with_params(&self, params: &[(ast::Pattern, Option<Type>, Option<ast::Expr>)], block: &ast::Block) -> (HashMap<String, u32>, Vec<ValType>) {
         let mut locals_map = HashMap::new();
         

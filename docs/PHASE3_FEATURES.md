@@ -113,7 +113,7 @@ fn binary_search(arr: [number], target: number) -> number
 
 ### Why Design by Contract?
 
-- **Formal Specifications**: Contracts document function behavior formally
+- **Formal Specifications**: Contracts document function behaviour formally
 - **Early Error Detection**: Contract violations are caught at runtime (or compile time when possible)
 - **Better Testing**: Contracts serve as executable specifications
 - **Self-Documenting**: Contracts make assumptions and guarantees explicit
@@ -124,7 +124,7 @@ fn binary_search(arr: [number], target: number) -> number
 
 **Inspired by**: Koka (2012), Eff (2012), Nim (2008), Rust traits
 
-The effect system tracks and controls side effects, making function behavior explicit and predictable.
+The effect system tracks and controls side effects, making function behaviour explicit and predictable.
 
 ### Effect Annotations
 
@@ -462,7 +462,7 @@ fn safe_database_operation() {
 | Feature | Purpose | Benefit |
 |---------|---------|---------|
 | **Design by Contract** | Formal specifications | Catch bugs early, self-documenting code |
-| **Effect System** | Track side effects | Explicit behavior, safer refactoring |
+| **Effect System** | Track side effects | Explicit behaviour, safer refactoring |
 | **Compile-time Execution** | Metaprogramming | Zero runtime cost, type-safe generation |
 
 ---

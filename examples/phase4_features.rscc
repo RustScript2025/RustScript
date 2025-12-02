@@ -62,7 +62,7 @@ fn main() {
     console.log("Existential types with impl Trait");
     
     // Feature 14: GADTs
-    console.log("Generalized Algebraic Data Types");
+    console.log("Generalised Algebraic Data Types");
     
     // Feature 15: Higher-Kinded Types
     console.log("Higher-kinded types for type constructors");
@@ -121,8 +121,8 @@ fn main() {
     // Feature 29: Lazy Evaluation
     console.log("Lazy evaluation defers computation");
     
-    // Feature 30: Memoization
-    console.log("Memoization caches function results");
+    // Feature 30: Memoisation
+    console.log("Memoisation caches function results");
     
     // Feature 31: Immutable Data Structures
     console.log("Immutable data with structural sharing");
@@ -154,7 +154,7 @@ fn main() {
     console.log("Futures and streams for async patterns");
     
     // Feature 39: Mutex & RwLock
-    console.log("Mutex and RwLock for synchronization");
+    console.log("Mutex and RwLock for synchronisation");
     
     // Feature 40: Atomic Operations
     console.log("Atomic operations for lock-free sync");
@@ -182,8 +182,8 @@ fn main() {
     // Feature 46: Guard Clauses
     console.log("Guard clauses for early returns");
     
-    // Feature 47: Labeled Blocks
-    console.log("Labeled blocks with break values");
+    // Feature 47: Labelled Blocks
+    console.log("Labelled blocks with break values");
     
     // Feature 48: Catch Expressions
     console.log("Catch expressions for inline error handling");

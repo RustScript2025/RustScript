@@ -49,7 +49,7 @@ pub struct Ident {
     pub span: Span,
 }
 
-/// Custom serde module for Rc<str> serialization
+/// Custom serde module for Rc<str> serialisation
 mod rc_str_serde {
     use serde::{Deserialize, Deserializer, Serialize, Serializer};
     use std::rc::Rc;
@@ -502,7 +502,7 @@ pub enum Expr {
         else_block: Block,
         span: Span,
     },
-    /// Phase 4E: Labeled block
+    /// Phase 4E: Labelled block
     LabeledBlock {
         label: Ident,
         block: Block,
@@ -770,7 +770,7 @@ pub struct EffectHandler {
     pub span: Span,
 }
 
-/// Custom serde module for Option<Rc<str>> serialization
+/// Custom serde module for Option<Rc<str>> serialisation
 mod option_rc_str_serde {
     use serde::{Deserialize, Deserializer, Serializer};
     use std::rc::Rc;
@@ -869,13 +869,13 @@ pub struct Function {
     pub lifetimes: Vec<Lifetime>,
     /// Phase 4A: Const generic parameters
     pub const_params: Vec<Ident>,
-    /// Phase 4A: Enable tail call optimization
+    /// Phase 4A: Enable tail call optimisation
     pub tail_call_optimized: bool,
     /// Phase 4B: Where clause constraints
     pub where_clause: Vec<WhereClause>,
     /// Phase 4C: Curried parameter groups (for currying)
     pub param_groups: Vec<Vec<(Pattern, Option<Type>, Option<Expr>)>>,
-    /// Phase 4C: Enable memoization (caching of results)
+    /// Phase 4C: Enable memoisation (caching of results)
     pub memoized: bool,
     /// Phase 4H: Const function (compile-time evaluation)
     pub const_fn: bool,
@@ -985,7 +985,7 @@ pub enum Item {
     TypeAlias(TypeAlias),
     /// Phase 4B: Type-level function
     TypeFunction(TypeFunction),
-    /// Phase 4B: GADT (Generalized Algebraic Data Type)
+    /// Phase 4B: GADT (Generalised Algebraic Data Type)
     Enum(Enum),
 }
 
@@ -998,7 +998,7 @@ pub struct TypeFunction {
     pub span: Span,
 }
 
-/// Phase 4B: GADT (Generalized Algebraic Data Type)
+/// Phase 4B: GADT (Generalised Algebraic Data Type)
 /// Allows constructors to have different return types
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Enum {
@@ -1137,7 +1137,7 @@ pub struct DialectRule {
     pub span: Span,
 }
 
-/// Trait definition for implementing behaviors on types.
+/// Trait definition for implementing behaviours on types.
 /// 
 /// Phase 4A: Traits enable zero-cost abstractions and RAII patterns.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]

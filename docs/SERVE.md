@@ -6,7 +6,8 @@ A feature-rich HTTP development server for testing RustScript programmes in the 
 
 ## Quick Start
 
-```bash
+**On Windows:**
+```powershell
 # Basic usage (serves www/ directory on port 8000)
 python serve.py
 
@@ -15,6 +16,18 @@ python serve.py --all-features
 
 # Custom port and directory
 python serve.py --port 3000 --dir public
+```
+
+**On Linux/Mac:**
+```bash
+# Basic usage (serves www/ directory on port 8000)
+python3 serve.py
+
+# Enable all features
+python3 serve.py --all-features
+
+# Custom port and directory
+python3 serve.py --port 3000 --dir public
 ```
 
 ## Features
@@ -285,11 +298,20 @@ python serve.py --port 8001
 
 ### Directory Not Found
 
+```
+Error: Directory 'www' not found
+```
+
+**Solution**: Build the WASM package first:
+
+**On Windows:**
+```powershell
+build_wasm.bat
+```
+
+**On Linux/Mac:**
 ```bash
-# Error: Directory 'www' not found
-# Solution: Build the WASM package first
-./build_wasm.sh  # Linux/Mac
-build_wasm.bat   # Windows
+./build_wasm.sh
 ```
 
 ### HTTPS Certificate Warnings

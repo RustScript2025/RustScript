@@ -1,6 +1,145 @@
-// Sample RustScript file
-fn main() {
-    console.log("Sample program");
+// ============================================================================
+// RustScript Sample Programme
+// ============================================================================
+// Author: Michael Lauzon
+//
+// This sample demonstrates RustScript's key features in a practical example:
+// a simple task management system showcasing structs, pattern matching,
+// string interpolation, list comprehensions, and more.
+// ============================================================================
+
+// --- Data Structures ---
+
+struct Task {
+    id: number,
+    title: string,
+    completed: bool,
+    priority: string,
 }
 
+struct TaskList {
+    tasks: [Task],
+    name: string,
+}
+
+// --- Task Operations ---
+
+impl TaskList {
+    fn new(name: string) -> TaskList {
+        TaskList { tasks: [], name: name }
+    }
+
+    fn add(&mut self, title: string, priority: string) {
+        let id = self.tasks.length + 1;
+        let task = Task {
+            id: id,
+            title: title,
+            completed: false,
+            priority: priority,
+        };
+        self.tasks.push(task);
+        console.log("Added task #{id}: {title}");
+    }
+
+    fn complete(&mut self, id: number) {
+        for task in self.tasks {
+            if task.id == id {
+                task.completed = true;
+                console.log("Completed: {task.title}");
+                return;
+            }
+        }
+        console.log("Task #{id} not found");
+    }
+
+    fn summary(&self) {
+        let total = self.tasks.length;
+        let done = [t for t in self.tasks if t.completed].length;
+        let pending = total - done;
+        
+        console.log("\n=== {self.name} ===");
+        console.log("Total: {total} | Done: {done} | Pending: {pending}");
+    }
+}
+
+// --- Priority Handling with Pattern Matching ---
+
+fn priority_label(priority: string) -> string {
+    match priority {
+        "high" => "🔴 HIGH",
+        "medium" => "🟡 MEDIUM",
+        "low" => "🟢 LOW",
+        _ => "⚪ UNKNOWN",
+    }
+}
+
+fn display_tasks(list: TaskList) {
+    console.log("\n--- Tasks in {list.name} ---");
+    
+    // List comprehension to filter and display
+    let high_priority = [t for t in list.tasks if t.priority == "high"];
+    let other_tasks = [t for t in list.tasks if t.priority != "high"];
+    
+    if high_priority.length > 0 {
+        console.log("\nHigh Priority:");
+        for task in high_priority {
+            let status = if task.completed { "✓" } else { "○" };
+            console.log("  [{status}] {task.title}");
+        }
+    }
+    
+    if other_tasks.length > 0 {
+        console.log("\nOther Tasks:");
+        for task in other_tasks {
+            let status = if task.completed { "✓" } else { "○" };
+            let label = priority_label(task.priority);
+            console.log("  [{status}] {task.title} ({label})");
+        }
+    }
+}
+
+// --- Main Programme ---
+
+fn main() {
+    console.log("=== RustScript Task Manager ===\n");
+    
+    // Create a new task list
+    let mut work = TaskList::new("Work Tasks");
+    
+    // Add some tasks
+    work.add("Review pull requests", "high");
+    work.add("Update documentation", "medium");
+    work.add("Fix bug #42", "high");
+    work.add("Refactor login module", "low");
+    work.add("Write unit tests", "medium");
+    
+    // Complete some tasks
+    console.log("");
+    work.complete(1);
+    work.complete(3);
+    
+    // Display all tasks
+    display_tasks(work);
+    
+    // Show summary
+    work.summary();
+    
+    // Demonstrate optional chaining and null coalescing
+    let user_name = get_current_user()?.name ?? "Anonymous";
+    console.log("\nLogged in as: {user_name}");
+    
+    console.log("\n=== Demo Complete ===");
+}
+
+// Helper function for optional chaining demo
+fn get_current_user() -> User {
+    User { name: "Alice", role: "Developer" }
+}
+
+struct User {
+    name: string,
+    role: string,
+}
+
+// Run the programme
 main();
