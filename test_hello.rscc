@@ -1,5 +1,0 @@
-fn main() {
-    console.log("Hello, World!");
-}
-
-main();
