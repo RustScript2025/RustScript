@@ -1,12 +1,74 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Test Input</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <title>Test Input - RustScript</title>
+    <style>
+        body {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            background: #0a0a12;
+            color: #00ff00;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #ff3355;
+            text-align: center;
+            text-shadow: 0 0 10px #ff3355;
+            margin-bottom: 20px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        #output {
+            background: #0d0d1a;
+            border: 2px solid #22cc66;
+            border-radius: 8px;
+            padding: 20px;
+            min-height: 300px;
+            max-height: 500px;
+            overflow-y: auto;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            box-shadow: 0 0 20px rgba(34, 204, 102, 0.2);
+        }
+        #output .log { color: #00ff00; }
+        #output .error { color: #ff4444; }
+        #output .info { color: #3399ff; }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #3399ff;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            color: #22cc66;
+        }
+    </style>
 </head>
 <body>
-    <h1>Testing input() function</h1>
-    <pre id="output"></pre>
-    
+    <div class="container">
+        <h1>🧪 Input Function Test</h1>
+        <p class="subtitle">Testing RustScript's input() function via WebAssembly</p>
+        
+        <div id="output"></div>
+        
+        <a href="index.html" class="back-link">← Back to Home</a>
+    </div>
+
+    <!-- ================================================================== -->
+    <!-- RustScript Test Code - Tests the input() function                  -->
+    <!-- ================================================================== -->
     <script type="text/rustscript">
 fn main() {
     console.log("Starting test...");
@@ -14,28 +76,45 @@ fn main() {
     console.log("Done!");
 }
     </script>
-    
+
+    <!-- ================================================================== -->
+    <!-- RustScript Runtime Loader                                          -->
+    <!-- ================================================================== -->
     <script type="module">
         import init, { run_script } from './pkg/RustScript.js';
         
-        const output = document.getElementById('output');
+        const outputEl = document.getElementById('output');
         
+        // Writes output to the display element with optional styling.
+        function writeOutput(text, type = 'log') {
+            const line = document.createElement('div');
+            line.className = type;
+            line.textContent = text;
+            outputEl.appendChild(line);
+            outputEl.scrollTop = outputEl.scrollHeight;
+        }
+        
+        // Main initialisation function.
         async function main() {
             try {
                 await init();
-                output.textContent += 'WASM initialized\n';
+                writeOutput('🦀 RustScript WASM Runtime Initialised 🦀', 'info');
+                writeOutput('');
                 
                 const script = document.querySelector('script[type="text/rustscript"]');
                 const source = script.textContent.trim();
                 
-                output.textContent += 'Source:\n' + source + '\n\n';
-                output.textContent += 'Running...\n';
+                writeOutput('Source:', 'info');
+                writeOutput(source);
+                writeOutput('');
+                writeOutput('Running...', 'info');
                 
                 await run_script(source);
                 
-                output.textContent += 'Success!\n';
+                writeOutput('');
+                writeOutput('✓ Test completed successfully!', 'info');
             } catch (e) {
-                output.textContent += 'Error: ' + e + '\n';
+                writeOutput('Error: ' + e, 'error');
             }
         }
         

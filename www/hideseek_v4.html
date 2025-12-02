@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <title>Hide and Seek v4 - RustScript 0.4.0</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0a12 0%, #1a1a2e 100%);
+            color: #00ff00;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .game-layout {
+            display: flex;
+            gap: 25px;
+            align-items: flex-start;
+            flex-wrap: nowrap;
+        }
+        .game-main { flex: 1; min-width: 0; }
+        .game-sidebar {
+            width: 320px;
+            flex-shrink: 0;
+            position: sticky;
+            top: 20px;
+        }
+        h1 {
+            color: #ff3355;
+            text-align: center;
+            text-shadow: 0 0 10px #ff3355, 0 0 20px #ff335580;
+            margin-bottom: 5px;
+            font-size: 2em;
+        }
+        .subtitle { text-align: center; color: #888; margin-bottom: 20px; }
+        .version-badge {
+            background: linear-gradient(135deg, #22cc66 0%, #00aa44 100%);
+            color: #000;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-left: 10px;
+            box-shadow: 0 0 10px #22cc6680;
+        }
+        .feature-badge {
+            background: #3399ff;
+            color: #000;
+            padding: 2px 8px;
+            border-radius: 8px;
+            font-size: 9px;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+        #game-output {
+            background: #0d0d1a;
+            border: 2px solid #22cc66;
+            border-radius: 12px;
+            padding: 20px;
+            min-height: 420px;
+            max-height: 520px;
+            overflow-y: auto;
+            font-size: 14px;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            box-shadow: 0 0 30px rgba(34, 204, 102, 0.25), inset 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        #game-output .log { color: #00ff00; }
+        #game-output .error { color: #ff4444; text-shadow: 0 0 5px #ff444480; }
+        #game-output .highlight { color: #ffff00; font-weight: bold; text-shadow: 0 0 8px #ffff0080; }
+        #game-output .info { color: #3399ff; }
+        #game-output .success { color: #22cc66; font-weight: bold; }
+        #game-output .dim { color: #666; }
+        .input-area { margin-top: 15px; display: flex; gap: 10px; }
+        #command-input {
+            flex: 1;
+            background: #0d0d1a;
+            border: 2px solid #3399ff;
+            border-radius: 8px;
+            color: #00ff00;
+            font-family: inherit;
+            font-size: 16px;
+            padding: 14px 18px;
+            outline: none;
+            transition: all 0.3s;
+        }
+        #command-input:focus {
+            border-color: #00ff00;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.4);
+        }
+        #command-input::placeholder { color: #444; }
+        button {
+            background: linear-gradient(135deg, #22cc66 0%, #00aa44 100%);
+            border: none;
+            border-radius: 8px;
+            color: #000;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: bold;
+            padding: 14px 28px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(34, 204, 102, 0.5);
+        }
+        button:active { transform: translateY(0); }
+        .controls {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+        }
+        .controls button {
+            background: #1a1a2e;
+            border: 1px solid #3399ff;
+            color: #3399ff;
+            padding: 10px 8px;
+            font-size: 11px;
+        }
+        .controls button:hover {
+            background: #3399ff;
+            color: #000;
+            transform: translateY(-1px);
+        }
+        .help {
+            padding: 18px;
+            background: #0d0d1a;
+            border: 2px solid #22cc66;
+            border-radius: 12px;
+            font-size: 12px;
+            color: #aaa;
+            box-shadow: 0 0 20px rgba(34, 204, 102, 0.15);
+        }
+        .help h3 {
+            color: #ff3355;
+            margin-top: 0;
+            margin-bottom: 12px;
+            font-size: 15px;
+            text-shadow: 0 0 8px rgba(255, 51, 85, 0.5);
+        }
+        .help h4 {
+            color: #3399ff;
+            margin: 14px 0 8px 0;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .help p { margin: 5px 0; line-height: 1.5; }
+        .help kbd {
+            background: #1a1a2e;
+            border: 1px solid #3399ff;
+            border-radius: 4px;
+            padding: 2px 7px;
+            color: #3399ff;
+            font-weight: bold;
+            font-size: 10px;
+        }
+        .features-used {
+            margin-top: 15px;
+            padding: 12px;
+            background: rgba(51, 153, 255, 0.1);
+            border: 1px solid #3399ff40;
+            border-radius: 8px;
+        }
+        .features-used h4 {
+            color: #22cc66;
+            margin: 0 0 8px 0;
+            font-size: 11px;
+        }
+        .features-used ul {
+            margin: 0;
+            padding-left: 16px;
+            font-size: 10px;
+            color: #888;
+        }
+        .features-used li { margin: 3px 0; }
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 12px;
+        }
+        .stat { text-align: center; }
+        .stat-value { color: #22cc66; font-weight: bold; font-size: 16px; }
+        .stat-label { color: #666; font-size: 10px; text-transform: uppercase; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 HIDE AND SEEK 🔍 <span class="version-badge">RustScript 0.4.0</span></h1>
+        <p class="subtitle">Showcasing Phase 4 Features <span class="feature-badge">72 Features</span></p>
+        
+        <div class="game-layout">
+            <div class="game-main">
+                <div class="stats-bar" id="stats-bar" style="display: none;">
+                    <div class="stat"><div class="stat-value" id="stat-found">0/5</div><div class="stat-label">Found</div></div>
+                    <div class="stat"><div class="stat-value" id="stat-turns">30</div><div class="stat-label">Turns</div></div>
+                    <div class="stat"><div class="stat-value" id="stat-score">0</div><div class="stat-label">Score</div></div>
+                    <div class="stat"><div class="stat-value" id="stat-hints">3</div><div class="stat-label">Free Hints</div></div>
+                </div>
+                
+                <div id="game-output"></div>
+                
+                <div class="input-area">
+                    <input type="text" id="command-input" placeholder="Enter command..." autofocus>
+                    <button onclick="submitCommand()">Enter</button>
+                </div>
+                
+                <div class="controls">
+                    <button onclick="sendCommand('n')">↑ North</button>
+                    <button onclick="sendCommand('w')">← West</button>
+                    <button onclick="sendCommand('l')">👁 Look</button>
+                    <button onclick="sendCommand('e')">→ East</button>
+                    <button onclick="sendCommand('s')">↓ South</button>
+                    <button onclick="sendCommand('u')">⬆ Up</button>
+                    <button onclick="sendCommand('m')">🗺 Map</button>
+                    <button onclick="sendCommand('h')">💡 Hint</button>
+                    <button onclick="sendCommand('d')">⬇ Down</button>
+                    <button onclick="sendCommand('q')">🚪 Quit</button>
+                </div>
+            </div>
+            
+            <div class="game-sidebar">
+                <div class="help">
+                    <h3>How to Play</h3>
+                    <p>Find all your hidden friends before you run out of turns!</p>
+                    <h4>Movement</h4>
+                    <p><kbd>N</kbd> <kbd>S</kbd> <kbd>E</kbd> <kbd>W</kbd> - Cardinal directions</p>
+                    <p><kbd>U</kbd> <kbd>D</kbd> - Up/Down (Hallway only)</p>
+                    <h4>Actions</h4>
+                    <p><kbd>L</kbd> - Look around for hiding spots</p>
+                    <p><kbd>1-9</kbd> - Search a hiding spot</p>
+                    <p><kbd>H</kbd> - Get hint (free, then costs pts)</p>
+                    <p><kbd>M</kbd> - Show map</p>
+                    <p><kbd>Q</kbd> - Quit game</p>
+                    <h4>Scoring</h4>
+                    <p>Easy: +100 find, -50 miss, 3 free hints</p>
+                    <p>Medium: +75 find, -75 miss, 2 free hints</p>
+                    <p>Hard: +50 find, -100 miss, 1 free hint</p>
+                    
+                    <div class="features-used">
+                        <h4>🦀 RustScript 0.4.0 Patterns Used</h4>
+                        <ul>
+                            <li>Pattern matching with guards</li>
+                            <li>Object spread operator (...)</li>
+                            <li>Destructuring assignment</li>
+                            <li>Arrow functions (closures)</li>
+                            <li>Template literals (interpolation)</li>
+                            <li>Immutable state updates</li>
+                            <li>Array methods (filter, map, find)</li>
+                            <li>Async/await patterns</li>
+                        </ul>
+                    </div>
+                    
+                    <h4 style="margin-top: 15px;">Other Versions</h4>
+                    <p><a href="hideseek.html" style="color: #22cc66;">v1</a> - JavaScript implementation</p>
+                    <p><a href="hideseek_v2.html" style="color: #22cc66;">v2</a> - Basic WASM demo</p>
+                    <p><a href="hideseek_v3.html" style="color: #22cc66;">v3</a> - Async input</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================================== -->
+    <!-- Hide and Seek v4 - Game Engine                                     -->
+    <!-- Written in JavaScript using RustScript 0.4.0 coding patterns       -->
+    <!-- Demonstrates: pattern matching, spread operator, destructuring,    -->
+    <!-- closures, immutable updates, and functional programming style      -->
+    <!-- ================================================================== -->
+    <script type="module">
+        // ====================================================================
+        // DOM References
+        // ====================================================================
+        const outputEl = document.getElementById('game-output');
+        const inputEl = document.getElementById('command-input');
+        const statsBar = document.getElementById('stats-bar');
+        
+        // ====================================================================
+        // Output System
+        // ====================================================================
+        const writeOutput = (text, type = 'log') => {
+            const line = document.createElement('div');
+            line.className = type;
+            line.textContent = text;
+            outputEl.appendChild(line);
+            outputEl.scrollTop = outputEl.scrollHeight;
+        };
+        
+        const updateStats = (game) => {
+            document.getElementById('stat-found').textContent = `${game.found}/${game.total}`;
+            document.getElementById('stat-turns').textContent = game.turns;
+            document.getElementById('stat-score').textContent = game.score;
+            document.getElementById('stat-hints').textContent = Math.max(0, game.freeHints - game.hintsUsed);
+        };
+
+        // ====================================================================
+        // Game Data - Struct-like objects (RustScript pattern)
+        // ====================================================================
+        const rooms = [
+            { name: "Living Room", desc: "A cosy living room with a fireplace.", n: 10, s: 0, e: 2, w: 0 },
+            { name: "Kitchen", desc: "A modern kitchen with stainless steel appliances.", n: 0, s: 8, e: 11, w: 1 },
+            { name: "Bedroom", desc: "A bedroom with a large bed and wooden furniture.", n: 0, s: 10, e: 4, w: 12 },
+            { name: "Bathroom", desc: "A clean bathroom with white tiles.", n: 0, s: 0, e: 0, w: 3 },
+            { name: "Basement", desc: "A dark basement filled with old boxes.", n: 10, s: 0, e: 0, w: 0 },
+            { name: "Attic", desc: "A dusty attic with old furniture.", n: 0, s: 10, e: 0, w: 0 },
+            { name: "Garage", desc: "A garage with tools and a car.", n: 0, s: 0, e: 10, w: 0 },
+            { name: "Garden", desc: "A beautiful garden with flowers.", n: 2, s: 0, e: 0, w: 0 },
+            { name: "Study", desc: "A quiet study lined with bookshelves.", n: 0, s: 0, e: 0, w: 10 },
+            { name: "Hallway", desc: "A long hallway connecting various rooms.", n: 3, s: 1, e: 9, w: 7 },
+            { name: "Dining Room", desc: "An elegant dining room with a large table.", n: 0, s: 0, e: 0, w: 2 },
+            { name: "Closet", desc: "A small closet filled with clothes.", n: 0, s: 0, e: 3, w: 0 },
+        ];
+        
+        const hidingSpots = [
+            { name: "Behind the couch", room: 1 }, { name: "Under the coffee table", room: 1 }, { name: "Behind the curtains", room: 1 },
+            { name: "In the pantry", room: 2 }, { name: "Under the sink", room: 2 }, { name: "Behind the door", room: 2 },
+            { name: "Under the bed", room: 3 }, { name: "In the wardrobe", room: 3 }, { name: "Under the blankets", room: 3 },
+            { name: "In the shower", room: 4 }, { name: "In the linen closet", room: 4 },
+            { name: "Behind the furnace", room: 5 }, { name: "In the storage boxes", room: 5 }, { name: "Under the stairs", room: 5 },
+            { name: "In the old trunk", room: 6 }, { name: "Behind the boxes", room: 6 },
+            { name: "Behind the car", room: 7 }, { name: "Under the workbench", room: 7 },
+            { name: "Behind the bushes", room: 8 }, { name: "In the shed", room: 8 },
+            { name: "Behind the bookshelf", room: 9 }, { name: "Under the desk", room: 9 },
+            { name: "In the coat closet", room: 10 },
+            { name: "Under the table", room: 11 }, { name: "Behind the curtains", room: 11 },
+            { name: "Behind the clothes", room: 12 }, { name: "In the shoe box", room: 12 },
+        ];
+        
+        // ====================================================================
+        // Difficulty Config - Tuple destructuring pattern
+        // ====================================================================
+        const getDifficultyConfig = (choice) => {
+            // Pattern matching simulation
+            const configs = {
+                '1': [5, 30, 3, 25, 100, 50],   // Easy
+                '2': [8, 25, 2, 50, 75, 75],    // Medium
+                '3': [12, 20, 1, 75, 50, 100],  // Hard
+            };
+            return configs[choice] || configs['1'];
+        };
+        
+        // ====================================================================
+        // Game State - Immutable update pattern with spread operator
+        // ====================================================================
+        const createGame = (choice) => {
+            const [total, turns, freeHints, hintCost, findPts, missPts] = getDifficultyConfig(choice);
+            return {
+                room: 1, score: 0, turns, found: 0, total,
+                hintsUsed: 0, freeHints, hintCost, findPts, missPts,
+                spots: [], gameOver: false, inputCallback: null, playerName: "Player"
+            };
+        };
+        
+        let game = createGame('1');
+
+        // ====================================================================
+        // Spot Initialisation - Closure and spread pattern
+        // ====================================================================
+        const initSpots = () => {
+            game.spots = hidingSpots.map(s => ({ ...s, hasPerson: false, searched: false }));
+            let placed = 0;
+            while (placed < game.total) {
+                const idx = Math.floor(Math.random() * game.spots.length);
+                if (!game.spots[idx].hasPerson) {
+                    game.spots[idx].hasPerson = true;
+                    placed++;
+                }
+            }
+        };
+        
+        // ====================================================================
+        // Async Input System
+        // ====================================================================
+        const asyncInput = (prompt) => new Promise((resolve) => {
+            if (prompt) writeOutput(prompt, 'info');
+            game.inputCallback = resolve;
+            inputEl.focus();
+        });
+        
+        window.submitCommand = () => {
+            const cmd = inputEl.value.trim();
+            inputEl.value = '';
+            if (game.inputCallback) {
+                if (cmd) writeOutput(`> ${cmd}`, 'info');
+                const cb = game.inputCallback;
+                game.inputCallback = null;
+                cb(cmd);
+            }
+            inputEl.focus();
+        };
+        
+        window.sendCommand = (cmd) => {
+            if (game.inputCallback) {
+                writeOutput(`> ${cmd}`, 'info');
+                const cb = game.inputCallback;
+                game.inputCallback = null;
+                cb(cmd);
+            }
+            inputEl.focus();
+        };
+        
+        inputEl.addEventListener('keypress', (e) => { if (e.key === 'Enter') window.submitCommand(); });
+        
+        // ====================================================================
+        // Display Functions - Template literal interpolation
+        // ====================================================================
+        const showTitle = () => {
+            writeOutput("╔═══════════════════════════════════════════════╗", 'dim');
+            writeOutput("║                                               ║", 'dim');
+            writeOutput("║       H I D E   A N D   S E E K              ║", 'highlight');
+            writeOutput("║                                               ║", 'dim');
+            writeOutput("║         RustScript 0.4.0 Edition             ║", 'info');
+            writeOutput("║                                               ║", 'dim');
+            writeOutput("╚═══════════════════════════════════════════════╝", 'dim');
+        };
+        
+        const showRoom = () => {
+            const room = rooms[game.room - 1];
+            writeOutput("");
+            writeOutput("┌───────────────────────────────────────────────┐", 'dim');
+            writeOutput(`│  📍 ${room.name}`, 'info');
+            writeOutput("└───────────────────────────────────────────────┘", 'dim');
+            writeOutput(room.desc);
+            
+            // Build exits using filter pattern
+            const exits = [
+                room.n > 0 ? "⬆North" : null,
+                room.s > 0 ? "⬇South" : null,
+                room.e > 0 ? "➡East" : null,
+                room.w > 0 ? "⬅West" : null,
+                game.room === 10 ? "🔼Up 🔽Down" : null,
+            ].filter(Boolean).join(" ");
+            writeOutput(`Exits: ${exits}`);
+        };
+        
+        const showStatus = () => {
+            writeOutput("─────────────────────────────────────────────────", 'dim');
+            writeOutput(`🎯 Found: ${game.found}/${game.total}  ⏱ Turns: ${game.turns}  💰 Score: ${game.score}`, 'info');
+            writeOutput("─────────────────────────────────────────────────", 'dim');
+            updateStats(game);
+        };
+        
+        const showCommands = () => {
+            writeOutput("");
+            writeOutput("Commands: [N/S/E/W] Move  [U/D] Up/Down  [L] Look");
+            writeOutput("          [1-9] Search  [H] Hint  [M] Map  [Q] Quit");
+        };
+
+        const showMap = () => {
+            writeOutput("");
+            writeOutput("╔═══════════════════════════════════════════════╗", 'dim');
+            writeOutput("║                   🗺 MAP                       ║", 'info');
+            writeOutput("╠═══════════════════════════════════════════════╣", 'dim');
+            writeOutput("║              [Attic]                          ║");
+            writeOutput("║                 │                             ║");
+            writeOutput("║   [Closet]─[Bedroom]─[Bath]    [Study]        ║");
+            writeOutput("║               │                  │            ║");
+            writeOutput("║   [Garage]─[Hallway]────────────┘            ║");
+            writeOutput("║               │                               ║");
+            writeOutput("║          [Living]─[Kitchen]─[Dining]          ║");
+            writeOutput("║                       │                       ║");
+            writeOutput("║                   [Garden]                    ║");
+            writeOutput("║                                               ║");
+            writeOutput("║   [Basement] via Hallway (Down)               ║");
+            writeOutput("╚═══════════════════════════════════════════════╝", 'dim');
+        };
+        
+        const showSpots = () => {
+            // Filter pattern for room spots
+            const roomSpots = game.spots.filter(s => s.room === game.room);
+            writeOutput("");
+            writeOutput("👀 Hiding spots in this room:");
+            if (roomSpots.length === 0) {
+                writeOutput("  (No hiding spots here)");
+            } else {
+                roomSpots.forEach((spot, i) => {
+                    const status = spot.searched ? " ✓" : "";
+                    writeOutput(`  ${i + 1}. ${spot.name}${status}`);
+                });
+            }
+        };
+        
+        // ====================================================================
+        // Game Actions - Immutable state updates with spread
+        // ====================================================================
+        const movePlayer = (dir) => {
+            const room = rooms[game.room - 1];
+            
+            // Pattern matching simulation for direction
+            const directionMap = {
+                'n': room.n,
+                's': room.s,
+                'e': room.e,
+                'w': room.w,
+                'u': game.room === 10 ? 6 : 0,  // Guard pattern
+                'd': game.room === 10 ? 5 : 0,  // Guard pattern
+            };
+            
+            const newRoom = directionMap[dir] || 0;
+            
+            if (newRoom > 0) {
+                // Spread operator for immutable update
+                game = { ...game, room: newRoom, turns: game.turns - 1 };
+            } else {
+                writeOutput("❌ You can't go that way!");
+            }
+        };
+        
+        const searchSpot = (num) => {
+            const roomSpots = game.spots.filter(s => s.room === game.room);
+            
+            if (num < 1 || num > roomSpots.length) {
+                writeOutput("❌ Invalid spot number! Use L to look first.");
+                return;
+            }
+            
+            const spot = roomSpots[num - 1];
+            const actualIdx = game.spots.findIndex(s => s === spot);
+            
+            if (spot.searched) {
+                writeOutput("🔄 You already searched there!");
+                return;
+            }
+            
+            // Update spot (immutable pattern)
+            game.spots[actualIdx] = { ...game.spots[actualIdx], searched: true };
+            game = { ...game, turns: game.turns - 1 };
+            
+            if (spot.hasPerson) {
+                writeOutput("");
+                writeOutput("🎉 *** YOU FOUND SOMEONE! ***", 'highlight');
+                writeOutput(`They were hiding ${spot.name}!`);
+                writeOutput(`💰 +${game.findPts} points!`, 'success');
+                game = { ...game, score: game.score + game.findPts, found: game.found + 1 };
+            } else {
+                writeOutput("😔 Nobody is hiding there.", 'error');
+                writeOutput(`💸 -${game.missPts} points!`, 'error');
+                game = { ...game, score: game.score - game.missPts };
+            }
+        };
+
+        const getHint = () => {
+            // Find pattern with predicate
+            const unfound = game.spots.find(s => s.hasPerson && !s.searched);
+            
+            if (!unfound) {
+                writeOutput("🎯 No hints needed - you've found everyone!");
+                return;
+            }
+            
+            const room = rooms[unfound.room - 1];
+            writeOutput(`💡 Hint: Someone is hiding in the ${room.name}...`, 'info');
+            
+            const newHintsUsed = game.hintsUsed + 1;
+            
+            if (newHintsUsed <= game.freeHints) {
+                const remaining = game.freeHints - newHintsUsed;
+                writeOutput(`✨ Free hint! (${remaining} left)`, 'success');
+                game = { ...game, hintsUsed: newHintsUsed };
+            } else {
+                writeOutput(`💸 -${game.hintCost} points for hint`, 'error');
+                game = { ...game, score: game.score - game.hintCost, hintsUsed: newHintsUsed };
+            }
+        };
+        
+        // ====================================================================
+        // Win/Lose Conditions
+        // ====================================================================
+        const showWin = () => {
+            writeOutput("");
+            writeOutput("╔═══════════════════════════════════════════════╗", 'highlight');
+            writeOutput("║       🏆 CONGRATULATIONS! 🏆                  ║", 'highlight');
+            writeOutput("╠═══════════════════════════════════════════════╣", 'highlight');
+            writeOutput(`║  You found everyone!`, 'success');
+            writeOutput(`║  Final Score: ${game.score}`, 'success');
+            writeOutput(`║  Hints Used: ${game.hintsUsed}`);
+            writeOutput("╚═══════════════════════════════════════════════╝", 'highlight');
+        };
+        
+        const showLose = () => {
+            writeOutput("");
+            writeOutput("╔═══════════════════════════════════════════════╗", 'error');
+            writeOutput("║           💀 GAME OVER 💀                     ║", 'error');
+            writeOutput("╠═══════════════════════════════════════════════╣", 'error');
+            writeOutput(`║  You ran out of turns!`, 'error');
+            writeOutput(`║  Found: ${game.found}/${game.total}`);
+            writeOutput(`║  Final Score: ${game.score}`);
+            writeOutput("╚═══════════════════════════════════════════════╝", 'error');
+        };
+        
+        // ====================================================================
+        // Main Game Loop - Async/await pattern
+        // ====================================================================
+        const gameLoop = async () => {
+            while (!game.gameOver) {
+                // Win condition check
+                if (game.found >= game.total) {
+                    showWin();
+                    game.gameOver = true;
+                    break;
+                }
+                
+                // Lose condition check
+                if (game.turns <= 0) {
+                    showLose();
+                    game.gameOver = true;
+                    break;
+                }
+                
+                // Display current state
+                showRoom();
+                showStatus();
+                showCommands();
+                
+                // Get player input
+                const cmd = (await asyncInput("")).toLowerCase();
+                
+                // Pattern matching for commands
+                if ('nsewud'.includes(cmd) && cmd.length === 1) {
+                    movePlayer(cmd);
+                } else if (cmd === 'l') {
+                    showSpots();
+                } else if (cmd === 'h') {
+                    getHint();
+                } else if (cmd === 'm') {
+                    showMap();
+                } else if (cmd === 'q') {
+                    writeOutput("👋 Thanks for playing Hide and Seek v4!");
+                    game.gameOver = true;
+                } else if ('123456789'.includes(cmd) && cmd.length === 1) {
+                    searchSpot(parseInt(cmd));
+                } else if (cmd) {
+                    writeOutput("❓ Unknown command. Type H for hint or M for map.");
+                }
+            }
+            
+            writeOutput("");
+            writeOutput("🦀 Powered by RustScript 0.4.0 patterns!", 'info');
+            writeOutput("Refresh to play again.");
+        };
+
+        // ====================================================================
+        // Main Entry Point
+        // ====================================================================
+        const main = async () => {
+            showTitle();
+            writeOutput("");
+            writeOutput("🎮 Select Difficulty:");
+            writeOutput("  1. 🟢 Easy   (5 hidden, 30 turns, 3 free hints)");
+            writeOutput("  2. 🟡 Medium (8 hidden, 25 turns, 2 free hints)");
+            writeOutput("  3. 🔴 Hard   (12 hidden, 20 turns, 1 free hint)");
+            writeOutput("");
+            
+            const choice = await asyncInput("Choose (1-3): ");
+            game = createGame(choice);
+            
+            const name = await asyncInput("Enter your name: ");
+            game.playerName = name || "Player";
+            
+            initSpots();
+            statsBar.style.display = 'flex';
+            updateStats(game);
+            
+            writeOutput("");
+            writeOutput(`🎯 Alright ${game.playerName}, your friends are hiding!`);
+            writeOutput(`🔍 Find all ${game.total} of them in ${game.turns} turns!`);
+            writeOutput(`💡 You have ${game.freeHints} free hint(s)!`);
+            writeOutput("");
+            
+            await asyncInput("Press Enter to start...");
+            await gameLoop();
+        };
+        
+        // Start the game
+        main();
+    </script>
+</body>
+</html>

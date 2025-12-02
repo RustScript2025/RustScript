@@ -35,6 +35,10 @@ pub mod codegen_wasm;
 pub mod std_lib;
 pub mod borrow_checker;
 pub mod memory;
+pub mod tail_call_optimizer;
+pub mod macro_system;
+pub mod macro_registry;
+pub mod macro_compiler;
 
 // Import JavaScript console functions for logging.
 #[wasm_bindgen]
@@ -72,8 +76,12 @@ pub fn main_js() -> Result<(), JsValue> {
 /// The compiled WASM binary as a byte vector, or a JavaScript error.
 #[wasm_bindgen]
 pub fn compile_to_wasm(source: &str) -> Result<Vec<u8>, JsValue> {
-    let ast = parser::parse_program(source)
+    let mut ast = parser::parse_program(source)
         .map_err(|e| JsValue::from_str(&format!("Parse error: {e}")))?;
+    
+    // Phase 4A: Tail call optimization
+    let mut tail_optimizer = tail_call_optimizer::TailCallOptimizer::new();
+    tail_optimizer.optimize_module(&mut ast);
         
     let mut borrow_checker = borrow_checker::BorrowChecker::new();
     if let Err(errors) = borrow_checker.check_module(&ast) {

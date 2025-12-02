@@ -43,6 +43,10 @@ pub struct TypeChecker {
     functions: HashMap<String, (Vec<Type>, Type)>,
     /// Struct definitions: name -> field_map
     structs: HashMap<String, HashMap<String, Type>>,
+    /// Phase 4B: Type aliases: name -> target_type
+    type_aliases: HashMap<String, Type>,
+    /// Phase 4G: Trait implementations: (trait_name, type_name) -> TraitImpl
+    trait_impls: HashMap<(String, String), crate::ast::TraitImpl>,
 }
 
 impl TypeChecker {
@@ -51,6 +55,8 @@ impl TypeChecker {
         Self {
             functions: HashMap::new(),
             structs: HashMap::new(),
+            type_aliases: HashMap::new(),
+            trait_impls: HashMap::new(),
         }
     }
 
@@ -69,7 +75,7 @@ impl TypeChecker {
             match item {
                 crate::ast::Item::Function(func) => {
                     let params = func.params.iter()
-                        .map(|(_, ty)| self.resolve_type(ty.as_ref()))
+                        .map(|(_, ty, _)| self.resolve_type(ty.as_ref()))
                         .collect();
                     let ret_ty = func.return_type.as_ref()
                         .map(|t| self.resolve_type(Some(t)))
@@ -89,7 +95,7 @@ impl TypeChecker {
                 crate::ast::Item::Extend { methods, .. } => {
                     for method in methods {
                         let params = method.params.iter()
-                            .map(|(_, ty)| self.resolve_type(ty.as_ref()))
+                            .map(|(_, ty, _)| self.resolve_type(ty.as_ref()))
                             .collect();
                         let ret_ty = method.return_type.as_ref()
                             .map(|t| self.resolve_type(Some(t)))
@@ -99,6 +105,17 @@ impl TypeChecker {
                             }));
                         self.functions.insert(method.name.name.to_string(), (params, ret_ty));
                     }
+                },
+                crate::ast::Item::TypeAlias(alias) => {
+                    // Phase 4B: Collect type aliases
+                    let resolved = self.resolve_type(Some(&alias.target));
+                    self.type_aliases.insert(alias.name.name.to_string(), resolved);
+                },
+                crate::ast::Item::TraitImpl(trait_impl) => {
+                    // Phase 4G: Collect trait implementations
+                    let trait_name = trait_impl.trait_name.name.to_string();
+                    let type_name = self.type_to_string(&trait_impl.for_type);
+                    self.trait_impls.insert((trait_name, type_name), trait_impl.clone());
                 },
                 _ => {}
             }
@@ -129,14 +146,122 @@ impl TypeChecker {
     }
     
     fn resolve_type(&self, ty: Option<&Type>) -> Type {
-        ty.cloned().unwrap_or(Type::Number)
+        match ty {
+            Some(Type::Reference { inner, mutable, lifetime }) => {
+                // Phase 4A: Resolve reference types with lifetimes
+                Type::Reference {
+                    inner: Box::new(self.resolve_type(Some(inner))),
+                    mutable: *mutable,
+                    lifetime: lifetime.clone(),
+                }
+            }
+            Some(Type::ConstArray { element_type, size }) => {
+                // Phase 4A: Resolve const generic arrays
+                Type::ConstArray {
+                    element_type: Box::new(self.resolve_type(Some(element_type))),
+                    size: size.clone(),
+                }
+            }
+            Some(crate::ast::Type::Union(types)) => {
+                // Phase 4B: Resolve union types
+                crate::ast::Type::Union(types.iter().map(|t| self.resolve_type(Some(t))).collect())
+            }
+            Some(crate::ast::Type::Intersection(types)) => {
+                // Phase 4B: Resolve intersection types
+                crate::ast::Type::Intersection(types.iter().map(|t| self.resolve_type(Some(t))).collect())
+            }
+            Some(Type::Generic(ident)) => {
+                // Phase 4B: Check if this is a type alias
+                if let Some(aliased) = self.type_aliases.get(ident.name.as_ref()) {
+                    aliased.clone()
+                } else {
+                    Type::Generic(ident.clone())
+                }
+            }
+            Some(Type::HigherKinded { constructor, arity }) => {
+                // Phase 4B: Higher-kinded types are resolved as-is
+                Type::HigherKinded {
+                    constructor: constructor.clone(),
+                    arity: *arity,
+                }
+            }
+            Some(Type::AppliedHigherKinded { constructor, args }) => {
+                // Phase 4B: Resolve applied higher-kinded types
+                Type::AppliedHigherKinded {
+                    constructor: Box::new(self.resolve_type(Some(constructor))),
+                    args: args.iter().map(|t| self.resolve_type(Some(t))).collect(),
+                }
+            }
+            Some(Type::PhantomData(inner)) => {
+                // Phase 4B: PhantomData is a zero-sized marker type
+                Type::PhantomData(Box::new(self.resolve_type(Some(inner))))
+            }
+            Some(Type::Refinement { base, binder, predicate }) => {
+                // Phase 4B: Refinement types add predicates to base types
+                // The predicate is checked at compile-time or runtime
+                Type::Refinement {
+                    base: Box::new(self.resolve_type(Some(base))),
+                    binder: binder.clone(),
+                    predicate: predicate.clone(),
+                }
+            }
+            Some(Type::Dependent { constructor, value_params }) => {
+                // Phase 4B: Dependent types where type depends on runtime values
+                // The value parameters are evaluated at runtime
+                Type::Dependent {
+                    constructor: constructor.clone(),
+                    value_params: value_params.clone(),
+                }
+            }
+            Some(Type::TypeLevelApp { func, args }) => {
+                // Phase 4B: Type-level function application
+                Type::TypeLevelApp {
+                    func: func.clone(),
+                    args: args.iter().map(|t| self.resolve_type(Some(t))).collect(),
+                }
+            }
+            Some(Type::TypeLevelLit(n)) => {
+                // Phase 4B: Type-level literals
+                Type::TypeLevelLit(*n)
+            }
+            Some(Type::Existential { bounds }) => {
+                // Phase 4B: Existential types hide concrete implementation
+                Type::Existential {
+                    bounds: bounds.clone(),
+                }
+            }
+            Some(Type::GADTReturn { constructor, type_args }) => {
+                // Phase 4B: GADT constructor return type
+                Type::GADTReturn {
+                    constructor: constructor.clone(),
+                    type_args: type_args.iter().map(|t| self.resolve_type(Some(t))).collect(),
+                }
+            }
+            Some(Type::ImmutableVec(elem)) => {
+                // Phase 4C: Immutable vector
+                Type::ImmutableVec(Box::new(self.resolve_type(Some(elem))))
+            }
+            Some(Type::ImmutableMap { key_type, value_type }) => {
+                // Phase 4C: Immutable map
+                Type::ImmutableMap {
+                    key_type: Box::new(self.resolve_type(Some(key_type))),
+                    value_type: Box::new(self.resolve_type(Some(value_type))),
+                }
+            }
+            Some(Type::ImmutableSet(elem)) => {
+                // Phase 4C: Immutable set
+                Type::ImmutableSet(Box::new(self.resolve_type(Some(elem))))
+            }
+            Some(t) => t.clone(),
+            None => Type::Number,
+        }
     }
 
     fn check_function(&self, func: &crate::ast::Function, types: &mut HashMap<Span, Type>) -> Result<(), TypeError> {
         let mut scopes = vec![HashMap::new()];
         
         // Register parameters in scope
-        for (pattern, ty) in &func.params {
+        for (pattern, ty, _default) in &func.params {
             if let crate::ast::Pattern::Ident(id) = pattern {
                 let resolved_ty = self.resolve_type(ty.as_ref());
                 scopes[0].insert(id.name.to_string(), resolved_ty);
@@ -203,6 +328,17 @@ impl TypeChecker {
             },
             crate::ast::Stmt::Defer { block, .. } => {
                 self.check_block(block, types, scopes)?;
+                Ok(())
+            },
+            crate::ast::Stmt::Break { value, .. } => {
+                // Phase 4E: Break statement
+                if let Some(v) = value {
+                    self.check_expr(v, types, scopes)?;
+                }
+                Ok(())
+            },
+            crate::ast::Stmt::Continue { .. } => {
+                // Phase 4E: Continue statement
                 Ok(())
             },
         }
@@ -430,10 +566,430 @@ impl TypeChecker {
                 self.check_expr(condition, types, scopes)?;
                 Type::Boolean
             },
+            crate::ast::Expr::Move { expr, .. } => {
+                // Phase 4A: Move expression - returns the type of the moved value
+                self.check_expr(expr, types, scopes)?
+            },
+            crate::ast::Expr::Borrow { expr, mutable, .. } => {
+                // Phase 4A: Borrow expression - returns a reference type
+                let inner_ty = self.check_expr(expr, types, scopes)?;
+                Type::reference(inner_ty, *mutable)
+            },
+            crate::ast::Expr::Perform { args, .. } => {
+                // Phase 4A: Perform effect - check arguments, return generic type
+                for arg in args {
+                    self.check_expr(arg, types, scopes)?;
+                }
+                Type::Generic(crate::ast::Ident {
+                    name: "Effect".into(),
+                    span: Span::default(),
+                })
+            },
+            crate::ast::Expr::Handle { body, handlers, .. } => {
+                // Phase 4A: Handle effects - type is the body's type
+                let mut body_ty = Type::Number;
+                for stmt in &body.stmts {
+                    if let crate::ast::Stmt::Expr(expr, _) = stmt {
+                        body_ty = self.check_expr(expr, types, scopes)?;
+                    }
+                }
+                if let Some(expr) = &body.expr {
+                    body_ty = self.check_expr(expr, types, scopes)?;
+                }
+                // Check handlers
+                for handler in handlers {
+                    for stmt in &handler.body.stmts {
+                        if let crate::ast::Stmt::Expr(expr, _) = stmt {
+                            self.check_expr(expr, types, scopes)?;
+                        }
+                    }
+                    if let Some(expr) = &handler.body.expr {
+                        self.check_expr(expr, types, scopes)?;
+                    }
+                }
+                body_ty
+            },
+            crate::ast::Expr::Resume { value, .. } => {
+                // Phase 4A: Resume - type is the value's type
+                self.check_expr(value, types, scopes)?
+            },
+            crate::ast::Expr::InlineAsm { .. } => {
+                // Phase 4A: Inline assembly - return generic type
+                Type::Generic(crate::ast::Ident {
+                    name: "Asm".into(),
+                    span: Span::default(),
+                })
+            },
+            crate::ast::Expr::Placeholder(_) => {
+                // Phase 4C: Placeholder - return generic type
+                Type::Generic(crate::ast::Ident {
+                    name: "Placeholder".into(),
+                    span: Span::default(),
+                })
+            },
+            crate::ast::Expr::PartialApplication { .. } => {
+                // Phase 4C: Partial application - return function type
+                Type::Generic(crate::ast::Ident {
+                    name: "PartialFn".into(),
+                    span: Span::default(),
+                })
+            },
+            crate::ast::Expr::Lazy { expr, .. } => {
+                // Phase 4C: Lazy evaluation - return Lazy<T> type
+                let inner_type = self.check_expr(expr, types, scopes)?;
+                Type::Generic(crate::ast::Ident {
+                    name: format!("Lazy<{:?}>", inner_type).into(),
+                    span: Span::default(),
+                })
+            },
+            crate::ast::Expr::Force { expr, .. } => {
+                // Phase 4C: Force evaluation - return inner type
+                self.check_expr(expr, types, scopes)?
+            },
+            crate::ast::Expr::Do { bindings, result, .. } => {
+                // Phase 4C: Monadic do-notation
+                for binding in bindings {
+                    self.check_expr(&binding.expr, types, scopes)?;
+                }
+                self.check_expr(result, types, scopes)?
+            },
+            crate::ast::Expr::Spawn { body, .. } => {
+                // Phase 4D: Spawn returns a JoinHandle
+                self.check_block(body, types, scopes)?;
+                Type::Generic(crate::ast::Ident {
+                    name: "JoinHandle".into(),
+                    span: Span::default(),
+                })
+            },
+            crate::ast::Expr::Channel { .. } => {
+                // Phase 4D: Channel returns (Sender, Receiver) tuple
+                Type::Tuple(vec![
+                    Type::Generic(crate::ast::Ident {
+                        name: "Sender".into(),
+                        span: Span::default(),
+                    }),
+                    Type::Generic(crate::ast::Ident {
+                        name: "Receiver".into(),
+                        span: Span::default(),
+                    }),
+                ])
+            },
+            crate::ast::Expr::Send { channel, value, .. } => {
+                // Phase 4D: Send returns Result<(), SendError>
+                self.check_expr(channel, types, scopes)?;
+                self.check_expr(value, types, scopes)?;
+                Type::Generic(crate::ast::Ident {
+                    name: "Result".into(),
+                    span: Span::default(),
+                })
+            },
+            crate::ast::Expr::Recv { channel, .. } => {
+                // Phase 4D: Recv returns Result<T, RecvError>
+                self.check_expr(channel, types, scopes)?;
+                Type::Generic(crate::ast::Ident {
+                    name: "Result".into(),
+                    span: Span::default(),
+                })
+            },
+            crate::ast::Expr::Select { arms, .. } => {
+                // Phase 4D: Select returns the type of the first arm
+                if let Some(arm) = arms.first() {
+                    self.check_block(&arm.body, types, scopes)?
+                } else {
+                    Type::Generic(crate::ast::Ident {
+                        name: "()".into(),
+                        span: Span::default(),
+                    })
+                }
+            },
+            crate::ast::Expr::Scope { body, .. } => {
+                // Phase 4D: Scope returns the body's type
+                self.check_block(body, types, scopes)?
+            },
+            crate::ast::Expr::Atomic { target, value, .. } => {
+                // Phase 4D: Atomic operations return the target type
+                self.check_expr(target, types, scopes)?;
+                if let Some(v) = value {
+                    self.check_expr(v, types, scopes)?;
+                }
+                Type::Number
+            },
+            crate::ast::Expr::Lock { mutex, .. } => {
+                // Phase 4D: Lock returns a MutexGuard
+                self.check_expr(mutex, types, scopes)?;
+                Type::Generic(crate::ast::Ident {
+                    name: "MutexGuard".into(),
+                    span: Span::default(),
+                })
+            },
+            crate::ast::Expr::ReadLock { rwlock, .. } => {
+                // Phase 4D: ReadLock returns a RwLockReadGuard
+                self.check_expr(rwlock, types, scopes)?;
+                Type::Generic(crate::ast::Ident {
+                    name: "RwLockReadGuard".into(),
+                    span: Span::default(),
+                })
+            },
+            crate::ast::Expr::WriteLock { rwlock, .. } => {
+                // Phase 4D: WriteLock returns a RwLockWriteGuard
+                self.check_expr(rwlock, types, scopes)?;
+                Type::Generic(crate::ast::Ident {
+                    name: "RwLockWriteGuard".into(),
+                    span: Span::default(),
+                })
+            },
+            crate::ast::Expr::FutureJoin { futures, .. } => {
+                // Phase 4D: Future::join returns tuple of results
+                let mut types_vec = Vec::new();
+                for future in futures {
+                    let ty = self.check_expr(future, types, scopes)?;
+                    types_vec.push(ty);
+                }
+                Type::Tuple(types_vec)
+            },
+            crate::ast::Expr::FutureSelect { futures, .. } => {
+                // Phase 4D: Future::select returns first completed future's type
+                if let Some(first) = futures.first() {
+                    self.check_expr(first, types, scopes)?
+                } else {
+                    Type::Generic(crate::ast::Ident {
+                        name: "()".into(),
+                        span: Span::default(),
+                    })
+                }
+            },
+            crate::ast::Expr::FutureRace { futures, .. } => {
+                // Phase 4D: Future::race returns first completed future's type
+                if let Some(first) = futures.first() {
+                    self.check_expr(first, types, scopes)?
+                } else {
+                    Type::Generic(crate::ast::Ident {
+                        name: "()".into(),
+                        span: Span::default(),
+                    })
+                }
+            },
+            crate::ast::Expr::Timeout { duration, .. } => {
+                // Phase 4D: Timeout returns Result<T, TimeoutError>
+                self.check_expr(duration, types, scopes)?;
+                Type::Generic(crate::ast::Ident {
+                    name: "Result".into(),
+                    span: Span::default(),
+                })
+            },
+            crate::ast::Expr::StreamFromIter { iter, .. } => {
+                // Phase 4D: Stream::from_iter returns Stream<T>
+                let iter_type = self.check_expr(iter, types, scopes)?;
+                Type::Generic(crate::ast::Ident {
+                    name: format!("Stream<{:?}>", iter_type).into(),
+                    span: Span::default(),
+                })
+            },
+            crate::ast::Expr::StreamMap { stream, mapper, .. } => {
+                // Phase 4D: Stream map returns Stream<U>
+                self.check_expr(stream, types, scopes)?;
+                self.check_expr(mapper, types, scopes)?;
+                Type::Generic(crate::ast::Ident {
+                    name: "Stream".into(),
+                    span: Span::default(),
+                })
+            },
+            crate::ast::Expr::StreamFilter { stream, predicate, .. } => {
+                // Phase 4D: Stream filter returns Stream<T>
+                let stream_type = self.check_expr(stream, types, scopes)?;
+                self.check_expr(predicate, types, scopes)?;
+                stream_type
+            },
+            crate::ast::Expr::StreamCollect { stream, .. } => {
+                // Phase 4D: Stream collect returns Vec<T>
+                self.check_expr(stream, types, scopes)?;
+                Type::Array(Box::new(Type::Generic(crate::ast::Ident {
+                    name: "T".into(),
+                    span: Span::default(),
+                })))
+            },
+            crate::ast::Expr::ParIter { collection, .. } => {
+                // Phase 4D: par_iter returns ParallelIterator<T>
+                let coll_type = self.check_expr(collection, types, scopes)?;
+                Type::Generic(crate::ast::Ident {
+                    name: format!("ParallelIterator<{:?}>", coll_type).into(),
+                    span: Span::default(),
+                })
+            },
+            crate::ast::Expr::Try { body, catch_clauses, .. } => {
+                // Phase 4E: Try block returns Result type
+                let body_type = self.check_block(body, types, scopes)?;
+                
+                // Check all catch clauses
+                for clause in catch_clauses {
+                    self.check_block(&clause.body, types, scopes)?;
+                }
+                
+                body_type
+            },
+            crate::ast::Expr::TryOperator { expr, .. } => {
+                // Phase 4E: ? operator unwraps Result/Option
+                let inner_type = self.check_expr(expr, types, scopes)?;
+                // Returns the inner type (T from Result<T, E> or Option<T>)
+                inner_type
+            },
+            crate::ast::Expr::Guard { condition, else_block, .. } => {
+                // Phase 4E: Guard clause
+                self.check_expr(condition, types, scopes)?;
+                self.check_block(else_block, types, scopes)?;
+                // Guard returns unit type
+                Type::Generic(crate::ast::Ident {
+                    name: "()".into(),
+                    span: Span::default(),
+                })
+            },
+            crate::ast::Expr::LabeledBlock { block, .. } => {
+                // Phase 4E: Labeled block returns block's type
+                self.check_block(block, types, scopes)?
+            },
+            crate::ast::Expr::BreakWithValue { value, .. } => {
+                // Phase 4E: Break with value
+                if let Some(v) = value {
+                    self.check_expr(v, types, scopes)?
+                } else {
+                    Type::Generic(crate::ast::Ident {
+                        name: "()".into(),
+                        span: Span::default(),
+                    })
+                }
+            },
+            crate::ast::Expr::Catch { expr, handler, .. } => {
+                // Phase 4E: Catch expression returns handler's type
+                self.check_expr(expr, types, scopes)?;
+                self.check_expr(handler, types, scopes)?
+            },
+            crate::ast::Expr::Panic { message, .. } => {
+                // Phase 4E: Panic never returns (! type)
+                if let Some(msg) = message {
+                    self.check_expr(msg, types, scopes)?;
+                }
+                Type::Generic(crate::ast::Ident {
+                    name: "!".into(),
+                    span: Span::default(),
+                })
+            },
+            crate::ast::Expr::CfgExpr { then_expr, else_expr, .. } => {
+                // Phase 4E: Conditional compilation returns then branch type
+                let then_type = self.check_expr(then_expr, types, scopes)?;
+                if let Some(else_e) = else_expr {
+                    self.check_expr(else_e, types, scopes)?;
+                }
+                then_type
+            },
+            crate::ast::Expr::ConstAssert { condition, message, .. } => {
+                // Phase 4E: Const assertion returns unit
+                self.check_expr(condition, types, scopes)?;
+                if let Some(msg) = message {
+                    self.check_expr(msg, types, scopes)?;
+                }
+                Type::Generic(crate::ast::Ident {
+                    name: "()".into(),
+                    span: Span::default(),
+                })
+            },
+            crate::ast::Expr::Unreachable { message, .. } => {
+                // Phase 4E: Unreachable never returns (! type)
+                if let Some(msg) = message {
+                    self.check_expr(msg, types, scopes)?;
+                }
+                Type::Generic(crate::ast::Ident {
+                    name: "!".into(),
+                    span: Span::default(),
+                })
+            },
+            crate::ast::Expr::MacroInvocation { args, .. } => {
+                // Phase 4F: Macro invocation - type depends on expansion
+                for arg in args {
+                    self.check_expr(arg, types, scopes)?;
+                }
+                // Return generic type for now
+                Type::Generic(crate::ast::Ident {
+                    name: "T".into(),
+                    span: Span::default(),
+                })
+            },
+            crate::ast::Expr::TypeInfo { .. } => {
+                // Phase 4F: Type reflection returns TypeInfo struct
+                Type::Generic(crate::ast::Ident {
+                    name: "TypeInfo".into(),
+                    span: Span::default(),
+                })
+            },
+            crate::ast::Expr::Quote { code, .. } => {
+                // Phase 4F: Quote returns TokenStream
+                self.check_block(code, types, scopes)?;
+                Type::Generic(crate::ast::Ident {
+                    name: "TokenStream".into(),
+                    span: Span::default(),
+                })
+            },
+            // Phase 4G: String slicing
+            crate::ast::Expr::StringSlice { string, range, .. } => {
+                let _string_ty = self.check_expr(string, types, scopes)?;
+                // Check range expressions
+                if let Some(start) = &range.start {
+                    self.check_expr(start, types, scopes)?;
+                }
+                if let Some(end) = &range.end {
+                    self.check_expr(end, types, scopes)?;
+                }
+                if let Some(step) = &range.step {
+                    self.check_expr(step, types, scopes)?;
+                }
+                Type::String
+            },
+            // Phase 4G: Format strings
+            crate::ast::Expr::FormatString { parts, .. } => {
+                for part in parts {
+                    if let crate::ast::FormatPart::Formatted { expr, .. } = part {
+                        self.check_expr(expr, types, scopes)?;
+                    }
+                }
+                Type::String
+            },
+            // Phase 4G: Destructuring assignment
+            crate::ast::Expr::DestructuringAssign { value, .. } => {
+                let value_ty = self.check_expr(value, types, scopes)?;
+                // Pattern checking would happen here
+                value_ty
+            },
+            // Phase 4G: Range expression
+            crate::ast::Expr::Range { start, end, step, .. } => {
+                if let Some(s) = start {
+                    self.check_expr(s, types, scopes)?;
+                }
+                if let Some(e) = end {
+                    self.check_expr(e, types, scopes)?;
+                }
+                if let Some(st) = step {
+                    self.check_expr(st, types, scopes)?;
+                }
+                // Range type
+                Type::Generic(crate::ast::Ident {
+                    name: "Range".into(),
+                    span: Span::default(),
+                })
+            },
         };
         
         types.insert(expr.span().clone(), ty.clone());
         Ok(ty)
+    }
+    
+    // Phase 4G: Convert Type to String for trait impl lookup
+    fn type_to_string(&self, ty: &Type) -> String {
+        match ty {
+            Type::Number => "number".to_string(),
+            Type::String => "string".to_string(),
+            Type::Boolean => "bool".to_string(),
+            Type::Generic(ident) => ident.name.to_string(),
+            _ => format!("{:?}", ty),
+        }
     }
 }
 
@@ -462,6 +1018,53 @@ impl crate::ast::Expr {
             crate::ast::Expr::If { span, .. } => span,
             crate::ast::Expr::Loop { span, .. } => span,
             crate::ast::Expr::While { span, .. } => span,
+            crate::ast::Expr::Move { span, .. } => span,
+            crate::ast::Expr::Borrow { span, .. } => span,
+            crate::ast::Expr::Perform { span, .. } => span,
+            crate::ast::Expr::Handle { span, .. } => span,
+            crate::ast::Expr::Resume { span, .. } => span,
+            crate::ast::Expr::InlineAsm { span, .. } => span,
+            crate::ast::Expr::Placeholder(span) => span,
+            crate::ast::Expr::PartialApplication { span, .. } => span,
+            crate::ast::Expr::Lazy { span, .. } => span,
+            crate::ast::Expr::Force { span, .. } => span,
+            crate::ast::Expr::Do { span, .. } => span,
+            crate::ast::Expr::Spawn { span, .. } => span,
+            crate::ast::Expr::Channel { span, .. } => span,
+            crate::ast::Expr::Send { span, .. } => span,
+            crate::ast::Expr::Recv { span, .. } => span,
+            crate::ast::Expr::Select { span, .. } => span,
+            crate::ast::Expr::Scope { span, .. } => span,
+            crate::ast::Expr::Atomic { span, .. } => span,
+            crate::ast::Expr::Lock { span, .. } => span,
+            crate::ast::Expr::ReadLock { span, .. } => span,
+            crate::ast::Expr::WriteLock { span, .. } => span,
+            crate::ast::Expr::FutureJoin { span, .. } => span,
+            crate::ast::Expr::FutureSelect { span, .. } => span,
+            crate::ast::Expr::FutureRace { span, .. } => span,
+            crate::ast::Expr::Timeout { span, .. } => span,
+            crate::ast::Expr::StreamFromIter { span, .. } => span,
+            crate::ast::Expr::StreamMap { span, .. } => span,
+            crate::ast::Expr::StreamFilter { span, .. } => span,
+            crate::ast::Expr::StreamCollect { span, .. } => span,
+            crate::ast::Expr::ParIter { span, .. } => span,
+            crate::ast::Expr::Try { span, .. } => span,
+            crate::ast::Expr::TryOperator { span, .. } => span,
+            crate::ast::Expr::Guard { span, .. } => span,
+            crate::ast::Expr::LabeledBlock { span, .. } => span,
+            crate::ast::Expr::BreakWithValue { span, .. } => span,
+            crate::ast::Expr::Catch { span, .. } => span,
+            crate::ast::Expr::Panic { span, .. } => span,
+            crate::ast::Expr::CfgExpr { span, .. } => span,
+            crate::ast::Expr::ConstAssert { span, .. } => span,
+            crate::ast::Expr::Unreachable { span, .. } => span,
+            crate::ast::Expr::MacroInvocation { span, .. } => span,
+            crate::ast::Expr::TypeInfo { span, .. } => span,
+            crate::ast::Expr::Quote { span, .. } => span,
+            crate::ast::Expr::StringSlice { span, .. } => span,
+            crate::ast::Expr::FormatString { span, .. } => span,
+            crate::ast::Expr::DestructuringAssign { span, .. } => span,
+            crate::ast::Expr::Range { span, .. } => span,
         }
     }
 }

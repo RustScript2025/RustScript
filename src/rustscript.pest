@@ -40,7 +40,10 @@ keyword_boundary = {
     ("let" | "mut" | "const" | "fn" | "async" | "await" | "match" | "if" | "else" |
     "for" | "guard" | "defer" | "extend" | "in" | "while" | "loop" | "return" |
     "yield" | "gen" | "struct" | "impl" | "mod" | "use" | "requires" | "ensures" |
-    "invariant" | "comptime" | "pure" | "effect" | "true" | "false")
+    "invariant" | "comptime" | "pure" | "effect" | "trait" | "move" | "ref" | "true" | "false" |
+    "perform" | "handle" | "with" | "resume" | "asm" | "type" | "typefn" | "enum" | "where" | "lazy" | "force" | "memoize" | "do" |
+    "spawn" | "channel" | "send" | "recv" | "select" | "scope" | "atomic" | "lock" | "timeout" | "Future" | "Stream" |
+    "try" | "catch" | "break" | "continue" | "panic" | "cfg" | "target" | "feature" | "debug" | "release" | "test" | "const_assert" | "unreachable" | "derive" | "quote")
     ~ !(ASCII_ALPHANUMERIC | "_")
 }
 
@@ -48,7 +51,10 @@ keyword = {
     "let" | "mut" | "const" | "fn" | "async" | "await" | "match" | "if" | "else" |
     "for" | "guard" | "defer" | "extend" | "in" | "while" | "loop" | "return" |
     "yield" | "gen" | "struct" | "impl" | "mod" | "use" | "requires" | "ensures" |
-    "invariant" | "comptime" | "pure" | "effect" | "true" | "false"
+    "invariant" | "comptime" | "pure" | "effect" | "trait" | "move" | "ref" | "true" | "false" |
+    "perform" | "handle" | "with" | "resume" | "asm" | "type" | "typefn" | "enum" | "where" | "lazy" | "force" | "memoize" | "do" |
+    "spawn" | "channel" | "send" | "recv" | "select" | "scope" | "atomic" | "lock" | "timeout" | "Future" | "Stream" |
+    "try" | "catch" | "break" | "continue" | "panic" | "cfg" | "target" | "feature" | "debug" | "release" | "test" | "const_assert" | "unreachable" | "derive" | "quote"
 }
 
 // ============================================================================
@@ -56,16 +62,76 @@ keyword = {
 // ============================================================================
 
 type_expr = {
+    type_union
+}
+
+// Phase 4B: Union and intersection types with proper precedence
+type_union = { type_intersection ~ ("|" ~ type_intersection)* }
+type_intersection = { type_primary ~ ("&" ~ type_primary)* }
+
+type_primary = {
+    type_reference |
+    type_const_array |
+    type_immutable_vec |
+    type_immutable_map |
+    type_immutable_set |
     type_array |
     type_tuple |
     type_function |
-    type_generic
+    type_refinement |
+    type_dependent |
+    type_existential |
+    type_level_lit |
+    type_phantom_data |
+    type_higher_kinded |
+    type_generic |
+    "(" ~ type_expr ~ ")"
 }
 
+// Phase 4C: Immutable data structures
+type_immutable_vec = { "ImmutableVec" ~ "<" ~ type_expr ~ ">" }
+type_immutable_map = { "ImmutableMap" ~ "<" ~ type_expr ~ "," ~ type_expr ~ ">" }
+type_immutable_set = { "ImmutableSet" ~ "<" ~ type_expr ~ ">" }
+
+// Phase 4B: Existential types (impl Trait)
+type_existential = { "impl" ~ ident ~ ("+" ~ ident)* }
+
+// Phase 4B: Type-level literal for type computations
+type_level_lit = @{ "#" ~ ASCII_DIGIT+ }
+
+// Phase 4B: Dependent types (type depends on value)
+// Vec(n) where n is a runtime value
+type_dependent = { ident ~ "(" ~ expr ~ ("," ~ expr)* ~ ")" }
+
+// Phase 4B: Refinement types with predicates
+// {x: i32 | x > 0} for positive integers
+type_refinement = { "{" ~ ident ~ ":" ~ type_expr ~ "|" ~ expr ~ "}" }
+
+// Phase 4B: PhantomData<T> marker type
+type_phantom_data = { "PhantomData" ~ "<" ~ type_expr ~ ">" }
+
+// Phase 4B: Higher-kinded types
+// F<_> for type constructors, F<T> for applied types
+type_higher_kinded = { ident ~ "<" ~ type_hk_args ~ ">" }
+type_hk_args = { type_hk_arg ~ ("," ~ type_hk_arg)* }
+type_hk_arg = { "_" | type_expr }
+
+type_reference = { "&" ~ lifetime? ~ "mut"? ~ type_expr }
+
+// Phase 4A: Lifetime annotation
+lifetime = { "'" ~ ident }
+
+// Phase 4A: Const generic array with size
+type_const_array = { "[" ~ type_expr ~ ";" ~ const_expr ~ "]" }
 type_array = { "[" ~ type_expr ~ "]" }
 type_tuple = { "(" ~ (type_expr ~ ("," ~ type_expr)*)? ~ ","? ~ ")" }
 type_function = { "(" ~ (type_expr ~ ("," ~ type_expr)*)? ~ ")" ~ "->" ~ type_expr }
 type_generic = { ident }
+
+// Phase 4A: Const expression
+const_expr = { const_binary | const_primary }
+const_binary = { const_primary ~ (("+" | "-" | "*" | "/") ~ const_primary)* }
+const_primary = { number | ident }
 
 // ============================================================================
 // PATTERNS
@@ -90,9 +156,18 @@ pattern_ident = { ident }
 // EXPRESSIONS
 // ============================================================================
 
-expr = { expr_pipeline }
+expr = { expr_catch }
 
-// Pipeline has lowest precedence
+// Phase 4E: Catch has lowest precedence
+expr_catch = { expr_composition ~ ("catch" ~ expr_composition)? }
+
+// Phase 4C: Function composition has lowest precedence (after pipeline)
+expr_composition = { expr_applicative ~ (("<<" | ">>") ~ expr_applicative)* }
+
+// Phase 4C: Applicative functors
+expr_applicative = { expr_pipeline ~ (("<$>" | "<*>") ~ expr_pipeline)* }
+
+// Pipeline has second-lowest precedence
 expr_pipeline = { expr_null_coalesce ~ ("|>" ~ expr_null_coalesce)* }
 
 // Null coalescing
@@ -108,16 +183,20 @@ comparison_op = { "==" | "!=" | "<=" | ">=" | "<" | ">" }
 
 // Arithmetic operators
 expr_additive = { expr_multiplicative ~ (("+"|"-") ~ expr_multiplicative)* }
-expr_multiplicative = { expr_postfix ~ (("*"|"/") ~ expr_postfix)* }
+expr_multiplicative = { expr_range ~ (("*"|"/") ~ expr_range)* }
 
-// Postfix expressions (field access, method calls, await)
+// Range operator (lower precedence than multiplication)
+expr_range = { expr_postfix ~ (".." ~ expr_postfix?)? ~ ("::" ~ expr_postfix)? }
+
+// Postfix expressions (field access, method calls, await, try operator)
 expr_postfix = {
     expr_primary ~ (
         field_access |
         index_access |
         optional_chain |
         method_call |
-        await_expr
+        await_expr |
+        try_operator
     )*
 }
 
@@ -126,6 +205,7 @@ index_access = { "[" ~ expr ~ "]" }
 optional_chain = { "?." ~ ident }
 method_call = { "(" ~ call_args? ~ ")" }
 await_expr = { ".await" }
+try_operator = { "?" }
 
 // Primary expressions
 expr_primary = {
@@ -140,15 +220,198 @@ expr_primary = {
     expr_yield |
     expr_async |
     expr_comptime |
+    expr_move |
+    expr_borrow |
+    expr_perform |
+    expr_handle |
+    expr_resume |
+    expr_asm |
+    expr_placeholder |
+    expr_force |
+    expr_do |
+    expr_spawn |
+    expr_channel |
+    expr_select |
+    expr_scope |
+    expr_atomic |
+    expr_future_join |
+    expr_future_select |
+    expr_future_race |
+    expr_timeout |
+    expr_stream_from_iter |
+    expr_try |
+    expr_guard |
+    expr_labeled_block |
+    expr_panic |
+    expr_cfg |
+    expr_const_assert |
+    expr_unreachable |
+    expr_macro_invocation |
+    expr_type_info |
+    expr_quote |
+    format_string |
+    regex_literal |
     ident |
     "(" ~ expr ~ ")"
 }
+
+// Phase 4F: Macro invocation
+expr_macro_invocation = { ident ~ "!" ~ "(" ~ (expr ~ ("," ~ expr)*)? ~ ")" }
+
+// Phase 4F: Type reflection
+expr_type_info = { "@" ~ "typeInfo" ~ "(" ~ type_expr ~ ")" }
+
+// Phase 4F: Quote for code generation
+expr_quote = { "quote" ~ "!" ~ block }
+
+// Phase 4E: Const assertion
+expr_const_assert = { "const_assert" ~ "!" ~ "(" ~ expr ~ ("," ~ expr)? ~ ")" }
+
+// Phase 4E: Unreachable marker
+expr_unreachable = { "unreachable" ~ ("!" ~ "(" ~ expr ~ ")")? }
+
+// Phase 4E: Panic expression
+expr_panic = { "panic" ~ ("!" ~ "(" ~ expr ~ ")")? }
+
+// Phase 4E: Conditional compilation
+expr_cfg = { "#" ~ "[" ~ "cfg" ~ "(" ~ cfg_condition ~ ")" ~ "]" ~ expr ~ ("else" ~ expr)? }
+cfg_condition = {
+    ("target" ~ "=" ~ string) |
+    ("feature" ~ "=" ~ string) |
+    "debug" |
+    "release" |
+    "test"
+}
+
+// Phase 4G: Regular expression literals
+regex_literal = { "r/" ~ regex_pattern ~ "/" ~ regex_flags? }
+regex_pattern = { (!"/" ~ ANY)* }
+regex_flags = { ("i" | "g" | "m" | "s" | "u" | "y")+ }
+
+// Phase 4G: String slicing
+expr_string_slice = { expr ~ "[" ~ slice_range ~ "]" }
+slice_range = {
+    (expr? ~ ".." ~ expr? ~ ("::" ~ expr)?) |
+    (expr)
+}
+
+// Phase 4G: Format strings (advanced)
+format_string = { "f" ~ string_with_format }
+string_with_format = { "\"" ~ format_part* ~ "\"" }
+format_part = {
+    format_expr |
+    format_text
+}
+format_expr = { "{" ~ expr ~ format_spec? ~ "}" }
+format_spec = { ":" ~ format_align? ~ format_sign? ~ format_width? ~ ("." ~ format_precision)? ~ format_type? }
+format_align = { ("<" | ">" | "^") }
+format_sign = { ("+" | "-" | " ") }
+format_width = { ASCII_DIGIT+ }
+format_precision = { ASCII_DIGIT+ }
+format_type = { ("d" | "x" | "X" | "o" | "b" | "e" | "E" | "f" | "F" | "s") }
+format_text = { (!("{" | "\"") ~ ANY)+ }
+
+// Phase 4G: Destructuring assignment
+destructuring_assign = { pattern ~ "=" ~ expr }
+
+// Phase 4E: Try-catch blocks
+expr_try = { "try" ~ block ~ catch_clause* }
+catch_clause = { "catch" ~ ident? ~ ("as" ~ ident)? ~ block }
+
+// Phase 4E: Guard clause
+expr_guard = { "guard" ~ expr ~ "else" ~ block }
+
+// Phase 4E: Labeled block
+expr_labeled_block = { label ~ ":" ~ block }
+label = @{ "'" ~ ident }
+
+// Phase 4C: Monadic do-notation
+expr_do = { "do" ~ "{" ~ do_binding* ~ expr ~ "}" }
+do_binding = { "let" ~ pattern ~ "<-" ~ expr ~ ";" }
+
+// Phase 4D: Concurrency expressions
+expr_spawn = { "spawn" ~ block }
+expr_channel = { "channel" ~ ("(" ~ expr ~ ")")? }
+expr_select = { "select" ~ "!" ~ "{" ~ select_arm+ ~ "}" }
+expr_scope = { "scope" ~ "(" ~ "|" ~ ident ~ "|" ~ block ~ ")" }
+expr_atomic = { "atomic" ~ "::" ~ atomic_op ~ "(" ~ expr ~ ("," ~ expr)? ~ ("," ~ memory_ordering)? ~ ")" }
+expr_future_join = { "Future" ~ "::" ~ "join" ~ "(" ~ expr ~ ("," ~ expr)* ~ ")" }
+expr_future_select = { "Future" ~ "::" ~ "select" ~ "(" ~ expr ~ ("," ~ expr)* ~ ")" }
+expr_future_race = { "Future" ~ "::" ~ "race" ~ "(" ~ expr ~ ("," ~ expr)* ~ ")" }
+expr_timeout = { "timeout" ~ "(" ~ expr ~ ")" }
+expr_stream_from_iter = { "Stream" ~ "::" ~ "from_iter" ~ "(" ~ expr ~ ")" }
+
+// Phase 4D: Select arms
+select_arm = {
+    select_pattern ~ "=>" ~ block ~ ","?
+}
+
+select_pattern = {
+    (pattern ~ "=" ~ expr_postfix ~ ".recv" ~ "(" ~ ")") |
+    (expr_postfix ~ ".send" ~ "(" ~ expr ~ ")") |
+    ("timeout" ~ "(" ~ expr ~ ")") |
+    "_"
+}
+
+// Phase 4D: Atomic operations
+atomic_op = {
+    "load" | "store" | "swap" | "compare_exchange" |
+    "fetch_add" | "fetch_sub" | "fetch_and" | "fetch_or" | "fetch_xor"
+}
+
+// Phase 4D: Memory ordering
+memory_ordering = {
+    "Relaxed" | "Acquire" | "Release" | "AcqRel" | "SeqCst"
+}
+
+// Phase 4C: Placeholder for partial application
+expr_placeholder = { "_" ~ !ident }
+
+// Phase 4C: Force lazy evaluation
+expr_force = { "force" ~ "(" ~ expr ~ ")" }
+
+// Phase 4A: Move expression
+expr_move = { "move" ~ expr_primary }
+
+// Phase 4A: Borrow expression
+expr_borrow = { "&" ~ "mut"? ~ expr_primary }
+
+// Phase 4A: Perform an effect
+expr_perform = { "perform" ~ ident ~ "(" ~ (expr ~ ("," ~ expr)*)? ~ ")" }
+
+// Phase 4A: Handle effects
+expr_handle = { "handle" ~ block ~ "with" ~ "{" ~ effect_handler+ ~ "}" }
+
+// Phase 4A: Effect handler
+effect_handler = { ident ~ "(" ~ (pattern ~ ("," ~ pattern)*)? ~ ")" ~ "=>" ~ block }
+
+// Phase 4A: Resume from handler
+expr_resume = { "resume" ~ "(" ~ expr ~ ")" }
+
+// Phase 4A: Inline WebAssembly assembly
+expr_asm = { "asm" ~ "!" ~ "{" ~ wasm_instruction* ~ "}" }
+
+// Phase 4A: WebAssembly instructions
+wasm_instruction = {
+    wasm_local_get | wasm_local_set | wasm_const |
+    wasm_arithmetic | wasm_comparison | wasm_control |
+    wasm_raw
+}
+
+wasm_local_get = { "local.get" ~ number }
+wasm_local_set = { "local.set" ~ number }
+wasm_const = { ("i32.const" | "i64.const" | "f32.const" | "f64.const") ~ number }
+wasm_arithmetic = { "i32.add" | "i32.sub" | "i32.mul" | "f64.add" | "f64.sub" | "f64.mul" | "f64.div" }
+wasm_comparison = { "i32.eq" | "i32.ne" | "f64.eq" | "f64.ne" | "f64.lt" | "f64.gt" }
+wasm_control = { "drop" | "return" | ("call" ~ number) }
+wasm_raw = { ident }
 
 // Block expression - wraps a block for use in expression context
 expr_block = { block }
 
 // Literals
 literal = {
+    regex_literal |
     number |
     string |
     boolean |
@@ -210,11 +473,13 @@ stmt = {
     stmt_return |
     stmt_guard |
     stmt_defer |
+    stmt_break |
+    stmt_continue |
     stmt_expr
 }
 
 stmt_let = {
-    "let" ~ "mut"? ~ pattern ~ (":" ~ type_expr)? ~ ("=" ~ expr)? ~ ";"
+    "lazy"? ~ "let" ~ "mut"? ~ pattern ~ (":" ~ type_expr)? ~ ("=" ~ expr)? ~ ";"
 }
 
 stmt_return = { "return" ~ expr? ~ ";" }
@@ -224,6 +489,10 @@ stmt_guard = {
 }
 
 stmt_defer = { "defer" ~ block }
+
+stmt_break = { "break" ~ label? ~ expr? ~ ";" }
+
+stmt_continue = { "continue" ~ label? ~ ";" }
 
 stmt_expr = { expr ~ ";"? }
 
@@ -240,16 +509,34 @@ block = {
 // ============================================================================
 
 function = {
+    decorator* ~
     "async"? ~ "gen"? ~ "pure"? ~
     "fn" ~ ident ~
-    "(" ~ params? ~ ")" ~
+    lifetime_params? ~
+    curried_params ~
     ("->" ~ type_expr)? ~
+    where_clause? ~
     contract* ~
     block
 }
 
+// Phase 4C: Function decorators
+decorator = { "@" ~ ident }
+
+// Phase 4C: Curried parameters - one or more parameter groups
+curried_params = { param_group+ }
+param_group = { "(" ~ params? ~ ")" }
+
+// Phase 4B: Where clause for type bounds
+where_clause = { "where" ~ where_predicate ~ ("," ~ where_predicate)* ~ ","? }
+where_predicate = { ident ~ ":" ~ type_bound ~ ("+" ~ type_bound)* }
+type_bound = { ident | lifetime }
+
+// Phase 4A: Lifetime parameters
+lifetime_params = { "<" ~ lifetime ~ ("," ~ lifetime)* ~ ">" }
+
 params = { param ~ ("," ~ param)* ~ ","? }
-param = { pattern ~ (":" ~ type_expr)? }
+param = { pattern ~ (":" ~ type_expr)? ~ ("=" ~ expr)? }
 
 contract = {
     "@" ~ contract_kind ~ "(" ~ expr ~ ")"
@@ -262,10 +549,51 @@ contract_kind = { "requires" | "ensures" | "invariant" }
 // ============================================================================
 
 struct_def = {
-    "struct" ~ ident ~ "{" ~ (struct_field_def ~ ("," ~ struct_field_def)*)? ~ ","? ~ "}"
+    attribute* ~ (struct_tuple | struct_named)
 }
 
+// Phase 4B: Tuple struct (newtype pattern)
+struct_tuple = {
+    "struct" ~ ident ~ type_params? ~ "(" ~ (type_expr ~ ("," ~ type_expr)*)? ~ ","? ~ ")" ~ ";"
+}
+
+// Named struct with fields
+struct_named = {
+    "struct" ~ ident ~ type_params? ~ "{" ~ (struct_field_def ~ ("," ~ struct_field_def)*)? ~ ","? ~ "}"
+}
+
+// Phase 4F: Attributes (derive and custom)
+attribute = { "#" ~ "[" ~ attribute_content ~ "]" }
+attribute_content = {
+    ("derive" ~ "(" ~ ident ~ ("," ~ ident)* ~ ")") |
+    (ident ~ ("(" ~ expr ~ ("," ~ expr)* ~ ")")?)
+}
+
+// Phase 4B: Type parameters with optional variance annotations
+type_params = { "<" ~ type_param ~ ("," ~ type_param)* ~ ">" }
+type_param = { ident ~ (":" ~ ident ~ ("+" ~ ident)*)? }
+
 struct_field_def = { ident ~ ":" ~ type_expr }
+
+// ============================================================================
+// ENUMS (Phase 4B: GADTs)
+// ============================================================================
+
+enum_def = {
+    "enum" ~ ident ~ type_params? ~ "{" ~ 
+    (enum_variant ~ ("," ~ enum_variant)*)? ~ ","? ~ "}"
+}
+
+enum_variant = {
+    ident ~ enum_variant_fields? ~ ("->" ~ type_expr)?
+}
+
+enum_variant_fields = {
+    "(" ~ (enum_variant_field ~ ("," ~ enum_variant_field)*)? ~ ","? ~ ")" |
+    "{" ~ (struct_field_def ~ ("," ~ struct_field_def)*)? ~ ","? ~ "}"
+}
+
+enum_variant_field = { type_expr }
 
 // ============================================================================
 // IMPORTS
@@ -286,14 +614,65 @@ extend_block = {
 }
 
 // ============================================================================
+// TRAITS (Phase 4A)
+// ============================================================================
+
+trait_def = {
+    "trait" ~ ident ~ "{" ~ trait_item* ~ "}"
+}
+
+// Phase 4B: Trait items (methods and associated types)
+trait_item = {
+    trait_associated_type | trait_method
+}
+
+// Phase 4B: Associated type with optional bounds and default
+trait_associated_type = {
+    "type" ~ ident ~ (":" ~ ident ~ ("+" ~ ident)*)? ~ ("=" ~ type_expr)? ~ ";"
+}
+
+trait_method = {
+    "fn" ~ ident ~ "(" ~ params? ~ ")" ~ ("->" ~ type_expr)? ~ ";"
+}
+
+trait_impl = {
+    "impl" ~ ident ~ "for" ~ type_expr ~ "{" ~ impl_item* ~ "}"
+}
+
+// Phase 4G: Impl block items (functions and associated types)
+impl_item = {
+    impl_associated_type | function
+}
+
+// Phase 4G: Associated type in impl block
+impl_associated_type = {
+    "type" ~ ident ~ "=" ~ type_expr ~ ";"
+}
+
+// ============================================================================
 // TOP LEVEL ITEMS
 // ============================================================================
 
 item = {
+    trait_impl |
+    trait_def |
+    type_fn_def |
+    type_alias |
+    enum_def |
     function |
     struct_def |
     extend_block |
     import
+}
+
+// Phase 4B: Type-level function
+type_fn_def = {
+    "typefn" ~ ident ~ "<" ~ ident ~ ("," ~ ident)* ~ ">" ~ "=" ~ type_expr ~ ";"
+}
+
+// Phase 4B: Type alias
+type_alias = {
+    "type" ~ ident ~ type_params? ~ "=" ~ type_expr ~ ";"
 }
 
 // ============================================================================
@@ -303,3 +682,6 @@ item = {
 program = {
     SOI ~ item* ~ EOI
 }
+
+
+

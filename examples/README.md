@@ -65,6 +65,43 @@ Demonstrates:
 node phase3_features.js
 ```
 
+### Phase 4: Advanced Language Features
+
+**File**: `phase4_features.rscc`
+
+Demonstrates 72 advanced features across 8 categories:
+- **4A**: Memory safety (lifetimes, borrowing, tail call optimisation)
+- **4B**: Advanced types (union types, GADTs, higher-kinded types)
+- **4C**: Functional programming (partial application, currying, lenses)
+- **4D**: Concurrency (async/await, channels, parallel iterators)
+- **4E**: Control flow (try blocks, guard clauses, defer)
+- **4F**: Metaprogramming (macros, reflection, code generation)
+- **4G**: Domain-specific (regex literals, operator overloading)
+- **4H**: Utilities (default parameters, const functions)
+
+**Run it:**
+```bash
+../target/release/rsxe phase4_features.rscc
+node phase4_features.js
+```
+
+### Hide and Seek Game
+
+**File**: `hideseek.rscc`
+
+A complete text adventure game demonstrating RustScript in action:
+- Structs and data modelling
+- Pattern matching
+- Control flow
+- User input handling
+- Game state management
+
+**Run it:**
+```bash
+../target/release/rsxe hideseek.rscc
+node hideseek.js
+```
+
 ## Example Structure
 
 Each example file follows this structure:
@@ -83,6 +120,8 @@ We recommend exploring the examples in this order:
 2. **phase1_features.rscc** - Learn modern syntax enhancements
 3. **phase2_features.rscc** - Explore advanced function capabilities
 4. **phase3_features.rscc** - Master safety and metaprogramming
+5. **phase4_features.rscc** - Discover 72 advanced language features
+6. **hideseek.rscc** - See a complete application in action
 
 ## Compiling to WebAssembly
 
@@ -138,15 +177,18 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md) for guidelines.
 - `hello_world.rscc` - Your first programme
 
 ### Feature Demonstrations
-- `phase1_features.rscc` - Syntax enhancements
-- `phase2_features.rscc` - Function enhancements
-- `phase3_features.rscc` - Safety features
+- `phase1_features.rscc` - Syntax enhancements (4 features)
+- `phase2_features.rscc` - Function enhancements (3 features)
+- `phase3_features.rscc` - Safety features (3 features)
+- `phase4_features.rscc` - Advanced features (72 features)
+
+### Complete Applications
+- `hideseek.rscc` - Text adventure game
 
 ### Coming Soon
 - Data structures and algorithms
 - Web application examples
 - API client examples
-- Game development examples
 
 ## Need Help?
 

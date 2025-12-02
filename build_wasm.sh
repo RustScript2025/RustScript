@@ -102,32 +102,15 @@ if [ ! -f "target/release/rjsc" ]; then
     echo ""
 fi
 
-# Build WebAssembly runtime
+# Build WebAssembly runtime from main project
 print_info "Building WebAssembly runtime..."
 
-# Check if there's a wasm runtime crate to build
-if [ -d "wasm-runtime" ]; then
-    cd wasm-runtime
-    wasm-pack build --target web --out-dir ../www/lib
-    if [ $? -ne 0 ]; then
-        print_error "Failed to build WebAssembly runtime"
-        exit 1
-    fi
-    cd ..
-    print_success "WebAssembly runtime built successfully"
-elif [ -d "runtime" ]; then
-    cd runtime
-    wasm-pack build --target web --out-dir ../www/lib
-    if [ $? -ne 0 ]; then
-        print_error "Failed to build WebAssembly runtime"
-        exit 1
-    fi
-    cd ..
-    print_success "WebAssembly runtime built successfully"
-else
-    print_warning "No wasm-runtime or runtime directory found"
-    print_info "Skipping WebAssembly runtime build"
+wasm-pack build --target web --out-dir www/pkg
+if [ $? -ne 0 ]; then
+    print_error "Failed to build WebAssembly runtime"
+    exit 1
 fi
+print_success "WebAssembly runtime built to www/pkg/"
 
 echo ""
 
