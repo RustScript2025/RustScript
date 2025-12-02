@@ -10,7 +10,7 @@
 
 **Author**: Michael Lauzon
 
-RustScript is a modern **web-scripting language** that compiles to WebAssembly for browser-based applications. It synthesises the best ideas from 60+ years of scripting language evolution, starting with Rust's memory safety and JavaScript's ergonomic syntax as a foundation, whilst incorporating powerful features from languages spanning LISP (1958) to Zig (2016).
+RustScript is a modern **web-scripting language** that compiles to WebAssembly for browser-based applications. It synthesises the best ideas from 60+ years of scripting language evolution, starting with Rust's memory safety and JavaScript's ergonomic syntax as a foundation, whilst incorporating powerful features from languages spanning LISP (1958) to modern languages (2025).
 
 ## What's New in v0.4.0
 
