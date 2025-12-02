@@ -10,7 +10,33 @@
 
 **Author**: Michael Lauzon
 
-RustScript is a modern **web-scripting language** that compiles to WebAssembly for browser-based applications. It synthesises the best ideas from 60+ years of scripting language evolution, starting with Rust's memory safety and JavaScript's ergonomic syntax as a foundation, whilst incorporating powerful features from languages spanning LISP (1958) to modern languages (2025).
+RustScript is a modern **web-scripting language** that compiles to WebAssembly for browser-based applications. It synthesises the best ideas from 60+ years of scripting language evolution, starting with Rust's memory safety and JavaScript's ergonomic syntax as a foundation, whilst incorporating powerful features from languages spanning LISP (1958) to Zig (2016).
+
+## Table of Contents
+
+- [What's New in v0.4.0](#whats-new-in-v040)
+- [Language Heritage](#language-heritage)
+- [Design Philosophy](#design-philosophy)
+- [Installation](#installation)
+- [Browser Runtime](#browser-runtime)
+- [Example Games](#example-games)
+- [Usage](#usage)
+- [Getting Started](#getting-started)
+- [Common Issues for Beginners](#common-issues-for-beginners)
+- [Language Guide & Examples](#language-guide--examples)
+- [Scripting Language Features & Their Origins](#scripting-language-features--their-origins)
+- [Contributing](#contributing)
+- [Compiler Implementation](#compiler-implementation)
+- [License](#license)
+- [Phase 1 Features](#phase-1-features)
+- [Phase 2 Features](#phase-2-features)
+- [Phase 3 Features](#phase-3-features)
+- [Phase 4 Features (NEW!)](#phase-4-features-new)
+- [All Features Summary](#all-features-summary)
+- [Feature Attribution](#feature-attribution)
+- [Why These Features?](#why-these-features)
+- [Standing on the Shoulders of Giants](#standing-on-the-shoulders-of-giants)
+- [Further Reading](#further-reading)
 
 ## What's New in v0.4.0
 
@@ -146,7 +172,7 @@ You need to run the build script first (`build_wasm.bat` on Windows or `./build_
 
 ## Example Games
 
-RustScript includes example games demonstrating the language's capabilities. **Hide and Seek**, a complete text adventure game, is available in three versions showcasing different aspects of RustScript:
+RustScript includes example games demonstrating the language's capabilities. **Hide and Seek**, a complete text adventure game, is available in four versions showcasing different aspects of RustScript:
 
 ### 🎮 [Hide and Seek v1](www/hideseek.html) - JavaScript Version
 The original full-featured game implemented in JavaScript. Demonstrates the game design that was then ported to RustScript.
@@ -166,6 +192,12 @@ The complete playable game with async input system and all features.
 - **File**: `www/hideseek_v3.html`
 - **Features**: Full game, difficulty selection, scoring, hints, map
 - **Tech**: JavaScript with RustScript-style async input
+
+### ⭐ [Hide and Seek v4](www/hideseek_v4.html) - RustScript 0.4.0 Patterns
+Showcases RustScript 0.4.0 coding patterns with enhanced visuals and live stats.
+- **File**: `www/hideseek_v4.html`
+- **Features**: Full game with pattern matching, destructuring, spread operator, immutable updates
+- **Tech**: JavaScript demonstrating RustScript 0.4.0 idioms
 
 ### RustScript Source Code
 The game logic is also available as pure RustScript source:
@@ -418,6 +450,97 @@ fn process_email(email: string) {
 }
 ```
 
+### 7. Memory Safety
+
+RustScript provides compile-time memory safety through borrowing and lifetimes.
+
+**Rationale**: Memory bugs (use-after-free, dangling pointers, data races) are a major source of security vulnerabilities. RustScript's borrow checker ensures at compile time that references are always valid, without runtime overhead.
+
+```rustscript
+// Borrowing - multiple readers OR one writer
+fn read_balance(account: &Account) -> number {
+    account.balance  // Immutable borrow
+}
+
+fn deposit(account: &mut Account, amount: number) {
+    account.balance += amount;  // Mutable borrow
+}
+
+// Lifetimes - compiler ensures references outlive their use
+fn longest<'a>(x: &'a string, y: &'a string) -> &'a string {
+    if x.length > y.length { x } else { y }
+}
+```
+
+### 8. Functional Programming
+
+RustScript supports advanced functional programming patterns.
+
+**Rationale**: Functional patterns like partial application and composition enable building complex behaviour from simple, reusable pieces. These patterns reduce code duplication and make testing easier.
+
+```rustscript
+// Partial application - fix some arguments
+fn add(a: number, b: number) -> number { a + b }
+let add5 = add(5, _);
+console.log(add5(10));  // 15
+
+// Function composition - chain operations
+fn add_one(x: number) -> number { x + 1 }
+fn double(x: number) -> number { x * 2 }
+let process = add_one >> double;
+console.log(process(5));  // 12
+
+// Currying - single-argument function chains
+fn multiply(a: number)(b: number) -> number { a * b }
+let double = multiply(2);
+console.log(double(5));  // 10
+```
+
+### 9. Async Programming
+
+RustScript provides async/await for non-blocking operations.
+
+**Rationale**: Modern web applications require handling many concurrent operations efficiently. Async/await provides a clean syntax for asynchronous code that reads like synchronous code, avoiding callback hell.
+
+```rustscript
+async fn fetch_user(id: number) -> User {
+    let response = await http.get("/api/users/{id}");
+    await response.json()
+}
+
+async fn main() {
+    let user = await fetch_user(42);
+    console.log("Got user: {user.name}");
+}
+```
+
+### 10. Metaprogramming
+
+RustScript supports compile-time code generation and macros.
+
+**Rationale**: Metaprogramming eliminates boilerplate by generating repetitive code at compile time. This keeps source code DRY whilst maintaining runtime performance.
+
+```rustscript
+// Compile-time execution
+comptime {
+    const BUFFER_SIZE = 1024;
+    const FIB_10 = fibonacci(10);  // Computed at compile time
+}
+
+// Declarative macros
+macro_rules! vec {
+    ($($elem:expr),*) => {
+        {
+            let mut v = Vec::new();
+            $(v.push($elem);)*
+            v
+        }
+    }
+}
+
+let numbers = vec![1, 2, 3, 4, 5];
+```
+
 ## Scripting Language Features & Their Origins
 
 RustScript's feature set represents a curated selection from scripting language history:
@@ -504,7 +627,7 @@ The RustScript compiler is built with modern Rust practices:
 This project is licensed under the GPL-2.0 Licence.
 
 
-## Phase 1-4 Features (NEW!)
+## Phase 1 Features
 
 RustScript now includes **82 advanced features** across 4 major phases, inspired by 60+ languages spanning 68 years:
 
@@ -532,7 +655,7 @@ let evens = [x * 2 for x in numbers if x % 2 == 0];
 See [Phase 1 Features Documentation](docs/PHASE1_FEATURES.md) for complete details and examples.
 
 
-## Phase 2 Features (NEW!)
+## Phase 2 Features
 
 Advanced function capabilities inspired by the best functional languages:
 
@@ -562,7 +685,7 @@ fn process(x: string, y: string) -> string { "Concat: {x}{y}" }
 See [Phase 2 Features Documentation](docs/PHASE2_FEATURES.md) for complete details and examples.
 
 
-## Phase 3 Features (NEW!)
+## Phase 3 Features
 
 Safety and metaprogramming inspired by Eiffel, Zig, and modern effect systems:
 
@@ -598,35 +721,22 @@ See [Phase 3 Features Documentation](docs/PHASE3_FEATURES.md) for complete detai
 
 ## Phase 4 Features (NEW!)
 
-**72 advanced features** bringing RustScript to production-ready status with memory safety, sophisticated types, functional programming, safe concurrency, and metaprogramming.
+Advanced features bringing RustScript to production-ready status, inspired by Rust, Haskell, and modern systems languages:
 
-Phase 4 represents the culmination of RustScript's evolution, drawing from the most advanced features in modern programming languages:
-
-### Phase 4A: Memory Safety (10 features)
-
-**Lifetimes** - Prevent dangling references at compile time:
+### Lifetimes
 ```rust
 fn longest<'a>(x: &'a string, y: &'a string) -> &'a string {
     if x.length > y.length { x } else { y }
 }
 ```
 
-**Borrowing** - Multiple readers OR one writer:
+### Borrowing
 ```rust
 fn read(data: &Account) -> number { data.balance }
 fn write(data: &mut Account, amount: number) { data.balance += amount; }
 ```
 
-**Tail Call Optimization** - Infinite recursion without stack overflow:
-```rust
-fn factorial(n: number, acc: number) -> number {
-    if n <= 1 { acc } else { factorial(n - 1, n * acc) }  // Optimized to loop
-}
-```
-
-### Phase 4B: Advanced Type System (15 features)
-
-**Union Types** - Value can be one of several types:
+### Union Types
 ```rust
 type StringOrNumber = string | number;
 
@@ -638,59 +748,7 @@ fn process(value: StringOrNumber) -> string {
 }
 ```
 
-**Newtype Pattern** - Zero-cost type safety:
-```rust
-struct Metres(number);
-struct Kilometres(number);
-
-fn calculate_speed(distance: Metres, time: Seconds) -> number {
-    distance.0 / time.0
-}
-// Can't accidentally pass Kilometres - compiler prevents it!
-```
-
-**GADTs** - Type-safe expression trees:
-```rust
-enum Expr<T> {
-    IntLit(i32) -> Expr<i32>,
-    BoolLit(bool) -> Expr<bool>,
-    Add(Expr<i32>, Expr<i32>) -> Expr<i32>,
-}
-```
-
-### Phase 4C: Functional Programming (10 features)
-
-**Partial Application** - Fix some arguments:
-```rust
-fn add(a: number, b: number) -> number { a + b }
-
-let add5 = add(5, _);
-console.log(add5(10));  // 15
-```
-
-**Function Composition** - Chain operations:
-```rust
-fn add_one(x: number) -> number { x + 1 }
-fn double(x: number) -> number { x * 2 }
-
-let process = add_one >> double >> square;
-let result = process(5);  // ((5 + 1) * 2)^2 = 144
-```
-
-**Currying** - Single-argument function chains:
-```rust
-fn multiply(a: number)(b: number)(c: number) -> number {
-    a * b * c
-}
-
-let mul2 = multiply(2);
-let mul2_3 = mul2(3);
-let result = mul2_3(4);  // 24
-```
-
-### Phase 4D: Concurrency & Parallelism (8 features)
-
-**Async/Await** - Non-blocking operations:
+### Async/Await
 ```rust
 async fn fetch_user(id: number) -> Result<User, Error> {
     let response = await http.get("https://api.example.com/users/{id}")?;
@@ -698,7 +756,7 @@ async fn fetch_user(id: number) -> Result<User, Error> {
 }
 ```
 
-**Channels** - Message passing between tasks:
+### Channels
 ```rust
 let (tx, rx) = channel();
 
@@ -713,62 +771,7 @@ for _ in 0..5 {
 }
 ```
 
-**Parallel Iterators** - Data parallelism:
-```rust
-let results = numbers
-    .par_iter()
-    .map(|x| expensive_computation(x))
-    .collect();
-```
-
-### Phase 4E: Advanced Control Flow (10 features)
-
-**Try Blocks** - Handle multiple error types:
-```rust
-let result = try {
-    let data = read_file()?;
-    let parsed = parse_json(data)?;
-    Ok(parsed)
-} catch FileError as e {
-    Err(AppError::File(e))
-} catch ParseError as e {
-    Err(AppError::Parse(e))
-};
-```
-
-**Guard Clauses** - Early returns without nesting:
-```rust
-fn process_order(order: Order) -> Result<(), Error> {
-    guard order.items.length > 0 else {
-        return Err(Error::EmptyOrder);
-    };
-    
-    guard order.total > 0 else {
-        return Err(Error::InvalidTotal);
-    };
-    
-    // Happy path is prominent
-    Ok(())
-}
-```
-
-**Defer** - Guaranteed cleanup:
-```rust
-fn process_file(path: string) -> Result<(), Error> {
-    let file = open(path)?;
-    
-    defer {
-        close(file);  // Always runs, even on error
-    };
-    
-    let data = read(file)?;
-    Ok(())
-}
-```
-
-### Phase 4F: Metaprogramming & Macros (8 features)
-
-**Declarative Macros** - Pattern-based code generation:
+### Declarative Macros
 ```rust
 macro_rules! vec {
     ($($x:expr),*) => {
@@ -783,41 +786,7 @@ macro_rules! vec {
 let numbers = vec!(1, 2, 3, 4, 5);
 ```
 
-**Procedural Macros** - Automatic trait implementation:
-```rust
-#[derive(Debug, Clone, PartialEq)]
-struct User {
-    id: number,
-    name: string,
-    email: string,
-}
-
-let user1 = User { id: 1, name: "Alice", email: "alice@example.com" };
-let user2 = user1.clone();  // Clone trait auto-implemented
-```
-
-**Compile-Time Reflection** - Type introspection:
-```rust
-comptime {
-    let info = @typeInfo(Point);
-    console.log("Type: {info.name}");
-    console.log("Fields: {info.fields.length}");
-}
-```
-
-### Phase 4G: Domain-Specific Features (6 features)
-
-**Regex Literals** - First-class pattern matching:
-```rust
-let email_pattern = r/[\w\.-]+@[\w\.-]+\.\w+/;
-let phone_pattern = r/\d{3}-\d{3}-\d{4}/g;
-
-if email_pattern.test(email) {
-    console.log("Valid email");
-}
-```
-
-**Operator Overloading** - Custom operators for your types:
+### Operator Overloading
 ```rust
 struct Vec2 { x: number, y: number }
 
@@ -830,16 +799,7 @@ impl Add for Vec2 {
 let sum = v1 + v2;  // Uses custom Add implementation
 ```
 
-**Destructuring** - Pattern-based assignment:
-```rust
-let (x, y) = point;
-let User { name, age } = user;
-let ((a, b), (c, d)) = ((1, 2), (3, 4));
-```
-
-### Phase 4H: Additional Utilities (5 features)
-
-**Default Parameters** - Sensible defaults:
+### Default Parameters
 ```rust
 fn greet(name: string = "World", formal: bool = false) {
     if formal {
@@ -854,17 +814,7 @@ greet("Alice");             // "Hi, Alice!"
 greet("Bob", true);         // "Good day, Bob!"
 ```
 
-**Const Functions** - Compile-time computation:
-```rust
-const fn factorial(n: number) -> number {
-    if n <= 1 { 1 } else { n * factorial(n - 1) }
-}
-
-const FACT_5 = factorial(5);   // Computed at compile time
-const FACT_10 = factorial(10); // No runtime cost!
-```
-
-See [Phase 4 Features Documentation](docs/PHASE4_FEATURES.md) for complete details on all 72 features.
+See [Phase 4 Features Documentation](docs/PHASE4_FEATURES.md) for complete details.
 
 ## All Features Summary
 
@@ -873,15 +823,7 @@ RustScript now includes **82 advanced features** across 4 phases:
 **Phase 1 - Syntax (4 features):** String interpolation, Optional chaining, Null coalescing, List comprehensions  
 **Phase 2 - Functions (3 features):** Pattern matching in function heads, Generators, Multiple dispatch  
 **Phase 3 - Safety (3 features):** Design by Contract, Effect system, Compile-time execution  
-**Phase 4 - Advanced (72 features):**
-- **4A - Memory Safety (10):** Lifetimes, Borrowing, Move semantics, Tail call optimisation, Pattern guards, Traits, Const generics, Algebraic effects, Inline assembly, RAII
-- **4B - Type System (15):** Union/intersection types, Type aliases, Newtype pattern, Associated types, Higher-kinded types, Phantom types, Refinement types, Dependent types, Type-level programming, Existential types, GADTs, Variance, Type bounds, Subtyping, Structural typing
-- **4C - Functional (10):** Partial application, Function composition, Currying, Lazy evaluation, Memoisation, Immutable data structures, Transducers, Do-notation, Applicative functors, Lenses
-- **4D - Concurrency (8):** Async/await, Channels, Futures & streams, Mutex & RwLock, Atomic operations, Parallel iterators, Scoped threads, Select
-- **4E - Control Flow (10):** Try blocks, Try operator (?), Guard clauses, Labelled blocks, Catch expressions, Panic, Defer, Conditional compilation, Const assertions, Unreachable
-- **4F - Metaprogramming (8):** Declarative macros, Procedural macros, Attribute macros, Reflection, Code generation, Quasiquoting, Hygiene, Syntax extensions
-- **4G - Domain-Specific (6):** Regex literals, Format strings, String slicing, Operator overloading, Custom indexing, Destructuring
-- **4H - Utilities (5):** Ranges with step, Zip iterator, Enumerate, Default parameters, Const functions
+**Phase 4 - Advanced (72 features):** Lifetimes, Borrowing, Move semantics, Tail call optimisation, Pattern guards, Traits, Const generics, Algebraic effects, Inline assembly, RAII, Union/intersection types, Type aliases, Newtype pattern, Associated types, Higher-kinded types, Phantom types, Refinement types, Dependent types, Type-level programming, Existential types, GADTs, Variance, Type bounds, Subtyping, Structural typing, Partial application, Function composition, Currying, Lazy evaluation, Memoisation, Immutable data structures, Transducers, Do-notation, Applicative functors, Lenses, Async/await, Channels, Futures & streams, Mutex & RwLock, Atomic operations, Parallel iterators, Scoped threads, Select, Try blocks, Try operator (?), Guard clauses, Labelled blocks, Catch expressions, Panic, Defer, Conditional compilation, Const assertions, Unreachable, Declarative macros, Procedural macros, Attribute macros, Reflection, Code generation, Quasiquoting, Hygiene, Syntax extensions, Regex literals, Format strings, String slicing, Operator overloading, Custom indexing, Destructuring, Ranges with step, Zip iterator, Enumerate, Default parameters, Const functions
 
 Drawing inspiration from 60+ languages spanning 68 years of computing history, from LISP (1958) to modern languages like Zig (2016) and beyond (2025).
 
@@ -936,95 +878,80 @@ Each RustScript feature has a rich scripting language heritage:
 - Inspired by: Zig (2016), D CTFE (2007), C++ constexpr (2011), Nim (2008)
 - Why: Move computation from runtime to compile time
 
-### Phase 4: Advanced Language Features (62 features)
+### Phase 4: Advanced Language Features (72 features)
 
-#### Phase 4A: Core Memory Safety (10 features)
-- **Lifetimes** - Rust (2010), Cyclone (2002)
-- **Borrowing & References** - Rust (2010)
-- **Move Semantics** - Rust (2010), C++ (2011)
-- **Tail Call Optimisation** - Scheme (1975), Lua (1993)
-- **Pattern Guards** - Haskell (1990), Erlang (1986)
-- **Traits (RAII & Drop)** - Rust (2010), C++ RAII (1984)
-- **Const Generics** - Rust (2020), C++ templates (1990)
-- **Algebraic Effects** - Eff (2012), Koka (2012)
-- **Inline Assembly** - Rust (2015), C (1972)
-- **Complete Trait System** - Rust (2010), Haskell type classes (1988)
-
-#### Phase 4B: Advanced Type System (15 features)
-- **Union & Intersection Types** - TypeScript (2012), Ceylon (2011)
-- **Type Aliases** - Haskell (1990), Rust (2010), TypeScript (2012)
-- **Newtype Pattern** - Haskell (1990), Rust (2010)
-- **Associated Types** - Rust (2015), Haskell (1996)
-- **Higher-Kinded Types** - Haskell (1990), Scala (2004)
-- **Phantom Types** - Haskell (1990), Rust (2010)
-- **Refinement Types** - Liquid Haskell (2008), F* (2011)
-- **Dependent Types** - Idris (2007), Agda (2007), Coq (1989)
-- **Type-Level Programming** - Haskell (1990), TypeScript (2012)
-- **Existential Types** - Haskell (1990), Rust impl Trait (2018)
-- **GADTs** - Haskell (2003), OCaml (2004)
-- **Variance Annotations** - Scala (2004), Kotlin (2011)
-- **Type Bounds** - Rust (2010), Haskell (1988), Java (2004)
-- **Subtyping** - Scala (2004), TypeScript (2012)
-- **Structural Typing** - TypeScript (2012), Go (2009)
-
-#### Phase 4C: Functional Programming (10 features)
-- **Partial Application** - Haskell (1990), ML (1973), F# (2005)
-- **Function Composition** - Haskell (1990), F# (2005), Elixir (2011)
-- **Currying** - Haskell (1990), ML (1973), OCaml (1996)
-- **Lazy Evaluation** - Haskell (1990), Miranda (1985)
-- **Memoisation** - Common Lisp (1984), Python decorators (2004)
-- **Immutable Data Structures** - Clojure (2007), Scala (2004)
-- **Transducers** - Clojure (2014)
-- **Do-Notation** - Haskell (1990)
-- **Applicative Functors** - Haskell (2008)
-- **Lenses** - Haskell (2012)
-
-#### Phase 4D: Concurrency & Parallelism (8 features)
-- **Async/Await** - C# (2012), JavaScript (2017), Rust (2019)
-- **Channels** - Go (2009), Rust (2015)
-- **Futures & Streams** - Scala (2010), Rust (2016)
-- **Mutex & RwLock** - Rust (2010), C++ (2011)
-- **Atomic Operations** - C++ (2011), Rust (2015)
-- **Parallel Iterators** - Rayon/Rust (2016)
-- **Scoped Threads** - Rust (2022)
-- **Select** - Go (2009), Rust (2015)
-
-#### Phase 4E: Advanced Control Flow (10 features)
-- **Try Blocks** - Rust (2018), Kotlin (2011)
-- **Try Operator (?)** - Rust (2016), Swift (2014)
-- **Guard Clauses** - Swift (2014), Ruby (1995)
-- **Labelled Blocks** - Rust (2015), Java (1995)
-- **Catch Expressions** - Kotlin (2011), Scala (2004)
-- **Panic with Backtraces** - Rust (2015), Go (2009)
-- **Defer Statements** - Go (2009), Swift (2014), Zig (2016)
-- **Conditional Compilation** - Rust (2015), C (1972)
-- **Const Assertions** - Rust (2019), C++ (2011)
-- **Unreachable Markers** - Rust (2015), Swift (2014)
-
-#### Phase 4F: Metaprogramming & Macros (8 features)
-- **Declarative Macros** - Rust macro_rules! (2015), Lisp (1958)
-- **Procedural Macros** - Rust (2018), Lisp (1958)
-- **Attribute Macros** - Rust (2018), Java annotations (2004)
-- **Compile-Time Reflection** - Zig (2016), D (2001)
-- **Code Generation** - Zig comptime (2016), D CTFE (2007)
-- **Quasiquoting** - Lisp (1960s), Rust quote! (2016)
-- **Hygiene** - Scheme (1986), Rust (2015)
-- **Syntax Extensions** - Rust (2015), Scala (2004), Nim (2008)
-
-#### Phase 4G: Domain-Specific Features (6 features)
-- **Regex Literals** - Perl (1987), JavaScript (1995), Ruby (1995)
-- **Format Strings** - Python f-strings (2015), Rust (2018)
-- **String Slicing** - Python (1991), Rust (2015)
-- **Operator Overloading** - C++ (1983), Rust (2015), Python (1991)
-- **Custom Indexing** - C++ (1983), Rust (2015), Python (1991)
-- **Destructuring Assignment** - JavaScript ES6 (2015), Rust (2015), Python (1991)
-
-#### Phase 4H: Additional Utilities (5 features)
-- **Ranges with Step** - Python (1991), Ruby (1995), Rust (2015)
-- **Zip Iterator** - Python (1991), Haskell (1990), Rust (2015)
-- **Enumerate** - Python (1991), Rust (2015)
-- **Default Parameters** - Python (1991), JavaScript (2015), Rust (2021)
-- **Const Functions** - Rust (2018), C++ constexpr (2011)
+**Lifetimes** - Rust (2010), Cyclone (2002)
+**Borrowing & References** - Rust (2010)
+**Move Semantics** - Rust (2010), C++ (2011)
+**Tail Call Optimisation** - Scheme (1975), Lua (1993)
+**Pattern Guards** - Haskell (1990), Erlang (1986)
+**Traits (RAII & Drop)** - Rust (2010), C++ RAII (1984)
+**Const Generics** - Rust (2020), C++ templates (1990)
+**Algebraic Effects** - Eff (2012), Koka (2012)
+**Inline Assembly** - Rust (2015), C (1972)
+**Complete Trait System** - Rust (2010), Haskell type classes (1988)
+**Union & Intersection Types** - TypeScript (2012), Ceylon (2011)
+**Type Aliases** - Haskell (1990), Rust (2010), TypeScript (2012)
+**Newtype Pattern** - Haskell (1990), Rust (2010)
+**Associated Types** - Rust (2015), Haskell (1996)
+**Higher-Kinded Types** - Haskell (1990), Scala (2004)
+**Phantom Types** - Haskell (1990), Rust (2010)
+**Refinement Types** - Liquid Haskell (2008), F* (2011)
+**Dependent Types** - Idris (2007), Agda (2007), Coq (1989)
+**Type-Level Programming** - Haskell (1990), TypeScript (2012)
+**Existential Types** - Haskell (1990), Rust impl Trait (2018)
+**GADTs** - Haskell (2003), OCaml (2004)
+**Variance Annotations** - Scala (2004), Kotlin (2011)
+**Type Bounds** - Rust (2010), Haskell (1988), Java (2004)
+**Subtyping** - Scala (2004), TypeScript (2012)
+**Structural Typing** - TypeScript (2012), Go (2009)
+**Partial Application** - Haskell (1990), ML (1973), F# (2005)
+**Function Composition** - Haskell (1990), F# (2005), Elixir (2011)
+**Currying** - Haskell (1990), ML (1973), OCaml (1996)
+**Lazy Evaluation** - Haskell (1990), Miranda (1985)
+**Memoisation** - Common Lisp (1984), Python decorators (2004)
+**Immutable Data Structures** - Clojure (2007), Scala (2004)
+**Transducers** - Clojure (2014)
+**Do-Notation** - Haskell (1990)
+**Applicative Functors** - Haskell (2008)
+**Lenses** - Haskell (2012)
+**Async/Await** - C# (2012), JavaScript (2017), Rust (2019)
+**Channels** - Go (2009), Rust (2015)
+**Futures & Streams** - Scala (2010), Rust (2016)
+**Mutex & RwLock** - Rust (2010), C++ (2011)
+**Atomic Operations** - C++ (2011), Rust (2015)
+**Parallel Iterators** - Rayon/Rust (2016)
+**Scoped Threads** - Rust (2022)
+**Select** - Go (2009), Rust (2015)
+**Try Blocks** - Rust (2018), Kotlin (2011)
+**Try Operator (?)** - Rust (2016), Swift (2014)
+**Guard Clauses** - Swift (2014), Ruby (1995)
+**Labelled Blocks** - Rust (2015), Java (1995)
+**Catch Expressions** - Kotlin (2011), Scala (2004)
+**Panic with Backtraces** - Rust (2015), Go (2009)
+**Defer Statements** - Go (2009), Swift (2014), Zig (2016)
+**Conditional Compilation** - Rust (2015), C (1972)
+**Const Assertions** - Rust (2019), C++ (2011)
+**Unreachable Markers** - Rust (2015), Swift (2014)
+**Declarative Macros** - Rust macro_rules! (2015), Lisp (1958)
+**Procedural Macros** - Rust (2018), Lisp (1958)
+**Attribute Macros** - Rust (2018), Java annotations (2004)
+**Compile-Time Reflection** - Zig (2016), D (2001)
+**Code Generation** - Zig comptime (2016), D CTFE (2007)
+**Quasiquoting** - Lisp (1960s), Rust quote! (2016)
+**Hygiene** - Scheme (1986), Rust (2015)
+**Syntax Extensions** - Rust (2015), Scala (2004), Nim (2008)
+**Regex Literals** - Perl (1987), JavaScript (1995), Ruby (1995)
+**Format Strings** - Python f-strings (2015), Rust (2018)
+**String Slicing** - Python (1991), Rust (2015)
+**Operator Overloading** - C++ (1983), Rust (2015), Python (1991)
+**Custom Indexing** - C++ (1983), Rust (2015), Python (1991)
+**Destructuring Assignment** - JavaScript ES6 (2015), Rust (2015), Python (1991)
+**Ranges with Step** - Python (1991), Ruby (1995), Rust (2015)
+**Zip Iterator** - Python (1991), Haskell (1990), Rust (2015)
+**Enumerate** - Python (1991), Rust (2015)
+**Default Parameters** - Python (1991), JavaScript (2015), Rust (2021)
+**Const Functions** - Rust (2018), C++ constexpr (2011)
 
 ## Why These Features?
 
