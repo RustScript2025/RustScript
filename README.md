@@ -995,7 +995,7 @@ By learning from language history, RustScript avoids repeating past mistakes whi
 - 📖 [Phase 1 Features](docs/PHASE1_FEATURES.md) - String & syntax enhancements
 - 📖 [Phase 2 Features](docs/PHASE2_FEATURES.md) - Function enhancements
 - 📖 [Phase 3 Features](docs/PHASE3_FEATURES.md) - Safety & metaprogramming
-- 📖 [Phase 4 Features](docs/PHASE4_FEATURES.md) - Advanced language features (72 features)
+- 📖 [Phase 4 Features](docs/PHASE4_FEATURES.md) - Advanced language features
 - 📖 [Feature Attribution](docs/FEATURE_ATTRIBUTION.md) - Complete attribution for all 82 RustScript features with language origins
 - 💻 [Examples Directory](examples/) - Working code examples ([see examples README](examples/README.md))
 - 🤝 [Contributing Guide](CONTRIBUTING.md) - How to contribute to RustScript
