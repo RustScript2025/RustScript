@@ -674,7 +674,7 @@ This project is licensed under the GPL-2.0 Licence.
 
 ## Phase 1 Features
 
-RustScript now includes **82 advanced features** across 4 major phases, inspired by 60+ languages spanning 68 years:
+RustScript now includes **87 advanced features** across 4 major phases, inspired by 60+ languages spanning 68 years:
 
 ### String Interpolation
 ```rust

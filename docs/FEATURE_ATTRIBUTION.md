@@ -6,6 +6,15 @@ This document provides complete attribution for all 87 features in RustScript, s
 
 RustScript draws from **60+ languages** spanning **68 years** of computing history (1958-2025).
 
+## Table of Contents
+
+1. [Phase 1: String & Syntax Enhancements](#phase-1-string--syntax-enhancements-4-features)
+2. [Phase 2: Function Enhancements](#phase-2-function-enhancements-3-features)
+3. [Phase 3: Safety & Contracts](#phase-3-safety--contracts-3-features)
+4. [Phase 4: Advanced Language Features](#phase-4-advanced-language-features-77-features)
+5. [Language Timeline](#language-timeline)
+6. [Summary](#summary)
+
 ---
 
 ## Phase 1: String & Syntax Enhancements (4 features)

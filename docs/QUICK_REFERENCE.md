@@ -4,6 +4,34 @@
 
 A concise, scannable reference for RustScript syntax and features. For detailed explanations, see [TUTORIAL.md](TUTORIAL.md).
 
+## Table of Contents
+
+1. [Basic Syntax](#basic-syntax)
+2. [Control Flow](#control-flow)
+3. [Data Structures](#data-structures)
+4. [Error Handling](#error-handling)
+5. [Phase 1 Features](#phase-1-features)
+6. [Phase 2 Features](#phase-2-features)
+7. [Phase 3 Features](#phase-3-features)
+8. [Phase 4 Features](#phase-4-features)
+9. [Common Patterns](#common-patterns)
+10. [Operators](#operators)
+11. [Keywords](#keywords)
+12. [Comments](#comments)
+13. [Module System](#module-system)
+14. [Interop with JavaScript](#interop-with-javascript)
+15. [Compilation](#compilation)
+16. [Best Practices](#best-practices)
+17. [Common Gotchas](#common-gotchas)
+18. [Coming from Other Languages?](#coming-from-other-languages)
+19. [Syntax Cheat Sheet](#syntax-cheat-sheet)
+20. [Quick Examples](#quick-examples)
+21. [Complete Feature List](#complete-feature-list)
+22. [Language Inspirations](#language-inspirations)
+23. [See Also](#see-also)
+
+---
+
 ## Basic Syntax
 
 ### Variables
@@ -377,6 +405,208 @@ comptime {
 }
 ```
 
+## Phase 4 Features
+
+### Phase 4A: Memory Safety
+
+```rustscript
+// Lifetimes
+fn longest<'a>(x: &'a string, y: &'a string) -> &'a string { ... }
+
+// Borrowing
+fn read(data: &T) { }      // Immutable borrow
+fn write(data: &mut T) { } // Mutable borrow
+
+// Move semantics
+let moved = move data;
+
+// Tail call optimisation (automatic)
+fn factorial(n: number, acc: number) -> number {
+    if n <= 1 { acc } else { factorial(n - 1, n * acc) }
+}
+```
+
+### Phase 4B: Advanced Types
+
+```rustscript
+// Union types
+type StringOrNumber = string | number;
+
+// Intersection types
+type Combined = TraitA & TraitB;
+
+// Newtype pattern
+struct Metres(number);
+
+// GADTs
+enum Expr<T> {
+    IntLit(i32) -> Expr<i32>,
+    BoolLit(bool) -> Expr<bool>,
+}
+
+// Refinement types
+type Positive = {x: i32 | x > 0};
+```
+
+### Phase 4C: Functional Programming
+
+```rustscript
+// Partial application
+let add5 = add(5, _);
+
+// Function composition
+let process = f >> g >> h;
+
+// Currying
+fn add(a: number)(b: number) -> number { a + b }
+
+// Lazy evaluation
+lazy let expensive = { compute() };
+let result = force(expensive);
+
+// Memoisation
+@memoize
+fn fibonacci(n: number) -> number { ... }
+```
+
+### Phase 4D: Concurrency
+
+```rustscript
+// Async/await
+async fn fetch(url: string) -> Result<Data, Error> {
+    let response = await http.get(url)?;
+    Ok(response.json())
+}
+
+// Channels
+let (tx, rx) = channel();
+tx.send(value);
+let msg = rx.recv();
+
+// Atomic operations
+let counter = Atomic::new(0);
+atomic::fetch_add(counter, 1, SeqCst);
+
+// Parallel iterators
+numbers.par_iter().map(|x| x * 2).collect()
+```
+
+### Phase 4E: Control Flow
+
+```rustscript
+// Try blocks
+let result = try {
+    let data = read_file()?;
+    Ok(process(data))
+} catch Error as e {
+    Err(e)
+};
+
+// Guard clauses
+guard condition else { return; };
+
+// Labelled blocks
+let result = 'outer: {
+    for i in 0..10 {
+        if i == 5 { break 'outer i; }
+    }
+    0
+};
+
+// Defer
+defer { cleanup(); };
+```
+
+### Phase 4F: Metaprogramming
+
+```rustscript
+// Declarative macros
+macro_rules! vec {
+    ($($x:expr),*) => { ... };
+}
+
+// Derive macros
+#[derive(Debug, Clone)]
+struct Point { x: number, y: number }
+
+// Compile-time reflection
+comptime {
+    let info = @typeInfo(MyStruct);
+}
+
+// Code generation
+comptime {
+    emit(quote! { fn generated() { } });
+}
+```
+
+### Phase 4G: Domain-Specific
+
+```rustscript
+// Regex literals
+let pattern = r/\d{3}-\d{3}-\d{4}/g;
+
+// Format strings
+let msg = f"Hello, {name:>10}! Score: {score:6.2f}";
+
+// String slicing
+let sub = text[0..5];
+
+// Operator overloading
+impl Add for Vec2 {
+    fn add(self, other: Vec2) -> Vec2 { ... }
+}
+
+// Destructuring
+let (x, y) = point;
+let Point { x, y } = point;
+```
+
+### Phase 4H: Utilities
+
+```rustscript
+// Ranges with step
+for i in (0..100).step_by(5) { }
+
+// Zip iterator
+for (a, b) in zip(list1, list2) { }
+
+// Enumerate
+for (i, item) in enumerate(items) { }
+
+// Default parameters
+fn greet(name: string = "World") { }
+
+// Const functions
+const fn add(a: number, b: number) -> number { a + b }
+```
+
+### Phase 4I: MUSHcode-Inspired
+
+```rustscript
+// Iteration placeholders (## = value, #@ = index)
+let doubled = [## * 2 for ## in numbers];
+let indexed = ["{#@}: {##}" for ## in items];
+
+// Register variables (%q0-%q9 for numbers)
+%q0 = 0;
+for x in data { %q0 = %q0 + x; }
+let sum = %q0;
+
+// String registers (%r0-%r9 for strings)
+%r0 = "<ul>";
+for item in items { %r0 .= "<li>{item}</li>"; }
+%r0 .= "</ul>";
+
+// Literal operator (code-as-data)
+let template = lit!(Hello, {name}!);
+console.log(lit!(x + y));  // Prints "x + y", not the result
+
+// Default function (handles empty, not just null)
+let name = default(input, "Anonymous");  // "" -> "Anonymous"
+let positive = default(value, 1, |x| x > 0);  // With predicate
+```
+
 ## Common Patterns
 
 ### Early Return with Guard
@@ -731,216 +961,6 @@ fn process_file(path: string) -> Result<(), Error> {
 }
 ```
 
-## See Also
-
-- **[Complete Tutorial](TUTORIAL.md)** - In-depth guide with explanations
-- **[Phase 4 Features](PHASE4_FEATURES.md)** - All 72 advanced features documented
-- **[Examples](../examples/)** - Working code examples
-- **[Development Server](SERVE.md)** - Hot reload, HTTPS, and more
-
-
-## Phase 4 Features
-
-### Phase 4A: Memory Safety
-
-```rustscript
-// Lifetimes
-fn longest<'a>(x: &'a string, y: &'a string) -> &'a string { ... }
-
-// Borrowing
-fn read(data: &T) { }      // Immutable borrow
-fn write(data: &mut T) { } // Mutable borrow
-
-// Move semantics
-let moved = move data;
-
-// Tail call optimisation (automatic)
-fn factorial(n: number, acc: number) -> number {
-    if n <= 1 { acc } else { factorial(n - 1, n * acc) }
-}
-```
-
-### Phase 4B: Advanced Types
-
-```rustscript
-// Union types
-type StringOrNumber = string | number;
-
-// Intersection types
-type Combined = TraitA & TraitB;
-
-// Newtype pattern
-struct Metres(number);
-
-// GADTs
-enum Expr<T> {
-    IntLit(i32) -> Expr<i32>,
-    BoolLit(bool) -> Expr<bool>,
-}
-
-// Refinement types
-type Positive = {x: i32 | x > 0};
-```
-
-### Phase 4C: Functional Programming
-
-```rustscript
-// Partial application
-let add5 = add(5, _);
-
-// Function composition
-let process = f >> g >> h;
-
-// Currying
-fn add(a: number)(b: number) -> number { a + b }
-
-// Lazy evaluation
-lazy let expensive = { compute() };
-let result = force(expensive);
-
-// Memoisation
-@memoize
-fn fibonacci(n: number) -> number { ... }
-```
-
-### Phase 4D: Concurrency
-
-```rustscript
-// Async/await
-async fn fetch(url: string) -> Result<Data, Error> {
-    let response = await http.get(url)?;
-    Ok(response.json())
-}
-
-// Channels
-let (tx, rx) = channel();
-tx.send(value);
-let msg = rx.recv();
-
-// Atomic operations
-let counter = Atomic::new(0);
-atomic::fetch_add(counter, 1, SeqCst);
-
-// Parallel iterators
-numbers.par_iter().map(|x| x * 2).collect()
-```
-
-### Phase 4E: Control Flow
-
-```rustscript
-// Try blocks
-let result = try {
-    let data = read_file()?;
-    Ok(process(data))
-} catch Error as e {
-    Err(e)
-};
-
-// Guard clauses
-guard condition else { return; };
-
-// Labelled blocks
-let result = 'outer: {
-    for i in 0..10 {
-        if i == 5 { break 'outer i; }
-    }
-    0
-};
-
-// Defer
-defer { cleanup(); };
-```
-
-### Phase 4F: Metaprogramming
-
-```rustscript
-// Declarative macros
-macro_rules! vec {
-    ($($x:expr),*) => { ... };
-}
-
-// Derive macros
-#[derive(Debug, Clone)]
-struct Point { x: number, y: number }
-
-// Compile-time reflection
-comptime {
-    let info = @typeInfo(MyStruct);
-}
-
-// Code generation
-comptime {
-    emit(quote! { fn generated() { } });
-}
-```
-
-### Phase 4G: Domain-Specific
-
-```rustscript
-// Regex literals
-let pattern = r/\d{3}-\d{3}-\d{4}/g;
-
-// Format strings
-let msg = f"Hello, {name:>10}! Score: {score:6.2f}";
-
-// String slicing
-let sub = text[0..5];
-
-// Operator overloading
-impl Add for Vec2 {
-    fn add(self, other: Vec2) -> Vec2 { ... }
-}
-
-// Destructuring
-let (x, y) = point;
-let Point { x, y } = point;
-```
-
-### Phase 4H: Utilities
-
-```rustscript
-// Ranges with step
-for i in (0..100).step_by(5) { }
-
-// Zip iterator
-for (a, b) in zip(list1, list2) { }
-
-// Enumerate
-for (i, item) in enumerate(items) { }
-
-// Default parameters
-fn greet(name: string = "World") { }
-
-// Const functions
-const fn add(a: number, b: number) -> number { a + b }
-```
-
-### Phase 4I: MUSHcode-Inspired
-
-```rustscript
-// Iteration placeholders (## = value, #@ = index)
-let doubled = [## * 2 for ## in numbers];
-let indexed = ["{#@}: {##}" for ## in items];
-
-// Register variables (%q0-%q9 for numbers)
-%q0 = 0;
-for x in data { %q0 = %q0 + x; }
-let sum = %q0;
-
-// String registers (%r0-%r9 for strings)
-%r0 = "<ul>";
-for item in items { %r0 .= "<li>{item}</li>"; }
-%r0 .= "</ul>";
-
-// Literal operator (code-as-data)
-let template = lit!(Hello, {name}!);
-console.log(lit!(x + y));  // Prints "x + y", not the result
-
-// Default function (handles empty, not just null)
-let name = default(input, "Anonymous");  // "" -> "Anonymous"
-let positive = default(value, 1, |x| x > 0);  // With predicate
-```
-
 ## Complete Feature List
 
 RustScript includes **87 advanced features**:
@@ -965,3 +985,9 @@ RustScript draws from **60+ languages** spanning **68 years** (1958-2025):
 **Primary**: Rust, Haskell, TypeScript, Python, JavaScript, C++, Lisp, Go, Zig  
 **Additional**: ML, OCaml, F#, Scala, Erlang, Elixir, Swift, Kotlin, C#, Ruby, Perl, Scheme, Clojure, Julia, Koka, Eff, MUSHcode, and many more
 
+## See Also
+
+- **[Complete Tutorial](TUTORIAL.md)** - In-depth guide with explanations
+- **[Phase 4 Features](PHASE4_FEATURES.md)** - All 77 advanced features documented
+- **[Examples](../examples/)** - Working code examples
+- **[Development Server](SERVE.md)** - Hot reload, HTTPS, and more
