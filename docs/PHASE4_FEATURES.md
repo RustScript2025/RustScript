@@ -5,6 +5,24 @@
 
 Phase 4 represents a massive expansion of RustScript's capabilities, adding 77 advanced features across 9 sub-phases. These features bring RustScript to feature parity with modern systems programming languages whilst maintaining its unique blend of Rust's safety and JavaScript's ergonomics.
 
+## Table of Contents
+
+1. [Overview](#overview)
+2. [Phase 4A: Core Memory Safety](#phase-4a-core-memory-safety-10-features)
+3. [Phase 4B: Advanced Type System](#phase-4b-advanced-type-system-15-features)
+4. [Phase 4C: Functional Programming](#phase-4c-functional-programming-10-features)
+5. [Phase 4D: Concurrency & Parallelism](#phase-4d-concurrency--parallelism-8-features)
+6. [Phase 4E: Advanced Control Flow](#phase-4e-advanced-control-flow-10-features)
+7. [Phase 4F: Metaprogramming & Macros](#phase-4f-metaprogramming--macros-8-features)
+8. [Phase 4G: Domain-Specific Features](#phase-4g-domain-specific-features-6-features)
+9. [Phase 4H: Additional Utilities](#phase-4h-additional-utilities-5-features)
+10. [Phase 4I: MUSHcode-Inspired Features](#phase-4i-mushcode-inspired-features-5-features)
+11. [Language Origins Summary](#language-origins-summary)
+12. [Why Phase 4 Matters](#why-phase-4-matters)
+13. [See Also](#see-also)
+
+---
+
 ## Overview
 
 Phase 4 includes **77 features** organised into 9 sub-phases:

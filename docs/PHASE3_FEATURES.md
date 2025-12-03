@@ -4,6 +4,16 @@
 
 Phase 3 introduces advanced safety features and compile-time metaprogramming capabilities inspired by Eiffel, Zig, Koka, and modern effect systems.
 
+## Table of Contents
+
+1. [Overview](#overview)
+2. [Feature 1: Design by Contract](#feature-1-design-by-contract)
+3. [Feature 2: Effect System](#feature-2-effect-system)
+4. [Feature 3: Compile-time Execution](#feature-3-compile-time-execution)
+5. [See Also](#see-also)
+
+---
+
 ## Overview
 
 Phase 3 features focus on:

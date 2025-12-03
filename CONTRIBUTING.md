@@ -4,6 +4,22 @@
 
 Thank you for your interest in contributing to RustScript! This document provides guidelines and information for contributors.
 
+## Table of Contents
+
+1. [Development Setup](#development-setup)
+2. [Code Style and Standards](#code-style-and-standards)
+3. [Project Structure](#project-structure)
+4. [Adding New Features](#adding-new-features)
+5. [Documentation Standards](#documentation-standards)
+6. [Commit Messages](#commit-messages)
+7. [Pull Request Process](#pull-request-process)
+8. [Testing](#testing)
+9. [Getting Help](#getting-help)
+10. [Code of Conduct](#code-of-conduct)
+11. [Recognition](#recognition)
+
+---
+
 ## Development Setup
 
 ### Prerequisites
@@ -134,6 +150,16 @@ RustScript features are organised into phases:
 - **Phase 1**: Syntax enhancements (string interpolation, optional chaining, etc.)
 - **Phase 2**: Function enhancements (generators, multiple dispatch, etc.)
 - **Phase 3**: Safety features (contracts, effects, compile-time execution)
+- **Phase 4**: Advanced features (77 features across 9 sub-phases):
+  - **4A**: Core memory safety (lifetimes, borrowing, move semantics)
+  - **4B**: Advanced type system (union types, GADTs, higher-kinded types)
+  - **4C**: Functional programming (partial application, currying, lenses)
+  - **4D**: Concurrency (async/await, channels, parallel iterators)
+  - **4E**: Advanced control flow (try blocks, guard clauses, defer)
+  - **4F**: Metaprogramming (macros, reflection, code generation)
+  - **4G**: Domain-specific (regex literals, operator overloading)
+  - **4H**: Utilities (default parameters, const functions)
+  - **4I**: MUSHcode-inspired (iteration placeholders, registers, default function)
 
 When adding a new feature:
 

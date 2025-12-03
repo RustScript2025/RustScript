@@ -4,6 +4,16 @@
 
 This document describes the Phase 2 features added to RustScript, focusing on advanced function capabilities that enable more expressive and efficient code.
 
+## Table of Contents
+
+1. [Overview](#overview)
+2. [Feature 1: Pattern Matching in Function Heads](#feature-1-pattern-matching-in-function-heads)
+3. [Feature 2: Generators](#feature-2-generators)
+4. [Feature 3: Multiple Dispatch](#feature-3-multiple-dispatch)
+5. [See Also](#see-also)
+
+---
+
 ## Overview
 
 Phase 2 introduces three major features that transform how functions work in RustScript:

@@ -4,6 +4,17 @@
 
 This document describes the Phase 1 features added to RustScript, focusing on ergonomic improvements for string handling and collection manipulation.
 
+## Table of Contents
+
+1. [Overview](#overview)
+2. [Feature 1: String Interpolation](#feature-1-string-interpolation)
+3. [Feature 2: Optional Chaining](#feature-2-optional-chaining)
+4. [Feature 3: Null Coalescing](#feature-3-null-coalescing)
+5. [Feature 4: List Comprehensions](#feature-4-list-comprehensions)
+6. [See Also](#see-also)
+
+---
+
 ## Overview
 
 Phase 1 introduces four major features that significantly improve code readability and reduce boilerplate:
