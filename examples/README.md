@@ -4,6 +4,20 @@
 
 This directory contains example programmes demonstrating RustScript features.
 
+## Table of Contents
+
+1. [Getting Started](#getting-started)
+2. [Feature Examples](#feature-examples)
+3. [Example Structure](#example-structure)
+4. [Learning Path](#learning-path)
+5. [Compiling to WebAssembly](#compiling-to-webassembly)
+6. [Running in the Browser](#running-in-the-browser)
+7. [Contributing Examples](#contributing-examples)
+8. [Example Categories](#example-categories)
+9. [Need Help?](#need-help)
+
+---
+
 ## Getting Started
 
 ### Hello World

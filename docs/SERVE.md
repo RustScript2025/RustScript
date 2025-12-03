@@ -4,6 +4,25 @@
 
 A feature-rich HTTP development server for testing RustScript programmes in the browser.
 
+## Table of Contents
+
+1. [Quick Start](#quick-start)
+2. [Features](#features)
+3. [Command-Line Options](#command-line-options)
+4. [Usage Examples](#usage-examples)
+5. [Console Output](#console-output)
+6. [MIME Types](#mime-types)
+7. [Security Headers](#security-headers)
+8. [Troubleshooting](#troubleshooting)
+9. [Advanced Configuration](#advanced-configuration)
+10. [Performance Tips](#performance-tips)
+11. [Integration with Build Tools](#integration-with-build-tools)
+12. [Requirements](#requirements)
+13. [See Also](#see-also)
+14. [Getting Help](#getting-help)
+
+---
+
 ## Quick Start
 
 **On Windows:**

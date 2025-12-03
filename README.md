@@ -870,7 +870,7 @@ RustScript now includes **82 advanced features** across 4 phases:
 **Phase 3 - Safety (3 features):** Design by Contract, Effect system, Compile-time execution  
 **Phase 4 - Advanced (77 features):** Lifetimes, Borrowing, Move semantics, Tail call optimisation, Pattern guards, Traits, Const generics, Algebraic effects, Inline assembly, RAII, Union/intersection types, Type aliases, Newtype pattern, Associated types, Higher-kinded types, Phantom types, Refinement types, Dependent types, Type-level programming, Existential types, GADTs, Variance, Type bounds, Subtyping, Structural typing, Partial application, Function composition, Currying, Lazy evaluation, Memoisation, Immutable data structures, Transducers, Do-notation, Applicative functors, Lenses, Async/await, Channels, Futures & streams, Mutex & RwLock, Atomic operations, Parallel iterators, Scoped threads, Select, Try blocks, Try operator (?), Guard clauses, Labelled blocks, Catch expressions, Panic, Defer, Conditional compilation, Const assertions, Unreachable, Declarative macros, Procedural macros, Attribute macros, Reflection, Code generation, Quasiquoting, Hygiene, Syntax extensions, Regex literals, Format strings, String slicing, Operator overloading, Custom indexing, Destructuring, Ranges with step, Zip iterator, Enumerate, Default parameters, Const functions, Iteration placeholders, Register variables, String registers, Literal operator, Default function
 
-Drawing inspiration from 60+ languages spanning 68 years of computing history, from LISP (1958) to modern languages like Zig (2016) and beyond (2025).
+Drawing inspiration from 60+ languages spanning LISP (1958) to modern languages (2025).
 
 
 ## Feature Attribution
@@ -1028,7 +1028,7 @@ Each feature was chosen because it solved a real problem elegantly in its origin
 
 RustScript doesn't claim to invent new concepts. Instead, it carefully selects and integrates the best ideas from decades of programming language research and practice. Every feature has been battle-tested in production systems across multiple languages.
 
-With 87 features drawn from over 60 languages spanning 68 years (1958-2025), RustScript represents a curated synthesis of proven solutions. From LISP's macros (1958) to Rust's memory safety (2010) to Zig's compile-time execution (2016) and beyond, each feature was chosen because it solved a real problem elegantly in production systems.
+With 87 features drawn from over 60 languages spanning LISP (1958) to modern languages (2025), RustScript represents a curated synthesis of proven solutions. Each feature was chosen because it solved a real problem elegantly in production systems.
 
 By learning from language history, RustScript avoids repeating past mistakes whilst embracing proven solutions. The result is a language that feels familiar to developers from many backgrounds whilst offering a cohesive, modern development experience.
 
