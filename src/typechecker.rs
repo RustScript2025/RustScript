@@ -975,6 +975,60 @@ impl TypeChecker {
                     span: Span::default(),
                 })
             },
+            // Phase 4I: Iteration placeholder ##
+            crate::ast::Expr::IterPlaceholder { .. } => {
+                // Type depends on iteration context - generic for now
+                Type::Generic(crate::ast::Ident {
+                    name: "T".into(),
+                    span: Span::default(),
+                })
+            },
+            // Phase 4I: Iteration index placeholder #@
+            crate::ast::Expr::IterIndexPlaceholder { .. } => {
+                Type::Number
+            },
+            // Phase 4I: Register read %q0-%q9
+            crate::ast::Expr::RegisterRead { .. } => {
+                Type::Number
+            },
+            // Phase 4I: Register write %q0-%q9 = expr
+            crate::ast::Expr::RegisterWrite { value, .. } => {
+                self.check_expr(value, types, scopes)?;
+                Type::Number
+            },
+            // Phase 4I: String register read %r0-%r9
+            crate::ast::Expr::StringRegisterRead { .. } => {
+                Type::String
+            },
+            // Phase 4I: String register write %r0-%r9 = expr
+            crate::ast::Expr::StringRegisterWrite { value, .. } => {
+                self.check_expr(value, types, scopes)?;
+                Type::String
+            },
+            // Phase 4I: String register append %r0-%r9 .= expr
+            crate::ast::Expr::StringRegisterAppend { value, .. } => {
+                self.check_expr(value, types, scopes)?;
+                Type::String
+            },
+            // Phase 4I: Literal operator lit!()
+            crate::ast::Expr::LitOperator { .. } => {
+                Type::String
+            },
+            // Phase 4I: Default function
+            crate::ast::Expr::Default { value, fallback, predicate, .. } => {
+                let value_ty = self.check_expr(value, types, scopes)?;
+                let fallback_ty = self.check_expr(fallback, types, scopes)?;
+                if let Some(pred) = predicate {
+                    self.check_expr(pred, types, scopes)?;
+                }
+                // Return the common type of value and fallback
+                if value_ty == fallback_ty {
+                    value_ty
+                } else {
+                    // Union type
+                    fallback_ty
+                }
+            },
         };
         
         types.insert(expr.span().clone(), ty.clone());
@@ -1065,6 +1119,16 @@ impl crate::ast::Expr {
             crate::ast::Expr::FormatString { span, .. } => span,
             crate::ast::Expr::DestructuringAssign { span, .. } => span,
             crate::ast::Expr::Range { span, .. } => span,
+            // Phase 4I expressions
+            crate::ast::Expr::IterPlaceholder { span, .. } => span,
+            crate::ast::Expr::IterIndexPlaceholder { span, .. } => span,
+            crate::ast::Expr::RegisterRead { span, .. } => span,
+            crate::ast::Expr::RegisterWrite { span, .. } => span,
+            crate::ast::Expr::StringRegisterRead { span, .. } => span,
+            crate::ast::Expr::StringRegisterWrite { span, .. } => span,
+            crate::ast::Expr::StringRegisterAppend { span, .. } => span,
+            crate::ast::Expr::LitOperator { span, .. } => span,
+            crate::ast::Expr::Default { span, .. } => span,
         }
     }
 }

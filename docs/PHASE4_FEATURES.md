@@ -3,11 +3,11 @@
 **Author**: Michael Lauzon  
 **Completed**: December 1, 2025
 
-Phase 4 represents a massive expansion of RustScript's capabilities, adding 62 advanced features across 8 sub-phases. These features bring RustScript to feature parity with modern systems programming languages whilst maintaining its unique blend of Rust's safety and JavaScript's ergonomics.
+Phase 4 represents a massive expansion of RustScript's capabilities, adding 77 advanced features across 9 sub-phases. These features bring RustScript to feature parity with modern systems programming languages whilst maintaining its unique blend of Rust's safety and JavaScript's ergonomics.
 
 ## Overview
 
-Phase 4 includes **62 features** organised into 8 sub-phases:
+Phase 4 includes **77 features** organised into 9 sub-phases:
 
 - **Phase 4A**: Core Memory Safety (10 features)
 - **Phase 4B**: Advanced Type System (15 features)
@@ -17,6 +17,7 @@ Phase 4 includes **62 features** organised into 8 sub-phases:
 - **Phase 4F**: Metaprogramming & Macros (8 features)
 - **Phase 4G**: Domain-Specific Features (6 features)
 - **Phase 4H**: Additional Utilities (5 features)
+- **Phase 4I**: MUSHcode-Inspired Features (5 features)
 
 All features are **fully implemented** and available in RustScript today.
 
@@ -539,6 +540,125 @@ for i in (0..20).step_by(5) {
 
 ---
 
+## Phase 4I: MUSHcode-Inspired Features (5 Features)
+
+Features inspired by MUSHcode/Softcode (1990), a functional scripting language created by Larry Foard for multi-user text environments.
+
+### 73. Iteration Placeholders
+
+**Inspired by**: MUSHcode iter() function (1990)
+
+Concise iteration syntax where `##` represents the current element and `#@` represents the index.
+
+```rustscript
+// ## for current value, #@ for index
+let doubled = [## * 2 for ## in numbers];
+let indexed = ["{#@}: {##}" for ## in items];
+
+// In iter expressions
+iter(numbers, ## * 2)
+iter(items, "{#@}. {##}")
+```
+
+**Why it matters**: More concise than naming iteration variables, reduces variable name pollution.
+
+### 74. Register Variables
+
+**Inspired by**: MUSHcode setq()/setr() registers (1990)
+
+Fast temporary storage using numbered registers `%q0` through `%q9`, scoped to the current function.
+
+```rustscript
+fn calculate_stats(data: [number]) -> (number, number, number) {
+    %q0 = 0.0;  // sum
+    %q1 = data[0];  // min
+    %q2 = data[0];  // max
+    
+    for value in data {
+        %q0 = %q0 + value;
+        if value < %q1 { %q1 = value; }
+        if value > %q2 { %q2 = value; }
+    }
+    
+    (%q0 / data.length, %q1, %q2)  // (avg, min, max)
+}
+```
+
+**Why it matters**: Faster than hash-based variable lookup, useful for accumulator patterns.
+
+### 75. String Registers
+
+**Inspired by**: MUSHcode string accumulation patterns (1990)
+
+String registers `%r0` through `%r9` are optimised for string building and accumulation with efficient append operations.
+
+```rustscript
+fn build_html(items: [Item]) -> string {
+    %r0 = "<ul>\n";
+    
+    for item in items {
+        %r0 .= "  <li>{item.name}</li>\n";
+    }
+    
+    %r0 .= "</ul>";
+    %r0
+}
+```
+
+**Why it matters**: Efficient string building without intermediate allocations.
+
+### 76. Literal Operator
+
+**Inspired by**: MUSHcode lit() function (1990)
+
+The `lit!()` macro prevents evaluation of its contents, returning the literal string representation.
+
+```rustscript
+// Debugging - see the expression, not the result
+let x = 5;
+let y = 10;
+console.log(lit!(x + y));  // Prints: "x + y"
+console.log(x + y);        // Prints: 15
+
+// Template storage
+let email_template = lit!(
+    Dear {recipient},
+    Thank you for your order #{order_id}.
+    Best regards,
+    {sender}
+);
+```
+
+**Why it matters**: Enables code-as-data patterns, useful for templating and metaprogramming.
+
+### 77. Default Function
+
+**Inspired by**: MUSHcode default()/edefault() functions (1990)
+
+Flexible fallback values with lazy evaluation, handling empty strings and arrays (not just null).
+
+```rustscript
+// Handle empty strings (not just null)
+let name = default(user_input, "Anonymous");  // "" -> "Anonymous"
+
+// With null coalescing comparison
+let a = "" ?? "fallback";      // Returns "" (not null)
+let b = default("", "fallback"); // Returns "fallback" (empty string)
+
+// Custom predicate
+let positive = default(value, 1, |x| x > 0);  // Use 1 if value <= 0
+
+// Chained defaults
+let config = default(
+    env.get("CONFIG"),
+    default(file.read("config.json"), default_config())
+);
+```
+
+**Why it matters**: More flexible than `??`, supports predicates and handles empty values.
+
+---
+
 ## Language Origins Summary
 
 Phase 4 features draw from over 30 languages:
@@ -555,7 +675,7 @@ Phase 4 features draw from over 30 languages:
 - **Scala** (2004): Higher-kinded types, variance
 - **Kotlin** (2011): Try blocks, catch expressions
 
-**Additional Influences**: Scheme, ML, OCaml, F#, Erlang, Elixir, Swift, C#, JavaScript, Clojure, Koka, Eff, Cyclone, Ceylon, Idris, Agda, Coq, Liquid Haskell, F*, Perl, Ruby, Java, and more.
+**Additional Influences**: Scheme, ML, OCaml, F#, Erlang, Elixir, Swift, C#, JavaScript, Clojure, Koka, Eff, Cyclone, Ceylon, Idris, Agda, Coq, Liquid Haskell, F*, Perl, Ruby, Java, MUSHcode (1990), and more.
 
 ---
 
@@ -570,7 +690,7 @@ Phase 4 transforms RustScript from a modern scripting language into a full-featu
 5. **Metaprogramming**: Compile-time code generation for maximum flexibility
 6. **Developer Experience**: Modern conveniences without sacrificing safety
 
-With 72 total features (10 from Phases 1-3, 62 from Phase 4), RustScript offers a unique combination of safety, performance, and productivity.
+With 87 total features (10 from Phases 1-3, 77 from Phase 4), RustScript offers a unique combination of safety, performance, and productivity.
 
 ---
 

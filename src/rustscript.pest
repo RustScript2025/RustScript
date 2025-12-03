@@ -251,9 +251,32 @@ expr_primary = {
     expr_quote |
     format_string |
     regex_literal |
+    expr_iter_placeholder |
+    expr_iter_index |
+    expr_register |
+    expr_string_register |
+    expr_default |
+    expr_lit |
     ident |
     "(" ~ expr ~ ")"
 }
+
+// Phase 4I: Iteration placeholders (MUSHcode-inspired)
+expr_iter_placeholder = { "##" }
+expr_iter_index = { "#@" }
+
+// Phase 4I: Register variables %q0-%q9 (MUSHcode-inspired)
+expr_register = @{ "%q" ~ ASCII_DIGIT }
+
+// Phase 4I: String registers %r0-%r9 (MUSHcode-inspired)
+expr_string_register = @{ "%r" ~ ASCII_DIGIT }
+
+// Phase 4I: Default function with fallback (MUSHcode-inspired)
+expr_default = { "default" ~ "(" ~ expr ~ "," ~ expr ~ ("," ~ expr)? ~ ")" }
+
+// Phase 4I: Literal operator - prevents evaluation (MUSHcode-inspired)
+expr_lit = { "lit" ~ "!" ~ "(" ~ lit_content ~ ")" }
+lit_content = @{ (!")" ~ ANY)* }
 
 // Phase 4F: Macro invocation
 expr_macro_invocation = { ident ~ "!" ~ "(" ~ (expr ~ ("," ~ expr)*)? ~ ")" }
@@ -475,8 +498,20 @@ stmt = {
     stmt_defer |
     stmt_break |
     stmt_continue |
+    stmt_register_assign |
+    stmt_string_register_assign |
+    stmt_string_register_append |
     stmt_expr
 }
+
+// Phase 4I: Register assignment %q0-%q9 = expr (MUSHcode-inspired)
+stmt_register_assign = { expr_register ~ "=" ~ expr ~ ";" }
+
+// Phase 4I: String register assignment %r0-%r9 = expr (MUSHcode-inspired)
+stmt_string_register_assign = { expr_string_register ~ "=" ~ expr ~ ";" }
+
+// Phase 4I: String register append %r0-%r9 .= expr (MUSHcode-inspired)
+stmt_string_register_append = { expr_string_register ~ ".=" ~ expr ~ ";" }
 
 stmt_let = {
     "lazy"? ~ "let" ~ "mut"? ~ pattern ~ (":" ~ type_expr)? ~ ("=" ~ expr)? ~ ";"

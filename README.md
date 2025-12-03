@@ -1,4 +1,4 @@
-![Version](https://img.shields.io/badge/version-0.4.0-blue)
+![Version](https://img.shields.io/badge/version-0.4.1-blue)
 ![Rust](https://img.shields.io/badge/rust-1.91.1%2B-orange)
 ![License](https://img.shields.io/badge/license-GPL--2.0-green)
 
@@ -10,11 +10,11 @@
 
 **Author**: Michael Lauzon
 
-RustScript is a modern **web-scripting language** that compiles to WebAssembly for browser-based applications. It synthesises the best ideas from 60+ years of scripting language evolution, starting with Rust's memory safety and JavaScript's ergonomic syntax as a foundation, whilst incorporating powerful features from languages spanning LISP (1958) to modern languages (2025).
+RustScript is a modern **web-scripting language** that compiles to WebAssembly for browser-based applications. It synthesises the best ideas from 60+ years of scripting language evolution, starting with Rust's memory safety and JavaScript's ergonomic syntax as a foundation, whilst incorporating powerful features from languages spanning LISP (1958) to Zig (2016).
 
 ## Table of Contents
 
-- [What's New in v0.4.0](#whats-new-in-v040)
+- [What's New in v0.4.1](#whats-new-in-v041)
 - [Language Heritage](#language-heritage)
 - [Design Philosophy](#design-philosophy)
 - [Installation](#installation)
@@ -38,11 +38,22 @@ RustScript is a modern **web-scripting language** that compiles to WebAssembly f
 - [Standing on the Shoulders of Giants](#standing-on-the-shoulders-of-giants)
 - [Further Reading](#further-reading)
 
-## What's New in v0.4.0
+## What's New in v0.4.1
 
-### 🎉 Major Release: Phase 4 Complete!
+### 🎉 MUSHcode-Inspired Features!
 
-RustScript v0.4.0 adds **Phase 4: 72 advanced features** bringing the total to **82 features** from 60+ languages spanning 68 years (1958-2025). This release transforms RustScript from a modern scripting language into a production-ready systems programming language for the web.
+RustScript v0.4.1 adds **5 new features** inspired by MUSHcode/Softcode (1990), bringing the total to **87 features** from 60+ languages spanning 68 years (1958-2025).
+
+**New in v0.4.1:**
+- **Iteration Placeholders** (`##` for value, `#@` for index) - Concise iteration syntax
+- **Register Variables** (`%q0`-`%q9`) - Fast temporary numeric storage
+- **String Registers** (`%r0`-`%r9`) - Efficient string accumulation
+- **Literal Operator** (`lit!()`) - Code-as-data patterns
+- **Default Function** - Flexible fallback handling beyond null coalescing
+
+### Previous: v0.4.0 - Phase 4 Complete!
+
+RustScript v0.4.0 added **Phase 4: 72 advanced features** transforming RustScript from a modern scripting language into a production-ready systems programming language for the web.
 
 ### New Features: Phase 4
 
@@ -61,7 +72,7 @@ RustScript v0.4.0 adds **Phase 4: 72 advanced features** bringing the total to *
 ### Documentation Updates
 - 📚 New comprehensive [Phase 4 Features Documentation](docs/PHASE4_FEATURES.md)
 - 📖 Enhanced [Tutorial](docs/TUTORIAL.md) with Phase 4 examples
-- ⚡ Updated [Quick Reference](docs/QUICK_REFERENCE.md) with all 82 features
+- ⚡ Updated [Quick Reference](docs/QUICK_REFERENCE.md) with all 87 features
 
 ### Previous Releases
 
@@ -86,7 +97,7 @@ RustScript draws inspiration from one systems programming language and over 60 s
 **Metaprogramming**: LISP (1958), D (2001), Nim (2008), Rust (2010), Zig (2016)  
 **Multiple Dispatch**: Common Lisp CLOS (1988), Dylan (1992), Clojure (2007), Julia (2012)  
 **Effects & Contracts**: Ada (1983), Eiffel (1986), D (2001), Spec# (2004), Nim (2008), Koka (2012), Eff (2012)  
-**Data Processing**: SNOBOL (1962), APL (1966), MUMPS (1966), Forth (1970), AWK (1977), Icon (1977)  
+**Data Processing**: SNOBOL (1962), APL (1966), MUMPS (1966), Forth (1970), AWK (1977), Icon (1977), MUSHcode (1990)  
 **Concurrency**: Erlang (1986), C++ atomics (2011), Elixir (2011), Go (2009), Rust (2010), Rayon (2016)  
 **Modern Features**: Java (1995), C# (2000), Scala (2004), Rust (2010), Ceylon (2011), Kotlin (2011), TypeScript (2012), Swift (2014)  
 
@@ -212,11 +223,11 @@ The complete playable game with async input system and all features.
 - **Features**: Full game, difficulty selection, scoring, hints, map
 - **Tech**: JavaScript with RustScript-style async input
 
-### ⭐ [Hide and Seek v4](www/hideseek_v4.html) - RustScript 0.4.0 Patterns
-Showcases RustScript 0.4.0 coding patterns with enhanced visuals and live stats.
+### ⭐ [Hide and Seek v4](www/hideseek_v4.html) - RustScript 0.4.1 Patterns
+Showcases RustScript 0.4.1 coding patterns with enhanced visuals and live stats.
 - **File**: `www/hideseek_v4.html`
 - **Features**: Full game with pattern matching, destructuring, spread operator, immutable updates
-- **Tech**: JavaScript demonstrating RustScript 0.4.0 idioms
+- **Tech**: JavaScript demonstrating RustScript 0.4.1 idioms
 
 ### RustScript Source Code
 The game logic is also available as pure RustScript source:
@@ -278,8 +289,8 @@ The tutorial covers:
 - 📖 **[Phase 1 Features](docs/PHASE1_FEATURES.md)** - Modern syntax enhancements (4 features)
 - 📖 **[Phase 2 Features](docs/PHASE2_FEATURES.md)** - Advanced function capabilities (3 features)
 - 📖 **[Phase 3 Features](docs/PHASE3_FEATURES.md)** - Safety & metaprogramming (3 features)
-- 📖 **[Phase 4 Features](docs/PHASE4_FEATURES.md)** - Production-ready advanced features (72 features)
-- 📖 **[Feature Attribution](docs/FEATURE_ATTRIBUTION.md)** - Complete attribution for all 82 RustScript features with language origins
+- 📖 **[Phase 4 Features](docs/PHASE4_FEATURES.md)** - Production-ready advanced features (77 features)
+- 📖 **[Feature Attribution](docs/FEATURE_ATTRIBUTION.md)** - Complete attribution for all 87 RustScript features with language origins
 
 ### Examples
 
@@ -857,7 +868,7 @@ RustScript now includes **82 advanced features** across 4 phases:
 **Phase 1 - Syntax (4 features):** String interpolation, Optional chaining, Null coalescing, List comprehensions  
 **Phase 2 - Functions (3 features):** Pattern matching in function heads, Generators, Multiple dispatch  
 **Phase 3 - Safety (3 features):** Design by Contract, Effect system, Compile-time execution  
-**Phase 4 - Advanced (72 features):** Lifetimes, Borrowing, Move semantics, Tail call optimisation, Pattern guards, Traits, Const generics, Algebraic effects, Inline assembly, RAII, Union/intersection types, Type aliases, Newtype pattern, Associated types, Higher-kinded types, Phantom types, Refinement types, Dependent types, Type-level programming, Existential types, GADTs, Variance, Type bounds, Subtyping, Structural typing, Partial application, Function composition, Currying, Lazy evaluation, Memoisation, Immutable data structures, Transducers, Do-notation, Applicative functors, Lenses, Async/await, Channels, Futures & streams, Mutex & RwLock, Atomic operations, Parallel iterators, Scoped threads, Select, Try blocks, Try operator (?), Guard clauses, Labelled blocks, Catch expressions, Panic, Defer, Conditional compilation, Const assertions, Unreachable, Declarative macros, Procedural macros, Attribute macros, Reflection, Code generation, Quasiquoting, Hygiene, Syntax extensions, Regex literals, Format strings, String slicing, Operator overloading, Custom indexing, Destructuring, Ranges with step, Zip iterator, Enumerate, Default parameters, Const functions
+**Phase 4 - Advanced (77 features):** Lifetimes, Borrowing, Move semantics, Tail call optimisation, Pattern guards, Traits, Const generics, Algebraic effects, Inline assembly, RAII, Union/intersection types, Type aliases, Newtype pattern, Associated types, Higher-kinded types, Phantom types, Refinement types, Dependent types, Type-level programming, Existential types, GADTs, Variance, Type bounds, Subtyping, Structural typing, Partial application, Function composition, Currying, Lazy evaluation, Memoisation, Immutable data structures, Transducers, Do-notation, Applicative functors, Lenses, Async/await, Channels, Futures & streams, Mutex & RwLock, Atomic operations, Parallel iterators, Scoped threads, Select, Try blocks, Try operator (?), Guard clauses, Labelled blocks, Catch expressions, Panic, Defer, Conditional compilation, Const assertions, Unreachable, Declarative macros, Procedural macros, Attribute macros, Reflection, Code generation, Quasiquoting, Hygiene, Syntax extensions, Regex literals, Format strings, String slicing, Operator overloading, Custom indexing, Destructuring, Ranges with step, Zip iterator, Enumerate, Default parameters, Const functions, Iteration placeholders, Register variables, String registers, Literal operator, Default function
 
 Drawing inspiration from 60+ languages spanning 68 years of computing history, from LISP (1958) to modern languages like Zig (2016) and beyond (2025).
 
@@ -912,7 +923,7 @@ Each RustScript feature has a rich scripting language heritage:
 - Inspired by: D CTFE (2007), Nim (2008), C++ constexpr (2011), Zig (2016)
 - Why: Move computation from runtime to compile time
 
-### Phase 4: Advanced Language Features (72 features)
+### Phase 4: Advanced Language Features (77 features)
 
 **Lifetimes** - Cyclone (2002), Rust (2010)
 **Borrowing & References** - Rust (2010)
@@ -1003,7 +1014,7 @@ Each feature was chosen because it solved a real problem elegantly in its origin
 9. **Effect System** (Nim 2008, Rust traits 2010, Eff 2012, Koka 2012): Track side effects for easier reasoning
 10. **Compile-time Execution** (D CTFE 2007, Nim 2008, C++ constexpr 2011, Zig 2016): Move work from runtime to compile time
 
-**Phase 4 (72 features):**
+**Phase 4 (77 features):**
 - **Memory Safety** (Scheme TCO 1975, C++ RAII 1984, Cyclone 2002, Rust 2010): Scheme introduced tail call optimisation; C++ established RAII patterns; Cyclone pioneered region-based memory; Rust proved that memory safety without garbage collection is practical and performant
 - **Advanced Types** (Coq 1989, Haskell 1990, OCaml 2004, Scala 2004, Agda 2007, Idris 2007, Liquid Haskell 2008, Ceylon 2011, F* 2011, TypeScript 2012): Sophisticated type systems catch bugs at compile time; dependent types from Idris/Agda enable proofs; refinement types from Liquid Haskell add constraints; GADTs from Haskell/OCaml enable type-safe DSLs
 - **Functional Programming** (ML 1973, Common Lisp 1984, Miranda 1985, Haskell 1990, OCaml 1996, Scala 2004, F# 2005, Clojure 2007): Pure functions and immutability lead to more reliable code; Clojure's persistent data structures enable efficient immutability; Haskell's lenses provide composable data access
@@ -1017,7 +1028,7 @@ Each feature was chosen because it solved a real problem elegantly in its origin
 
 RustScript doesn't claim to invent new concepts. Instead, it carefully selects and integrates the best ideas from decades of programming language research and practice. Every feature has been battle-tested in production systems across multiple languages.
 
-With 82 features drawn from over 60 languages spanning 68 years (1958-2025), RustScript represents a curated synthesis of proven solutions. From LISP's macros (1958) to Rust's memory safety (2010) to Zig's compile-time execution (2016) and beyond, each feature was chosen because it solved a real problem elegantly in production systems.
+With 87 features drawn from over 60 languages spanning 68 years (1958-2025), RustScript represents a curated synthesis of proven solutions. From LISP's macros (1958) to Rust's memory safety (2010) to Zig's compile-time execution (2016) and beyond, each feature was chosen because it solved a real problem elegantly in production systems.
 
 By learning from language history, RustScript avoids repeating past mistakes whilst embracing proven solutions. The result is a language that feels familiar to developers from many backgrounds whilst offering a cohesive, modern development experience.
 
@@ -1029,8 +1040,8 @@ By learning from language history, RustScript avoids repeating past mistakes whi
 - 📖 [Phase 1 Features](docs/PHASE1_FEATURES.md) - String & syntax enhancements
 - 📖 [Phase 2 Features](docs/PHASE2_FEATURES.md) - Function enhancements
 - 📖 [Phase 3 Features](docs/PHASE3_FEATURES.md) - Safety & metaprogramming
-- 📖 [Phase 4 Features](docs/PHASE4_FEATURES.md) - Advanced language features (72 features)
-- 📖 [Feature Attribution](docs/FEATURE_ATTRIBUTION.md) - Complete attribution for all 82 RustScript features with language origins
+- 📖 [Phase 4 Features](docs/PHASE4_FEATURES.md) - Advanced language features (77 features)
+- 📖 [Feature Attribution](docs/FEATURE_ATTRIBUTION.md) - Complete attribution for all 87 RustScript features with language origins
 - 💻 [Examples Directory](examples/) - Working code examples ([see examples README](examples/README.md))
 - 🤝 [Contributing Guide](CONTRIBUTING.md) - How to contribute to RustScript
 

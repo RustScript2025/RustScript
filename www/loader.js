@@ -1,5 +1,5 @@
 /**
- * RustScript Browser Loader v0.4.0
+ * RustScript Browser Loader v0.4.1
  * Author: Michael Lauzon
  * 
  * A feature-rich runtime loader for RustScript in the browser.
@@ -407,7 +407,7 @@ async function bootstrap() {
         }
         
         // Initialise WASM module
-        Logger.info('Initialising RustScript Runtime v0.4.0...');
+        Logger.info('Initialising RustScript Runtime v0.4.1...');
         await init();
         
         metrics.initTime = performance.now() - startTime;
@@ -490,7 +490,7 @@ function logMetrics() {
 // Public API object exposed to window.RustScript
 const RustScript = {
     // Version number
-    version: '0.4.0',
+    version: '0.4.1',
     
     // Configuration object
     config: RustScriptConfig,

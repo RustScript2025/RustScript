@@ -822,6 +822,78 @@ fn parse_stmt(pair: Pair<Rule>) -> Result<Stmt, pest::error::Error<Rule>> {
             let expr_pair = inner.into_inner().next().unwrap();
             Ok(Stmt::Expr(parse_expr(expr_pair)?, Span::default()))
         }
+        Rule::stmt_register_assign => {
+            // Phase 4I: Parse register assignment %q0-%q9 = expr
+            let mut register = 0u8;
+            let mut value = None;
+            
+            for assign_inner in inner.into_inner() {
+                match assign_inner.as_rule() {
+                    Rule::expr_register => {
+                        let text = assign_inner.as_str();
+                        register = text.chars().last().unwrap().to_digit(10).unwrap() as u8;
+                    }
+                    Rule::expr => {
+                        value = Some(parse_expr(assign_inner)?);
+                    }
+                    _ => {}
+                }
+            }
+            
+            Ok(Stmt::Expr(Expr::RegisterWrite {
+                register,
+                value: Box::new(value.unwrap()),
+                span: Span::default(),
+            }, Span::default()))
+        }
+        Rule::stmt_string_register_assign => {
+            // Phase 4I: Parse string register assignment %r0-%r9 = expr
+            let mut register = 0u8;
+            let mut value = None;
+            
+            for assign_inner in inner.into_inner() {
+                match assign_inner.as_rule() {
+                    Rule::expr_string_register => {
+                        let text = assign_inner.as_str();
+                        register = text.chars().last().unwrap().to_digit(10).unwrap() as u8;
+                    }
+                    Rule::expr => {
+                        value = Some(parse_expr(assign_inner)?);
+                    }
+                    _ => {}
+                }
+            }
+            
+            Ok(Stmt::Expr(Expr::StringRegisterWrite {
+                register,
+                value: Box::new(value.unwrap()),
+                span: Span::default(),
+            }, Span::default()))
+        }
+        Rule::stmt_string_register_append => {
+            // Phase 4I: Parse string register append %r0-%r9 .= expr
+            let mut register = 0u8;
+            let mut value = None;
+            
+            for assign_inner in inner.into_inner() {
+                match assign_inner.as_rule() {
+                    Rule::expr_string_register => {
+                        let text = assign_inner.as_str();
+                        register = text.chars().last().unwrap().to_digit(10).unwrap() as u8;
+                    }
+                    Rule::expr => {
+                        value = Some(parse_expr(assign_inner)?);
+                    }
+                    _ => {}
+                }
+            }
+            
+            Ok(Stmt::Expr(Expr::StringRegisterAppend {
+                register,
+                value: Box::new(value.unwrap()),
+                span: Span::default(),
+            }, Span::default()))
+        }
         _ => unreachable!(),
     }
 }
@@ -1733,6 +1805,76 @@ fn parse_expr_primary(pair: Pair<Rule>) -> Result<Expr, pest::error::Error<Rule>
         Rule::format_string => {
             // Phase 4G: Parse format string
             parse_format_string(pair)
+        }
+        Rule::expr_iter_placeholder => {
+            // Phase 4I: Parse iteration placeholder ##
+            Ok(Expr::IterPlaceholder {
+                span: Span::default(),
+            })
+        }
+        Rule::expr_iter_index => {
+            // Phase 4I: Parse iteration index placeholder #@
+            Ok(Expr::IterIndexPlaceholder {
+                span: Span::default(),
+            })
+        }
+        Rule::expr_register => {
+            // Phase 4I: Parse register variable %q0-%q9
+            let text = pair.as_str();
+            let register = text.chars().last().unwrap().to_digit(10).unwrap() as u8;
+            Ok(Expr::RegisterRead {
+                register,
+                span: Span::default(),
+            })
+        }
+        Rule::expr_string_register => {
+            // Phase 4I: Parse string register %r0-%r9
+            let text = pair.as_str();
+            let register = text.chars().last().unwrap().to_digit(10).unwrap() as u8;
+            Ok(Expr::StringRegisterRead {
+                register,
+                span: Span::default(),
+            })
+        }
+        Rule::expr_default => {
+            // Phase 4I: Parse default function
+            let mut value = None;
+            let mut fallback = None;
+            let mut predicate = None;
+            
+            for inner in pair.into_inner() {
+                if inner.as_rule() == Rule::expr {
+                    if value.is_none() {
+                        value = Some(Box::new(parse_expr(inner)?));
+                    } else if fallback.is_none() {
+                        fallback = Some(Box::new(parse_expr(inner)?));
+                    } else {
+                        predicate = Some(Box::new(parse_expr(inner)?));
+                    }
+                }
+            }
+            
+            Ok(Expr::Default {
+                value: value.unwrap(),
+                fallback: fallback.unwrap(),
+                predicate,
+                span: Span::default(),
+            })
+        }
+        Rule::expr_lit => {
+            // Phase 4I: Parse literal operator lit!()
+            let mut code = String::new();
+            
+            for inner in pair.into_inner() {
+                if inner.as_rule() == Rule::lit_content {
+                    code = inner.as_str().to_string();
+                }
+            }
+            
+            Ok(Expr::LitOperator {
+                code,
+                span: Span::default(),
+            })
         }
         _ => {
             // Handle parenthesized expressions

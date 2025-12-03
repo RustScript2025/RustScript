@@ -583,6 +583,54 @@ pub enum Expr {
         step: Option<Box<Expr>>,
         span: Span,
     },
+    /// Phase 4I: Iteration placeholder (## for value)
+    IterPlaceholder {
+        span: Span,
+    },
+    /// Phase 4I: Iteration index placeholder (#@)
+    IterIndexPlaceholder {
+        span: Span,
+    },
+    /// Phase 4I: Register variable read (%q0-%q9)
+    RegisterRead {
+        register: u8,
+        span: Span,
+    },
+    /// Phase 4I: Register variable write (%q0-%q9 = expr)
+    RegisterWrite {
+        register: u8,
+        value: Box<Expr>,
+        span: Span,
+    },
+    /// Phase 4I: String register read (%r0-%r9)
+    StringRegisterRead {
+        register: u8,
+        span: Span,
+    },
+    /// Phase 4I: String register write (%r0-%r9 = expr)
+    StringRegisterWrite {
+        register: u8,
+        value: Box<Expr>,
+        span: Span,
+    },
+    /// Phase 4I: String register append (%r0 .= expr)
+    StringRegisterAppend {
+        register: u8,
+        value: Box<Expr>,
+        span: Span,
+    },
+    /// Phase 4I: Literal operator - prevents evaluation (lit!())
+    LitOperator {
+        code: String,
+        span: Span,
+    },
+    /// Phase 4I: Default function with fallback
+    Default {
+        value: Box<Expr>,
+        fallback: Box<Expr>,
+        predicate: Option<Box<Expr>>,
+        span: Span,
+    },
 }
 
 /// Phase 4F: Macro definition

@@ -1,6 +1,6 @@
 // Phase 4 Features - Complete Demonstration
-// Combines all advanced features from Phase 4A through Phase 4H
-// 71 total features showcasing RustScript's advanced capabilities
+// Combines all advanced features from Phase 4A through Phase 4I
+// 77 total features showcasing RustScript's advanced capabilities
 
 fn main() {
     console.log("=== Phase 4 Complete Feature Demonstration ===");
@@ -281,6 +281,39 @@ fn main() {
     console.log("Const function: 10 + 20 = {const_result}");
     
     // ========================================================================
+    // PHASE 4I: MUSHcode-Inspired Features (5 features)
+    // ========================================================================
+    console.log("\n--- Phase 4I: MUSHcode-Inspired Features ---");
+    
+    // Feature 73: Iteration Placeholders
+    let numbers = [1, 2, 3, 4, 5];
+    let doubled = [## * 2 for ## in numbers];
+    console.log("Iteration placeholders: doubled = {doubled}");
+    
+    // Feature 74: Register Variables
+    %q0 = 0;
+    for n in numbers {
+        %q0 = %q0 + n;
+    }
+    console.log("Register variables: sum = {%q0}");
+    
+    // Feature 75: String Registers
+    %r0 = "Items: ";
+    for n in numbers {
+        %r0 .= "{n} ";
+    }
+    console.log("String registers: {%r0}");
+    
+    // Feature 76: Literal Operator
+    let template = lit!(Hello, {name}!);
+    console.log("Literal operator: template = {template}");
+    
+    // Feature 77: Default Function
+    let empty_string = "";
+    let fallback = default(empty_string, "Anonymous");
+    console.log("Default function: '{empty_string}' -> '{fallback}'");
+    
+    // ========================================================================
     // Summary
     // ========================================================================
     console.log("\n=== Summary ===");
@@ -292,7 +325,8 @@ fn main() {
     console.log("✓ Phase 4F: 8 metaprogramming features");
     console.log("✓ Phase 4G: 6 domain-specific features");
     console.log("✓ Phase 4H: 5 utility features");
-    console.log("\n🎉 Total: 72 advanced language features!");
+    console.log("✓ Phase 4I: 5 MUSHcode-inspired features");
+    console.log("\n🎉 Total: 77 advanced language features!");
     console.log("RustScript is now a fully-featured systems programming language!");
 }
 

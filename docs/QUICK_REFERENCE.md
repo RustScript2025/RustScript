@@ -915,9 +915,35 @@ fn greet(name: string = "World") { }
 const fn add(a: number, b: number) -> number { a + b }
 ```
 
+### Phase 4I: MUSHcode-Inspired
+
+```rustscript
+// Iteration placeholders (## = value, #@ = index)
+let doubled = [## * 2 for ## in numbers];
+let indexed = ["{#@}: {##}" for ## in items];
+
+// Register variables (%q0-%q9 for numbers)
+%q0 = 0;
+for x in data { %q0 = %q0 + x; }
+let sum = %q0;
+
+// String registers (%r0-%r9 for strings)
+%r0 = "<ul>";
+for item in items { %r0 .= "<li>{item}</li>"; }
+%r0 .= "</ul>";
+
+// Literal operator (code-as-data)
+let template = lit!(Hello, {name}!);
+console.log(lit!(x + y));  // Prints "x + y", not the result
+
+// Default function (handles empty, not just null)
+let name = default(input, "Anonymous");  // "" -> "Anonymous"
+let positive = default(value, 1, |x| x > 0);  // With predicate
+```
+
 ## Complete Feature List
 
-RustScript includes **72 advanced features**:
+RustScript includes **87 advanced features**:
 
 **Phase 1 (4)**: String interpolation, Optional chaining, Null coalescing, List comprehensions  
 **Phase 2 (3)**: Pattern matching in function heads, Generators, Multiple dispatch  
@@ -929,12 +955,13 @@ RustScript includes **72 advanced features**:
 **Phase 4E (10)**: Try blocks, Try operator, Guard clauses, Labelled blocks, Catch expressions, Panic, Defer, Conditional compilation, Const assertions, Unreachable  
 **Phase 4F (8)**: Declarative macros, Procedural macros, Attribute macros, Reflection, Code generation, Quasiquoting, Hygiene, Syntax extensions  
 **Phase 4G (6)**: Regex literals, Format strings, String slicing, Operator overloading, Custom indexing, Destructuring  
-**Phase 4H (5)**: Ranges with step, Zip, Enumerate, Default parameters, Const functions
+**Phase 4H (5)**: Ranges with step, Zip, Enumerate, Default parameters, Const functions  
+**Phase 4I (5)**: Iteration placeholders, Register variables, String registers, Literal operator, Default function
 
 ## Language Inspirations
 
 RustScript draws from **60+ languages** spanning **68 years** (1958-2025):
 
 **Primary**: Rust, Haskell, TypeScript, Python, JavaScript, C++, Lisp, Go, Zig  
-**Additional**: ML, OCaml, F#, Scala, Erlang, Elixir, Swift, Kotlin, C#, Ruby, Perl, Scheme, Clojure, Julia, Koka, Eff, and many more
+**Additional**: ML, OCaml, F#, Scala, Erlang, Elixir, Swift, Kotlin, C#, Ruby, Perl, Scheme, Clojure, Julia, Koka, Eff, MUSHcode, and many more
 

@@ -165,7 +165,7 @@ node phase3_features.js
 
 **File**: `phase4_features.rscc`
 
-Demonstrates 72 advanced features across 8 categories:
+Demonstrates 77 advanced features across 9 categories:
 - Memory safety (lifetimes, borrowing, tail call optimisation)
 - Advanced types (union types, GADTs, higher-kinded types)
 - Functional programming (partial application, currying, lenses)
@@ -174,6 +174,7 @@ Demonstrates 72 advanced features across 8 categories:
 - Metaprogramming (macros, reflection, code generation)
 - Domain-specific (regex literals, operator overloading)
 - Utilities (default parameters, const functions)
+- MUSHcode-inspired (iteration placeholders, registers, default function)
 
 ```rustscript
 // Lifetimes
@@ -287,7 +288,7 @@ We recommend exploring the examples in this order:
 2. **phase1_features.rscc** - Learn modern syntax enhancements
 3. **phase2_features.rscc** - Explore advanced function capabilities
 4. **phase3_features.rscc** - Master safety and metaprogramming
-5. **phase4_features.rscc** - Discover 72 advanced language features
+5. **phase4_features.rscc** - Discover 77 advanced language features
 6. **hideseek.rscc** - See a complete application in action
 
 ## Compiling to WebAssembly
@@ -358,7 +359,7 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md) for guidelines.
 - `phase1_features.rscc` - Syntax enhancements (4 features)
 - `phase2_features.rscc` - Function enhancements (3 features)
 - `phase3_features.rscc` - Safety features (3 features)
-- `phase4_features.rscc` - Advanced features (72 features)
+- `phase4_features.rscc` - Advanced features (77 features)
 
 ### Complete Applications
 - `hideseek.rscc` - Text adventure game

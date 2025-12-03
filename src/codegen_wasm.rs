@@ -1285,6 +1285,80 @@ impl WasmGenerator {
             ast::Expr::ListComprehension { .. } => {
                 func.instruction(&Instruction::I32Const(0));
             },
+            // Phase 4I: Iteration placeholder ##
+            ast::Expr::IterPlaceholder { .. } => {
+                // The iteration placeholder is resolved during list comprehension expansion
+                // At runtime, it should have been replaced with the actual iteration variable
+                func.instruction(&Instruction::I32Const(0));
+            },
+            // Phase 4I: Iteration index placeholder #@
+            ast::Expr::IterIndexPlaceholder { .. } => {
+                // The index placeholder is resolved during list comprehension expansion
+                func.instruction(&Instruction::I32Const(0));
+            },
+            // Phase 4I: Register read %q0-%q9
+            ast::Expr::RegisterRead { register, .. } => {
+                // Registers are stored in locals 100-109 (reserved range)
+                let local_idx = 100 + *register as u32;
+                func.instruction(&Instruction::LocalGet(local_idx));
+            },
+            // Phase 4I: Register write %q0-%q9 = expr
+            ast::Expr::RegisterWrite { register, value, .. } => {
+                self.generate_expr(func, value, scratch_local, locals)?;
+                let local_idx = 100 + *register as u32;
+                func.instruction(&Instruction::LocalTee(local_idx));
+            },
+            // Phase 4I: String register read %r0-%r9
+            ast::Expr::StringRegisterRead { register, .. } => {
+                // String registers are stored in locals 110-119 (reserved range)
+                let local_idx = 110 + *register as u32;
+                func.instruction(&Instruction::LocalGet(local_idx));
+            },
+            // Phase 4I: String register write %r0-%r9 = expr
+            ast::Expr::StringRegisterWrite { register, value, .. } => {
+                self.generate_expr(func, value, scratch_local, locals)?;
+                let local_idx = 110 + *register as u32;
+                func.instruction(&Instruction::LocalTee(local_idx));
+            },
+            // Phase 4I: String register append %r0-%r9 .= expr
+            ast::Expr::StringRegisterAppend { register, value, .. } => {
+                // Get current value, generate new value, concatenate
+                let local_idx = 110 + *register as u32;
+                func.instruction(&Instruction::LocalGet(local_idx));
+                self.generate_expr(func, value, scratch_local, locals)?;
+                // TODO: Call string concatenation function
+                // For now, just keep the new value
+                func.instruction(&Instruction::LocalTee(local_idx));
+            },
+            // Phase 4I: Literal operator lit!()
+            ast::Expr::LitOperator { code, .. } => {
+                // Return the code as a string literal
+                let (ptr, len) = self.intern_string(code);
+                func.instruction(&Instruction::I32Const(ptr as i32));
+                func.instruction(&Instruction::I32Const(len as i32));
+            },
+            // Phase 4I: Default function
+            ast::Expr::Default { value, fallback, predicate, .. } => {
+                // Generate: if predicate(value) then value else fallback
+                self.generate_expr(func, value, scratch_local, locals)?;
+                func.instruction(&Instruction::LocalTee(scratch_local));
+                
+                if let Some(pred) = predicate {
+                    // Custom predicate
+                    self.generate_expr(func, pred, scratch_local, locals)?;
+                } else {
+                    // Default: check if value is truthy (non-zero, non-empty)
+                    func.instruction(&Instruction::LocalGet(scratch_local));
+                    func.instruction(&Instruction::I32Const(0));
+                    func.instruction(&Instruction::I32Ne);
+                }
+                
+                func.instruction(&Instruction::If(wasm_encoder::BlockType::Result(ValType::I32)));
+                func.instruction(&Instruction::LocalGet(scratch_local));
+                func.instruction(&Instruction::Else);
+                self.generate_expr(func, fallback, scratch_local, locals)?;
+                func.instruction(&Instruction::End);
+            },
         }
         Ok(())
     }

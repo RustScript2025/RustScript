@@ -2,7 +2,7 @@
 
 **Author**: Michael Lauzon
 
-This document provides complete attribution for all 82 features in RustScript, showing which languages inspired each feature and when those languages were created.
+This document provides complete attribution for all 87 features in RustScript, showing which languages inspired each feature and when those languages were created.
 
 RustScript draws from **60+ languages** spanning **68 years** of computing history (1958-2025).
 
@@ -70,7 +70,7 @@ RustScript draws from **60+ languages** spanning **68 years** of computing histo
 
 ---
 
-## Phase 4: Advanced Language Features (72 features)
+## Phase 4: Advanced Language Features (77 features)
 
 ### Phase 4A: Core Memory Safety (10 features)
 
@@ -376,6 +376,28 @@ RustScript draws from **60+ languages** spanning **68 years** of computing histo
 *Inspired by*: Rust (2018), C++ constexpr (2011)  
 *Why*: Functions callable at compile time
 
+### Phase 4I: MUSHcode-Inspired Features (5 features)
+
+**Iteration Placeholders**  
+*Inspired by*: MUSHcode iter() (1990)  
+*Why*: Concise iteration with `##` for value and `#@` for index
+
+**Register Variables**  
+*Inspired by*: MUSHcode setq()/setr() (1990)  
+*Why*: Fast temporary storage with `%q0`-`%q9`
+
+**String Registers**  
+*Inspired by*: MUSHcode string accumulation (1990)  
+*Why*: Efficient string building with `%r0`-`%r9`
+
+**Literal Operator**  
+*Inspired by*: MUSHcode lit() (1990)  
+*Why*: Code-as-data patterns with `lit!()`
+
+**Default Function**  
+*Inspired by*: MUSHcode default()/edefault() (1990)  
+*Why*: Flexible fallback handling beyond null coalescing
+
 ---
 
 ## Language Timeline
@@ -405,6 +427,7 @@ RustScript draws from **60+ languages** spanning **68 years** of computing histo
 
 ### 1990s
 - **Haskell (1990)**: Pure functional programming, lazy evaluation, type classes, lenses
+- **MUSHcode (1990)**: Iteration placeholders, registers, literal operator, default function
 - **Python (1991)**: List comprehensions, generators, default parameters
 - **Dylan (1992)**: Multiple dispatch
 - **Lua (1993)**: Tail call optimisation
@@ -445,6 +468,6 @@ RustScript draws from **60+ languages** spanning **68 years** of computing histo
 
 ## Summary
 
-RustScript's 82 features represent a carefully curated selection from 68 years of programming language evolution. Each feature was chosen because it solved a real problem elegantly in its original language and has been proven in production systems.
+RustScript's 87 features represent a carefully curated selection from 68 years of programming language evolution. Each feature was chosen because it solved a real problem elegantly in its original language and has been proven in production systems.
 
 By standing on the shoulders of giants, RustScript avoids repeating past mistakes while embracing proven solutions, creating a modern language that feels familiar to developers from many backgrounds.

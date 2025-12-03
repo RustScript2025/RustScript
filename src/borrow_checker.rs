@@ -509,6 +509,41 @@ impl BorrowChecker {
             ast::Expr::Literal(_, _) => {
                 // Literals don't involve ownership
             }
+            // Phase 4I: Iteration placeholders
+            ast::Expr::IterPlaceholder { .. } => {
+                // Resolved at compile time
+            }
+            ast::Expr::IterIndexPlaceholder { .. } => {
+                // Resolved at compile time
+            }
+            // Phase 4I: Register variables
+            ast::Expr::RegisterRead { .. } => {
+                // Registers are always valid
+            }
+            ast::Expr::RegisterWrite { value, .. } => {
+                self.check_expr(value);
+            }
+            ast::Expr::StringRegisterRead { .. } => {
+                // String registers are always valid
+            }
+            ast::Expr::StringRegisterWrite { value, .. } => {
+                self.check_expr(value);
+            }
+            ast::Expr::StringRegisterAppend { value, .. } => {
+                self.check_expr(value);
+            }
+            // Phase 4I: Literal operator
+            ast::Expr::LitOperator { .. } => {
+                // No ownership concerns
+            }
+            // Phase 4I: Default function
+            ast::Expr::Default { value, fallback, predicate, .. } => {
+                self.check_expr(value);
+                self.check_expr(fallback);
+                if let Some(pred) = predicate {
+                    self.check_expr(pred);
+                }
+            }
         }
     }
     

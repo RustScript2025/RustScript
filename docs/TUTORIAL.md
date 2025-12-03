@@ -31,7 +31,7 @@ By the end of this tutorial, you'll master:
 - Effect systems for tracking side effects
 - Compile-time execution for zero-cost abstractions
 
-**Phase 4: Production-Ready Features** (72 features)
+**Phase 4: Production-Ready Features** (77 features)
 - Memory safety without garbage collection (lifetimes, borrowing)
 - Advanced type system (GADTs, higher-kinded types, refinement types)
 - Functional programming (partial application, lenses, transducers)
