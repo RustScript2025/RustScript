@@ -42,7 +42,7 @@ RustScript is a modern **web-scripting language** that compiles to WebAssembly f
 
 ### 🎉 MUSHcode-Inspired Features!
 
-RustScript v0.4.1 adds **5 new features** inspired by MUSHcode/Softcode (1990), bringing the total to **87 features** from 60+ scripting languages spanning 68 years (1958-2025).
+RustScript v0.4.1 adds **5 new features** inspired by MUSHcode/Softcode (1990), bringing the total to **87 features** from 60+ languages spanning 68 years (1958-2025).
 
 **New in v0.4.1:**
 - **Iteration Placeholders** (`##` for value, `#@` for index) - Concise iteration syntax
@@ -87,17 +87,16 @@ RustScript v0.4.0 added **Phase 4: 72 advanced features** transforming RustScrip
 
 ## Language Heritage
 
-RustScript draws inspiration from one systems programming language and over 60 scripting languages across computing history:
+RustScript draws inspiration from over 60 scripting languages across computing history:
 
-**Memory Safety**: C++ RAII (1984), Cyclone (2002), Rust (2010)  
-**Type Systems**: ML (1973), Eiffel (1986), Haskell (1990), Coq (1989), Scala (2004), F# (2005), Agda (2007), Idris (2007), Liquid Haskell (2008), F* (2011), TypeScript (2012)  
-**Expressiveness**: Python (1991), Ruby (1995), JavaScript (1995), Rebol (1997), Kotlin (2011), Swift (2014)  
-**Functional Programming**: LISP (1958), Scheme (1975), Miranda (1985), Haskell (1990), OCaml (1996), Scala (2004), F# (2005), Clojure (2007)  
-**Pattern Matching**: ML (1973), Erlang (1986), Haskell (1990), OCaml (1996), Elixir (2011), Rust (2010)  
-**Metaprogramming**: LISP (1958), D (2001), Nim (2008), Rust (2010), Zig (2016)  
+**Expressiveness**: Python (1991), Ruby (1995), JavaScript (1995), Rebol (1997), Lua (1993), Tcl (1988), Perl (1987)  
+**Functional Programming**: LISP (1958), Scheme (1975), Clojure (2007), Racket (1995), Emacs Lisp (1985)  
+**Pattern Matching**: Erlang (1986), Elixir (2011), Prolog (1972)  
+**Metaprogramming**: LISP (1958), Nim (2008), Julia (2012), Groovy (2003)  
 **Multiple Dispatch**: Common Lisp CLOS (1988), Dylan (1992), Clojure (2007), Julia (2012)  
-**Effects & Contracts**: Ada (1983), Eiffel (1986), D (2001), Spec# (2004), Nim (2008), Koka (2012), Eff (2012)  
-**Data Processing**: SNOBOL (1962), APL (1966), MUMPS (1966), Forth (1970), AWK (1977), Icon (1977), MUSHcode (1990)  
+**Data Processing**: SNOBOL (1962), APL (1966), MUMPS (1966), Forth (1970), AWK (1977), Icon (1977), MUSHcode (1990), sed (1974), Awk (1977)  
+**Type Systems**: TypeScript (2012), CoffeeScript (2009), Dart (2011)  
+**Concurrency**: Erlang (1986), Elixir (2011), Go (2009)  
 **Concurrency**: Erlang (1986), C++ atomics (2011), Elixir (2011), Go (2009), Rust (2010), Rayon (2016)  
 **Modern Features**: Java (1995), C# (2000), Scala (2004), Rust (2010), Ceylon (2011), Kotlin (2011), TypeScript (2012), Swift (2014)  
 
