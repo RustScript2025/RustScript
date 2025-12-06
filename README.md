@@ -42,7 +42,7 @@ RustScript is a modern **web-scripting language** that compiles to WebAssembly f
 
 ### 🎉 MUSHcode-Inspired Features!
 
-RustScript v0.4.1 adds **5 new features** inspired by MUSHcode/Softcode (1990), bringing the total to **87 features** from 60+ languages spanning 68 years (1958-2025).
+RustScript v0.4.1 adds **5 new features** inspired by MUSHcode/Softcode (1990), bringing the total to **87 features** from 60+ scripting languages spanning 68 years (1958-2025).
 
 **New in v0.4.1:**
 - **Iteration Placeholders** (`##` for value, `#@` for index) - Concise iteration syntax
